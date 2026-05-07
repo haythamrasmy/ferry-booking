@@ -50,6 +50,7 @@ const [bookedSeats, setBookedSeats] = useState([]);
 const [passport, setPassport] = useState("");
 const [phone, setPhone] = useState("");
 const [email, setEmail] = useState("");
+const [bookings, setBookings] = useState([]);
 
 useEffect(() => {
   const fetchBookings = async () => {
@@ -69,7 +70,12 @@ const seats = querySnapshot.docs
 
     setBookedSeats(seats);
   };
+const bookingData = querySnapshot.docs.map((doc) => ({
+  id: doc.id,
+  ...doc.data(),
+}));
 
+setBookings(bookingData);
   fetchBookings();
 }, []);
 
@@ -384,19 +390,22 @@ setBookedSeats([...bookedSeats, selectedSeat]);
               </thead>
 
               <tbody>
-                <tr className="border-t border-slate-700">
-                  <td className="p-4">Ahmed Hassan</td>
-                  <td className="p-4">A1</td>
-                  <td className="p-4 text-green-400">مؤكد</td>
-                  <td className="p-4">مدفوع</td>
-                </tr>
+               {bookings.map((booking) => (
+  <tr
+    key={booking.id}
+    className="border-t border-slate-700"
+  >
+    <td className="p-4">{booking.name}</td>
 
-                <tr className="border-t border-slate-700">
-                  <td className="p-4">Mohamed Ali</td>
-                  <td className="p-4">C1</td>
-                  <td className="p-4 text-yellow-400">مقفول مؤقتًا</td>
-                  <td className="p-4">قيد المراجعة</td>
-                </tr>
+    <td className="p-4">{booking.seat}</td>
+
+    <td className="p-4 text-green-400">
+      مؤكد
+    </td>
+
+    <td className="p-4">قيد المراجعة</td>
+  </tr>
+))}
               </tbody>
             </table>
           </div>
