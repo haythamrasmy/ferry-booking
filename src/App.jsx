@@ -1,3 +1,10 @@
+import { useState, useEffect } from "react";
+import { db } from "./firebase";
+import {
+  collection,
+  addDoc,
+  getDocs,
+} from "firebase/firestore";
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
 
@@ -36,34 +43,94 @@ export default function FerryBookingWebsite() {
   ];
 
   // Fixed invalid variable names
-  const bookedSeats = ["A2", "B3"];
+const [bookedSeats, setBookedSeats] = useState([]);
   const lockedSeats = ["C1"];
+  const [selectedSeat, setSelectedSeat] = useState("");
+  const [name, setName] = useState("");
+const [passport, setPassport] = useState("");
+const [phone, setPhone] = useState("");
+const [email, setEmail] = useState("");
+
+useEffect(() => {
+  const fetchBookings = async () => {
+    const querySnapshot = await getDocs(
+      collection(db, "bookings")
+    );
+
+    const seats = querySnapshot.docs.map(
+      (doc) => doc.data().seat
+    );
+
+    setBookedSeats(seats);
+  };
+
+  fetchBookings();
+}, []);
+
+ const saveBooking = async () => {
+  if (!selectedSeat) {
+  alert("اختر مقعد أولًا");
+  return;
+}
+  try {
+    await addDoc(collection(db, "bookings"), {
+      name,
+      passport,
+      phone,
+      email,
+      seat: selectedSeat,
+      trip: "أسوان ← وادي حلفا",
+      createdAt: new Date(),
+    });
+
+    alert("تم حفظ الحجز بنجاح");
+setBookedSeats([...bookedSeats, selectedSeat]);
+    setName("");
+    setPassport("");
+    setPhone("");
+    setEmail("");
+  } catch (error) {
+    console.log(error);
+    alert("حدث خطأ");
+  }
+};
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-slate-900 to-blue-900 text-white py-20 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-          <div>
-            <h1 className="text-5xl font-bold leading-tight mb-6">
+        <div className="text-center">
+            <img
+  src="/logo.png"
+  alt="Logo"
+ className="w-24 mb-4 mx-auto"
+/>
+            <h1 className="text-2xl font-bold leading-tight mb-6">
               {companyName}
             </h1>
 
             <p className="text-lg text-slate-200 mb-8">
              
             </p>
-
-            <button className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
+<div className="flex justify-center">
+            <button className="hidden md:block bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
               احجز الآن
             </button>
           </div>
-
+   </div>
           <div>
             <img
+            
               src="/hero.jpg"
               alt="Nile Ferry"
-              className="rounded-3xl shadow-2xl w-full object-cover"
+              className="rounded-3xl shadow-2xl w-full object-cover max-h-[400px]"
             />
+            <div className="md:hidden flex justify-center mt-6">
+  <button className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
+    احجز الآن
+  </button>
+</div>
           </div>
         </div>
       </section>
@@ -148,7 +215,9 @@ export default function FerryBookingWebsite() {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold">اختر مقعدك</h2>
-
+             <p className="text-blue-700 font-bold mt-2">
+                المقعد المختار: {selectedSeat || "لا يوجد"}
+             </p>  
             <div className="flex gap-4 text-sm flex-wrap">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-500 rounded"></div>
@@ -176,12 +245,16 @@ export default function FerryBookingWebsite() {
                 return (
                   <button
                     key={seat}
+                    onClick={() => setSelectedSeat(seat)}
                     disabled={isBooked || isLocked}
                     className={`rounded-2xl py-5 font-bold transition ${
+                      
                       isBooked
                         ? "bg-red-500 text-white cursor-not-allowed"
                         : isLocked
                         ? "bg-yellow-400 text-black cursor-not-allowed"
+                        : selectedSeat === seat
+                        ? "bg-blue-700 text-white scale-105"
                         : "bg-green-500 hover:scale-105 text-white"
                     }`}
                   >
@@ -200,29 +273,36 @@ export default function FerryBookingWebsite() {
           <h2 className="text-3xl font-bold mb-8">بيانات الراكب</h2>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <input
-              type="text"
-              placeholder="الاسم بالكامل"
-              className="border rounded-2xl p-4 outline-none"
-            />
+           <input
+  type="text"
+  placeholder="الاسم بالكامل"
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  className="border rounded-2xl p-4 outline-none"
+/>
 
-            <input
-              type="text"
-              placeholder="رقم جواز السفر"
-              className="border rounded-2xl p-4 outline-none"
-            />
+           <input
+  type="text"
+  placeholder="رقم جواز السفر"
+  value={passport}
+  onChange={(e) => setPassport(e.target.value)}
+  className="border rounded-2xl p-4 outline-none"
+/>
 
-            <input
-              type="text"
-              placeholder="رقم الهاتف"
-              className="border rounded-2xl p-4 outline-none"
-            />
-
-            <input
-              type="email"
-              placeholder="البريد الإلكتروني"
-              className="border rounded-2xl p-4 outline-none"
-            />
+         <input
+  type="text"
+  placeholder="رقم الهاتف"
+  value={phone}
+  onChange={(e) => setPhone(e.target.value)}
+  className="border rounded-2xl p-4 outline-none"
+/>
+<input
+  type="email"
+  placeholder="البريد الإلكتروني"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  className="border rounded-2xl p-4 outline-none"
+/>
           </div>
 
           <div className="mt-8">
@@ -241,10 +321,12 @@ export default function FerryBookingWebsite() {
               <p className="text-slate-500">طريقة الدفع</p>
               <h3 className="font-bold text-xl">InstaPay / Paymob</h3>
             </div>
-
-            <button className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg transition">
-              تأكيد الحجز
-            </button>
+          <button
+  onClick={saveBooking}
+  className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg transition"
+>
+  تأكيد الحجز
+</button>
           </div>
         </div>
       </section>
