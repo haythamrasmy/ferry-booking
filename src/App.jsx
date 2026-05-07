@@ -81,6 +81,7 @@ useEffect(() => {
       seat: selectedSeat,
       trip: "أسوان ← وادي حلفا",
       createdAt: new Date(),
+      expiresAt: Date.now() + 10 * 60 * 1000,
     });
 
     alert("تم حفظ الحجز بنجاح");
@@ -215,6 +216,10 @@ setBookedSeats([...bookedSeats, selectedSeat]);
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold">اختر مقعدك</h2>
+            <p className="text-red-600 font-bold mt-3 text-sm">
+  ⚠️ بعد اختيار المقعد وإتمام الحجز سيتم حجزه لمدة 10 دقائق فقط،
+  وإذا لم يتم تأكيد الدفع سيصبح متاحًا مرة أخرى.
+</p>
              <p className="text-blue-700 font-bold mt-2">
                 المقعد المختار: {selectedSeat || "لا يوجد"}
              </p>  
