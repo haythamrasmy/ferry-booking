@@ -57,9 +57,15 @@ useEffect(() => {
       collection(db, "bookings")
     );
 
-    const seats = querySnapshot.docs.map(
-      (doc) => doc.data().seat
-    );
+    const currentTime = Date.now();
+
+const seats = querySnapshot.docs
+  .filter((doc) => {
+    const data = doc.data();
+
+    return data.expiresAt > currentTime;
+  })
+  .map((doc) => doc.data().seat);
 
     setBookedSeats(seats);
   };
