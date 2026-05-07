@@ -50,7 +50,7 @@ export default function FerryBookingWebsite() {
             </h1>
 
             <p className="text-lg text-slate-200 mb-8">
-              نظام حجز إلكتروني لرحلات الباخرة بين أسوان والسودان.
+             
             </p>
 
             <button className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
@@ -60,7 +60,7 @@ export default function FerryBookingWebsite() {
 
           <div>
             <img
-              src="/mnt/data/1.jpg"
+              src="/hero.jpg"
               alt="Nile Ferry"
               className="rounded-3xl shadow-2xl w-full object-cover"
             />
