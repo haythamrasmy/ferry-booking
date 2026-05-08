@@ -11,32 +11,14 @@ import {
 import {
   signInWithEmailAndPassword,
   signOut,
+  onAuthStateChanged,
 } from "firebase/auth";
-
 
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
 
-  const trips = [
-    {
-      id: 1,
-      route: "أسوان ← وادي حلفا",
-      date: "10 مايو 2026",
-      time: "07:00 صباحًا",
-      seats: 24,
-      price: "2500 جنيه",
-    },
-    {
-      id: 2,
-      route: "أسوان ← وادي حلفا",
-      date: "14 مايو 2026",
-      time: "09:00 صباحًا",
-      seats: 12,
-      price: "2500 جنيه",
-    },
-  ];
 
-  const seats = [
+const seats = [
     "A1",
     "A2",
     "A3",
@@ -51,6 +33,9 @@ export default function FerryBookingWebsite() {
     "C4",
   ];
 
+
+  
+
   // Fixed invalid variable names
 const [bookedSeats, setBookedSeats] = useState([]);
   const lockedSeats = ["C1"];
@@ -63,6 +48,26 @@ const [bookings, setBookings] = useState([]);
 const [adminEmail, setAdminEmail] = useState("");
 const [adminPassword, setAdminPassword] = useState("");
 const [isAdmin, setIsAdmin] = useState(false);
+
+const trips = [
+  {
+    id: 1,
+    route: "أسوان ← وادي حلفا",
+    date: "10 مايو 2026",
+    time: "07:00 صباحًا",
+    seats: seats.length - bookedSeats.length,
+    price: "2500 جنيه",
+  },
+
+  {
+    id: 2,
+    route: "أسوان ← وادي حلفا",
+    date: "14 مايو 2026",
+    time: "09:00 صباحًا",
+    seats: seats.length - bookedSeats.length,
+    price: "2500 جنيه",
+  },
+];
 
 const fetchBookings = async () => {
   try {
@@ -97,6 +102,19 @@ return !data.expiresAt || data.expiresAt > currentTime;
 
 useEffect(() => {
   fetchBookings();
+
+  const unsubscribe = onAuthStateChanged(
+    auth,
+    (user) => {
+      if (user) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    }
+  );
+
+  return () => unsubscribe();
 }, []);
 
 
@@ -106,6 +124,28 @@ useEffect(() => {
   return;
 }
   try {
+    const querySnapshot = await getDocs(
+  collection(db, "bookings")
+);
+
+const currentTime = Date.now();
+
+const alreadyBooked =
+  querySnapshot.docs.some((doc) => {
+    const data = doc.data();
+
+    return (
+      data.seat === selectedSeat &&
+      (!data.expiresAt ||
+        data.expiresAt > currentTime)
+    );
+  });
+
+if (alreadyBooked) {
+  alert("هذا المقعد تم حجزه بالفعل");
+
+  return;
+}
     await addDoc(collection(db, "bookings"), {
       name,
       passport,
@@ -396,117 +436,7 @@ const adminLogout = async () => {
         </div>
       </section>
 
-<section className="max-w-3xl mx-auto px-6 py-10">
-  <div className="bg-white rounded-3xl shadow-xl p-8">
-    <h2 className="text-2xl font-bold mb-6">
-      دخول الإدارة
-    </h2>
 
-    <div className="grid gap-4">
-      <input
-        type="email"
-        placeholder="Email"
-        value={adminEmail}
-        onChange={(e) =>
-          setAdminEmail(e.target.value)
-        }
-        className="border rounded-2xl p-4"
-      />
-
-      <input
-        type="password"
-        placeholder="Password"
-        value={adminPassword}
-        onChange={(e) =>
-          setAdminPassword(e.target.value)
-        }
-        className="border rounded-2xl p-4"
-      />
-
-      <button
-        onClick={adminLogin}
-        className="bg-black text-white rounded-2xl p-4"
-      >
-        تسجيل دخول الأدمن
-      </button>
-
-      {isAdmin && (
-        <button
-          onClick={adminLogout}
-          className="bg-red-600 text-white rounded-2xl p-4"
-        >
-          تسجيل الخروج
-        </button>
-      )}
-    </div>
-  </div>
-</section>
-
-      {/* Admin Section */}
-      {isAdmin && (
-<section className="bg-slate-900 text-white py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-10">
-            <h2 className="text-3xl font-bold">لوحة التحكم</h2>
-            <span className="text-slate-400">إدارة الحجوزات المباشرة</span>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-6 mb-10">
-            <div className="bg-slate-800 rounded-3xl p-6">
-              <p className="text-slate-400">إجمالي الرحلات</p>
-              <h3 className="text-4xl font-bold mt-3">12</h3>
-            </div>
-
-            <div className="bg-slate-800 rounded-3xl p-6">
-              <p className="text-slate-400">الحجوزات</p>
-              <h3 className="text-4xl font-bold mt-3">248</h3>
-            </div>
-
-            <div className="bg-slate-800 rounded-3xl p-6">
-              <p className="text-slate-400">الإيرادات</p>
-              <h3 className="text-4xl font-bold mt-3">620K</h3>
-            </div>
-
-            <div className="bg-slate-800 rounded-3xl p-6">
-              <p className="text-slate-400">المقاعد المقفولة</p>
-              <h3 className="text-4xl font-bold mt-3">4</h3>
-            </div>
-          </div>
-
-          <div className="bg-slate-800 rounded-3xl overflow-hidden">
-            <table className="w-full text-right">
-              <thead className="bg-slate-700">
-                <tr>
-                  <th className="p-4">الراكب</th>
-                  <th className="p-4">المقعد</th>
-                  <th className="p-4">الحالة</th>
-                  <th className="p-4">الدفع</th>
-                </tr>
-              </thead>
-
-              <tbody>
-               {bookings.map((booking) => (
-  <tr
-    key={booking.id}
-    className="border-t border-slate-700"
-  >
-    <td className="p-4">{booking.name}</td>
-
-    <td className="p-4">{booking.seat}</td>
-
-    <td className="p-4 text-green-400">
-      مؤكد
-    </td>
-
-    <td className="p-4">قيد المراجعة</td>
-  </tr>
-))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-)}
       {/* Footer */}
       <footer className="bg-black text-slate-400 py-8 px-6 text-center">
         <p>© 2026 هيئة وادي النيل للملاحة النهرية</p>
