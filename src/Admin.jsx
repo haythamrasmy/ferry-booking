@@ -5,7 +5,7 @@ import { db, auth } from "./firebase";
 import {
  collection,
 onSnapshot,
-deleteDoc,
+updateDoc,
 doc,
 } from "firebase/firestore";
 
@@ -32,9 +32,14 @@ export default function Admin() {
 
 const [loading, setLoading] =
   useState(true);
+
+  const [search, setSearch] =
+  useState("");
   
  useEffect(() => {
   let unsubscribeBookings = null;
+
+
 
   const unsubscribe =
     onAuthStateChanged(auth, (user) => {
@@ -82,6 +87,19 @@ const [loading, setLoading] =
       setBookings(bookingData);
     }
   );
+};
+
+const confirmBooking = async (id) => {
+  try {
+    await updateDoc(
+      doc(db, "bookings", id),
+      {
+        status: "confirmed",
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const deleteBooking = async (id) => {
@@ -197,6 +215,18 @@ if (loading) {
           </div>
         </div>
 
+<div className="mb-6">
+  <input
+    type="text"
+    placeholder="ابحث باسم الراكب أو المقعد"
+    value={search}
+    onChange={(e) =>
+      setSearch(e.target.value)
+    }
+    className="w-full bg-slate-700 text-white p-4 rounded-2xl outline-none"
+  />
+</div>
+
         <div className="bg-slate-800 rounded-3xl overflow-hidden">
           <table className="w-full text-right">
             <thead className="bg-slate-700">
@@ -209,23 +239,38 @@ if (loading) {
                   المقعد
                 </th>
 
-                <th className="p-4">
-                  الحالة
-                </th>
+               <th className="p-4">
+  الحالة
+</th>
 
-                <th className="p-4">
-                  الدفع
-                </th>
+<th className="p-4">
+  الإجراء
+</th>
 
-                <td className="p-4">
- 
-</td>
+              
               </tr>
             </thead>
 
+
+
             <tbody>
-              {bookings.map((booking) => (
-                <tr
+{bookings
+  .filter((booking) => {
+    return (
+      booking.name
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        ) ||
+      booking.seat
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+    );
+  })
+  .map((booking) => (
+                    <tr
                   key={booking.id}
                   className="border-t border-slate-700"
                 >
@@ -237,13 +282,26 @@ if (loading) {
                     {booking.seat}
                   </td>
 
-                  <td className="p-4 text-green-400">
-                    مؤكد
-                  </td>
 
-                  <td className="p-4">
-                    قيد المراجعة
-                  </td>
+               <td className="p-4">
+  {booking.status === "confirmed"
+    ? "مؤكد"
+    : "قيد المراجعة"}
+</td>
+
+<td className="p-4">
+  {booking.status !== "confirmed" && (
+    <button
+      onClick={() =>
+        confirmBooking(booking.id)
+      }
+      className="bg-green-600 px-4 py-2 rounded-xl"
+    >
+      تأكيد
+    </button>
+  )}
+</td>
+
                   <td className="p-4">
   <button
     onClick={() =>

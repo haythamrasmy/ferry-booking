@@ -114,6 +114,7 @@ useEffect(() => {
     }
   );
 
+  
   return () => unsubscribe();
 }, []);
 
@@ -147,15 +148,16 @@ if (alreadyBooked) {
   return;
 }
     await addDoc(collection(db, "bookings"), {
-      name,
-      passport,
-      phone,
-      email,
-      seat: selectedSeat,
-      trip: "أسوان ← وادي حلفا",
-      createdAt: new Date(),
-      expiresAt: Date.now() + 10 * 60 * 1000,
-    });
+  name,
+  passport,
+  phone,
+  email,
+  seat: selectedSeat,
+  trip: "أسوان ← وادي حلفا",
+  status: "pending",
+  createdAt: new Date(),
+  expiresAt: Date.now() + 10 * 60 * 1000,
+});
 
     alert("تم حفظ الحجز بنجاح");
 
