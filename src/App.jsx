@@ -1,5 +1,12 @@
+
 import { useState, useEffect } from "react";
 import { db } from "./firebase";
+import { auth } from "./firebase";
+
+import {
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 import {
   collection,
   addDoc,
@@ -51,6 +58,9 @@ const [passport, setPassport] = useState("");
 const [phone, setPhone] = useState("");
 const [email, setEmail] = useState("");
 const [bookings, setBookings] = useState([]);
+const [adminEmail, setAdminEmail] = useState("");
+const [adminPassword, setAdminPassword] = useState("");
+const [isAdmin, setIsAdmin] = useState(false);
 
 useEffect(() => {
   const fetchBookings = async () => {
@@ -106,6 +116,29 @@ setBookedSeats([...bookedSeats, selectedSeat]);
     console.log(error);
     alert("حدث خطأ");
   }
+};
+const adminLogin = async () => {
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      adminEmail,
+      adminPassword
+    );
+
+    setIsAdmin(true);
+
+    alert("تم تسجيل دخول الأدمن");
+  } catch (error) {
+    console.log(error);
+
+    alert("بيانات الأدمن غير صحيحة");
+  }
+};
+
+const adminLogout = async () => {
+  await signOut(auth);
+
+  setIsAdmin(false);
 };
 
   return (
@@ -348,8 +381,55 @@ setBookedSeats([...bookedSeats, selectedSeat]);
         </div>
       </section>
 
+<section className="max-w-3xl mx-auto px-6 py-10">
+  <div className="bg-white rounded-3xl shadow-xl p-8">
+    <h2 className="text-2xl font-bold mb-6">
+      دخول الإدارة
+    </h2>
+
+    <div className="grid gap-4">
+      <input
+        type="email"
+        placeholder="Email"
+        value={adminEmail}
+        onChange={(e) =>
+          setAdminEmail(e.target.value)
+        }
+        className="border rounded-2xl p-4"
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={adminPassword}
+        onChange={(e) =>
+          setAdminPassword(e.target.value)
+        }
+        className="border rounded-2xl p-4"
+      />
+
+      <button
+        onClick={adminLogin}
+        className="bg-black text-white rounded-2xl p-4"
+      >
+        تسجيل دخول الأدمن
+      </button>
+
+      {isAdmin && (
+        <button
+          onClick={adminLogout}
+          className="bg-red-600 text-white rounded-2xl p-4"
+        >
+          تسجيل الخروج
+        </button>
+      )}
+    </div>
+  </div>
+</section>
+
       {/* Admin Section */}
-      <section className="bg-slate-900 text-white py-16 px-6">
+      {isAdmin && (
+<section className="bg-slate-900 text-white py-16 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-10">
             <h2 className="text-3xl font-bold">لوحة التحكم</h2>
@@ -411,7 +491,7 @@ setBookedSeats([...bookedSeats, selectedSeat]);
           </div>
         </div>
       </section>
-
+)}
       {/* Footer */}
       <footer className="bg-black text-slate-400 py-8 px-6 text-center">
         <p>© 2026 هيئة وادي النيل للملاحة النهرية</p>
