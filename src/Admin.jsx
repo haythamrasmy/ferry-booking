@@ -216,16 +216,9 @@ if (loading) {
                 <th className="p-4">
                   الدفع
                 </th>
-                <th className="p-4">حذف</th>
+
                 <td className="p-4">
-  <button
-    onClick={() =>
-      deleteBooking(booking.id)
-    }
-    className="bg-red-600 px-4 py-2 rounded-xl"
-  >
-    حذف
-  </button>
+ 
 </td>
               </tr>
             </thead>
