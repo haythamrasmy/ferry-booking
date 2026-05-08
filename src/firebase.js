@@ -1,6 +1,8 @@
-import { getAuth } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyBY187ZU2P7kCuirqRO-mkeIlZi6hpDBLo",
   authDomain: "ferry-booking-853b4.firebaseapp.com",

@@ -1,17 +1,19 @@
 
 import { useState, useEffect } from "react";
-import { db } from "./firebase";
-import { auth } from "./firebase";
+import { db, auth } from "./firebase";
 
-import {
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
 import {
   collection,
   addDoc,
   getDocs,
 } from "firebase/firestore";
+
+import {
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+
+
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
 
@@ -62,32 +64,41 @@ const [adminEmail, setAdminEmail] = useState("");
 const [adminPassword, setAdminPassword] = useState("");
 const [isAdmin, setIsAdmin] = useState(false);
 
-useEffect(() => {
-  const fetchBookings = async () => {
+const fetchBookings = async () => {
+  try {
     const querySnapshot = await getDocs(
       collection(db, "bookings")
     );
 
     const currentTime = Date.now();
 
-const seats = querySnapshot.docs
-  .filter((doc) => {
-    const data = doc.data();
+    const activeSeats = querySnapshot.docs
+      .filter((doc) => {
+        const data = doc.data();
 
-    return data.expiresAt > currentTime;
-  })
-  .map((doc) => doc.data().seat);
+return !data.expiresAt || data.expiresAt > currentTime;
+      })
+      .map((doc) => doc.data().seat);
 
-    setBookedSeats(seats);
-  };
-const bookingData = querySnapshot.docs.map((doc) => ({
-  id: doc.id,
-  ...doc.data(),
-}));
+    setBookedSeats(activeSeats);
 
-setBookings(bookingData);
+    const bookingData = querySnapshot.docs.map(
+      (doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })
+    );
+
+    setBookings(bookingData);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+useEffect(() => {
   fetchBookings();
 }, []);
+
 
  const saveBooking = async () => {
   if (!selectedSeat) {
@@ -107,13 +118,17 @@ setBookings(bookingData);
     });
 
     alert("تم حفظ الحجز بنجاح");
+
+fetchBookings();
+
 setBookedSeats([...bookedSeats, selectedSeat]);
     setName("");
     setPassport("");
     setPhone("");
     setEmail("");
   } catch (error) {
-    console.log(error);
+console.log(error.code);
+console.log(error.message);
     alert("حدث خطأ");
   }
 };
