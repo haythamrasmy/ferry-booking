@@ -44,6 +44,8 @@ const [bookedSeats, setBookedSeats] = useState([]);
 const [passport, setPassport] = useState("");
 const [phone, setPhone] = useState("");
 const [email, setEmail] = useState("");
+const [paymentImage, setPaymentImage] =
+  useState("");
 const [bookings, setBookings] = useState([]);
 const [adminEmail, setAdminEmail] = useState("");
 const [adminPassword, setAdminPassword] = useState("");
@@ -152,6 +154,7 @@ if (alreadyBooked) {
   passport,
   phone,
   email,
+  paymentImage,
   seat: selectedSeat,
   trip: "أسوان ← وادي حلفا",
   status: "pending",
@@ -417,10 +420,24 @@ const adminLogout = async () => {
               ارفع صورة التحويل أو الدفع
             </label>
 
-            <input
-              type="file"
-              className="border rounded-2xl p-4 w-full"
-            />
+           <input
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const file = e.target.files[0];
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setPaymentImage(reader.result);
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  }}
+  className="border rounded-2xl p-4 w-full"
+/>
           </div>
 
           <div className="mt-10 flex items-center justify-between flex-wrap gap-6">

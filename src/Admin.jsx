@@ -94,7 +94,8 @@ const confirmBooking = async (id) => {
     await updateDoc(
       doc(db, "bookings", id),
       {
-        status: "confirmed",
+       status: "confirmed",
+       expiresAt: null,
       }
     );
   } catch (error) {
@@ -238,14 +239,24 @@ if (loading) {
                 <th className="p-4">
                   المقعد
                 </th>
-
-               <th className="p-4">
-  الحالة
+                  <th className="p-4">
+  الهاتف
 </th>
 
 <th className="p-4">
-  الإجراء
+  الجواز
 </th>
+
+<th className="p-4">
+  الإيصال
+</th>
+               <th className="p-4">
+                   الحالة
+                </th>
+
+              <th className="p-4">
+               الإجراء
+               </th>
 
               
               </tr>
@@ -281,7 +292,19 @@ if (loading) {
                   <td className="p-4">
                     {booking.seat}
                   </td>
-
+                    <td className="p-4">
+  {booking.phone}
+</td>
+<td className="p-4">
+  {booking.passport}
+</td>
+<td className="p-4">
+  <img
+    src={booking.paymentImage}
+    alt="Payment Image"
+    className="w-16 h-16 object-cover"
+  />
+</td>
 
                <td className="p-4">
   {booking.status === "confirmed"
@@ -300,6 +323,18 @@ if (loading) {
       تأكيد
     </button>
   )}
+</td>
+
+
+<td className="p-4">
+  <a
+    href={booking.paymentImage}
+    target="_blank"
+    rel="noreferrer"
+    className="bg-blue-600 px-4 py-2 rounded-xl"
+  >
+    عرض
+  </a>
 </td>
 
                   <td className="p-4">
