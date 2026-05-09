@@ -172,9 +172,9 @@ setBookedSeats([...bookedSeats, selectedSeat]);
     setPhone("");
     setEmail("");
   } catch (error) {
-console.log(error.code);
-console.log(error.message);
-    alert("حدث خطأ");
+
+console.log(error);
+alert(error.message);
   }
 };
 const adminLogin = async () => {
