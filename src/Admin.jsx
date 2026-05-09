@@ -231,131 +231,130 @@ export default function Admin() {
                     />
                 </div>
 
-                <div className="bg-slate-800 rounded-3xl overflow-hidden">
-                    <table className="w-full text-right">
-                        <thead className="bg-slate-700">
-                            <tr>
-                                <th className="p-4">
-                                    الراكب
-                                </th>
+                <div className="bg-slate-800 rounded-3xl overflow-x-auto">                   <table className="min-w-[1100px] w-full text-right">
+                    <thead className="bg-slate-700">
+                        <tr>
+                            <th className="p-4">
+                                الراكب
+                            </th>
 
-                                <th className="p-4">
-                                    المقعد
-                                </th>
-                                <th className="p-4">
-                                    الهاتف
-                                </th>
+                            <th className="p-4">
+                                المقعد
+                            </th>
+                            <th className="p-4">
+                                الهاتف
+                            </th>
 
-                                <th className="p-4">
-                                    الجواز
-                                </th>
+                            <th className="p-4">
+                                الجواز
+                            </th>
 
-                                <th className="p-4">
-                                    الإيصال
-                                </th>
-                                <th className="p-4">
-                                    الحالة
-                                </th>
+                            <th className="p-4">
+                                الإيصال
+                            </th>
+                            <th className="p-4">
+                                الحالة
+                            </th>
 
-                                <th className="p-4">
-                                    الإجراء
-                                </th>
-                                <th className="p-4"></th>
+                            <th className="p-4">
+                                الإجراء
+                            </th>
+                            <th className="p-4"></th>
 
-                            </tr>
-                        </thead>
-
+                        </tr>
+                    </thead>
 
 
-                        <tbody>
-                            {bookings
-                                .filter((booking) => {
-                                    return (
-                                        booking.name
-                                            ?.toLowerCase()
-                                            .includes(
-                                                search.toLowerCase()
-                                            ) ||
-                                        booking.seat
-                                            ?.toLowerCase()
-                                            .includes(
-                                                search.toLowerCase()
-                                            )
-                                    );
-                                })
-                                .map((booking) => (
-                                    <tr
-                                        key={booking.id}
-                                        className="border-t border-slate-700"
-                                    >
-                                        <td className="p-4">
-                                            {booking.name}
-                                        </td>
 
-                                        <td className="p-4">
-                                            {booking.seat}
-                                        </td>
+                    <tbody>
+                        {bookings
+                            .filter((booking) => {
+                                return (
+                                    booking.name
+                                        ?.toLowerCase()
+                                        .includes(
+                                            search.toLowerCase()
+                                        ) ||
+                                    booking.seat
+                                        ?.toLowerCase()
+                                        .includes(
+                                            search.toLowerCase()
+                                        )
+                                );
+                            })
+                            .map((booking) => (
+                                <tr
+                                    key={booking.id}
+                                    className="border-t border-slate-700"
+                                >
+                                    <td className="p-4">
+                                        {booking.name}
+                                    </td>
 
-                                        <td className="p-4">
-                                            {booking.phone}
-                                        </td>
+                                    <td className="p-4">
+                                        {booking.seat}
+                                    </td>
 
-                                        <td className="p-4">
-                                            {booking.passport}
-                                        </td>
+                                    <td className="p-4">
+                                        {booking.phone}
+                                    </td>
 
-                                        <td className="p-4 text-center">                                            {booking.paymentImage && (
-                                            <img
-                                                src={booking.paymentImage}
-                                                alt="Payment"
-                                                onClick={() =>
-                                                    booking.paymentImage &&
-                                                    window.open(
-                                                        booking.paymentImage,
-                                                        "_blank"
-                                                    )
-                                                }
-                                                className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
-                                            />
-                                        )}
-                                        </td>
+                                    <td className="p-4">
+                                        {booking.passport}
+                                    </td>
 
-                                        <td className="p-4">
-                                            {booking.status === "confirmed"
-                                                ? "مؤكد"
-                                                : "قيد المراجعة"}
-                                        </td>
+                                    <td className="p-4 text-center">                                            {booking.paymentImage && (
+                                        <img
+                                            src={booking.paymentImage}
+                                            alt="Payment"
+                                            onClick={() =>
+                                                booking.paymentImage &&
+                                                window.open(
+                                                    booking.paymentImage,
+                                                    "_blank"
+                                                )
+                                            }
+                                            className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
+                                        />
+                                    )}
+                                    </td>
 
-                                        <td className="p-4">
-                                            {booking.status !==
-                                                "confirmed" && (
-                                                    <button
-                                                        onClick={() =>
-                                                            confirmBooking(
-                                                                booking.id
-                                                            )
-                                                        }
-                                                        className="bg-green-600 px-4 py-2 rounded-xl"
-                                                    >
-                                                        تأكيد
-                                                    </button>
-                                                )}
-                                        </td>
+                                    <td className="p-4">
+                                        {booking.status === "confirmed"
+                                            ? "مؤكد"
+                                            : "قيد المراجعة"}
+                                    </td>
 
-                                        <td className="p-4">
-                                            <button
-                                                onClick={() =>
-                                                    deleteBooking(booking.id)
-                                                }
-                                                className="bg-red-600 px-4 py-2 rounded-xl"
-                                            >
-                                                حذف
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
+                                    <td className="p-4">
+                                        {booking.status !==
+                                            "confirmed" && (
+                                                <button
+                                                    onClick={() =>
+                                                        confirmBooking(
+                                                            booking.id
+                                                        )
+                                                    }
+                                                    className="bg-green-600 px-4 py-2 rounded-xl"
+                                                >
+                                                    تأكيد
+                                                </button>
+                                            )}
+                                    </td>
+
+                                    <td className="p-4">
+                                        <button
+                                            onClick={() =>
+                                                deleteBooking(booking.id)
+                                            }
+                                            className="bg-red-600 px-4 py-2 rounded-xl"
+                                        >
+                                            حذف
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </table>
                 </div>
             </div>
         </div>
