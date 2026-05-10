@@ -94,11 +94,19 @@ export default function FerryBookingWebsite() {
     onSnapshot(
       collection(db, "trips"),
       (snapshot) => {
-        const tripsData =
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
+       const currentTime = Date.now();
+
+const tripsData = snapshot.docs
+  .map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }))
+  .filter(
+    (trip) =>
+      currentTime <
+      trip.tripTimestamp +
+        86400000
+  );
 
         console.log(tripsData);
 

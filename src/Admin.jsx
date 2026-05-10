@@ -61,21 +61,20 @@ export default function Admin() {
     useEffect(() => {
         let unsubscribeBookings = null;
 
+const unsubscribeTrips =
+  onSnapshot(
+    collection(db, "trips"),
+    (snapshot) => {
+      const tripsData =
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
+      setTrips(tripsData);
+    }
+  );
 
-        const currentTime = Date.now();
-
-        const tripsData = snapshot.docs
-            .map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }))
-            .filter(
-                (trip) =>
-                    currentTime <
-                    trip.tripTimestamp +
-                    86400000
-            );
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
