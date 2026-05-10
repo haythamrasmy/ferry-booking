@@ -4,6 +4,7 @@ import { db, auth } from "./firebase";
 
 import {
     collection,
+    addDoc,
     onSnapshot,
     updateDoc,
     deleteDoc,
@@ -80,10 +81,16 @@ export default function Admin() {
                             data.expiresAt > currentTime
                         );
                     })
-                    .map((doc) => ({
-                        id: doc.id,
-                        ...doc.data(),
-                    }));
+                  .map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+}))
+.sort(
+    (a, b) =>
+        b.createdAt?.seconds -
+        a.createdAt?.seconds
+);
+                                   
 
                 setBookings(bookingData);
             }
@@ -191,6 +198,19 @@ export default function Admin() {
         );
     }
 
+    const confirmedBookings =
+  bookings.filter(
+    (booking) =>
+      booking.status ===
+      "confirmed"
+  );
+
+const pendingBookings =
+  bookings.filter(
+    (booking) =>
+      booking.status !==
+      "confirmed"
+  );
     return (
         <div className="min-h-screen bg-slate-900 text-white p-10">
             <div className="max-w-6xl mx-auto">
@@ -207,17 +227,37 @@ export default function Admin() {
                     </button>
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-6 mb-10">
-                    <div className="bg-slate-800 rounded-3xl p-6">
-                        <p className="text-slate-400">
-                            الحجوزات
-                        </p>
+                <div className="grid md:grid-cols-3 gap-6 mb-10">
+  <div className="bg-slate-800 rounded-3xl p-6">
+    <p className="text-slate-400">
+      إجمالي الحجوزات
+    </p>
 
-                        <h3 className="text-4xl font-bold mt-3">
-                            {bookings.length}
-                        </h3>
-                    </div>
-                </div>
+    <h3 className="text-4xl font-bold mt-3">
+      {bookings.length}
+    </h3>
+  </div>
+
+  <div className="bg-slate-800 rounded-3xl p-6">
+    <p className="text-slate-400">
+      الحجوزات المؤكدة
+    </p>
+
+    <h3 className="text-4xl font-bold mt-3 text-green-400">
+      {confirmedBookings.length}
+    </h3>
+  </div>
+
+  <div className="bg-slate-800 rounded-3xl p-6">
+    <p className="text-slate-400">
+      قيد المراجعة
+    </p>
+
+    <h3 className="text-4xl font-bold mt-3 text-yellow-400">
+      {pendingBookings.length}
+    </h3>
+  </div>
+</div>
 
                 <div className="mb-6">
                     <input
