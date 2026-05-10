@@ -21,8 +21,8 @@ export default function Admin() {
     const [bookings, setBookings] =
         useState([]);
 
-const [trips, setTrips] =
-  useState([]);
+    const [trips, setTrips] =
+        useState([]);
 
     const [adminEmail, setAdminEmail] =
         useState("");
@@ -41,22 +41,41 @@ const [trips, setTrips] =
     const [search, setSearch] =
         useState("");
 
+    const [route, setRoute] =
+        useState("");
+
+    const [date, setDate] =
+        useState("");
+
+    const [time, setTime] =
+        useState("");
+
+    const [price, setPrice] =
+        useState("");
+
+    const [seats, setSeats] =
+        useState("");
+    const [showTripForm, setShowTripForm] =
+        useState(false);
+
     useEffect(() => {
         let unsubscribeBookings = null;
 
-const unsubscribeTrips =
-  onSnapshot(
-    collection(db, "trips"),
-    (snapshot) => {
-      const tripsData =
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
 
-      setTrips(tripsData);
-    }
-  );
+
+        const currentTime = Date.now();
+
+        const tripsData = snapshot.docs
+            .map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            .filter(
+                (trip) =>
+                    currentTime <
+                    trip.tripTimestamp +
+                    86400000
+            );
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
@@ -97,16 +116,16 @@ const unsubscribeTrips =
                             data.expiresAt > currentTime
                         );
                     })
-                  .map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-}))
-.sort(
-    (a, b) =>
-        b.createdAt?.seconds -
-        a.createdAt?.seconds
-);
-                                   
+                    .map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }))
+                    .sort(
+                        (a, b) =>
+                            b.createdAt?.seconds -
+                            a.createdAt?.seconds
+                    );
+
 
                 setBookings(bookingData);
             }
@@ -139,6 +158,48 @@ const unsubscribeTrips =
             console.log(error);
         }
     };
+
+    const addTrip = async () => {
+        try {
+            await addDoc(
+                collection(db, "trips"),
+                {
+                    route,
+                    date,
+                    time,
+                    price,
+                    seats: Number(seats),
+                    tripTimestamp:
+                        new Date(date).getTime(),
+                }
+            );
+
+            alert("تم إضافة الرحلة");
+
+            setRoute("");
+            setDate("");
+            setTime("");
+            setPrice("");
+            setSeats("");
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const deleteTrip = async (id) => {
+        try {
+            await deleteDoc(
+                doc(db, "trips", id)
+            );
+
+            alert("تم حذف الرحلة");
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
 
     const adminLogin = async () => {
         try {
@@ -215,18 +276,18 @@ const unsubscribeTrips =
     }
 
     const confirmedBookings =
-  bookings.filter(
-    (booking) =>
-      booking.status ===
-      "confirmed"
-  );
+        bookings.filter(
+            (booking) =>
+                booking.status ===
+                "confirmed"
+        );
 
-const pendingBookings =
-  bookings.filter(
-    (booking) =>
-      booking.status !==
-      "confirmed"
-  );
+    const pendingBookings =
+        bookings.filter(
+            (booking) =>
+                booking.status !==
+                "confirmed"
+        );
     return (
         <div className="min-h-screen bg-slate-900 text-white p-10">
             <div className="max-w-6xl mx-auto">
@@ -244,36 +305,36 @@ const pendingBookings =
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-6 mb-10">
-  <div className="bg-slate-800 rounded-3xl p-6">
-    <p className="text-slate-400">
-      إجمالي الحجوزات
-    </p>
+                    <div className="bg-slate-800 rounded-3xl p-6">
+                        <p className="text-slate-400">
+                            إجمالي الحجوزات
+                        </p>
 
-    <h3 className="text-4xl font-bold mt-3">
-      {bookings.length}
-    </h3>
-  </div>
+                        <h3 className="text-4xl font-bold mt-3">
+                            {bookings.length}
+                        </h3>
+                    </div>
 
-  <div className="bg-slate-800 rounded-3xl p-6">
-    <p className="text-slate-400">
-      الحجوزات المؤكدة
-    </p>
+                    <div className="bg-slate-800 rounded-3xl p-6">
+                        <p className="text-slate-400">
+                            الحجوزات المؤكدة
+                        </p>
 
-    <h3 className="text-4xl font-bold mt-3 text-green-400">
-      {confirmedBookings.length}
-    </h3>
-  </div>
+                        <h3 className="text-4xl font-bold mt-3 text-green-400">
+                            {confirmedBookings.length}
+                        </h3>
+                    </div>
 
-  <div className="bg-slate-800 rounded-3xl p-6">
-    <p className="text-slate-400">
-      قيد المراجعة
-    </p>
+                    <div className="bg-slate-800 rounded-3xl p-6">
+                        <p className="text-slate-400">
+                            قيد المراجعة
+                        </p>
 
-    <h3 className="text-4xl font-bold mt-3 text-yellow-400">
-      {pendingBookings.length}
-    </h3>
-  </div>
-</div>
+                        <h3 className="text-4xl font-bold mt-3 text-yellow-400">
+                            {pendingBookings.length}
+                        </h3>
+                    </div>
+                </div>
 
                 <div className="mb-6">
                     <input
@@ -287,130 +348,240 @@ const pendingBookings =
                     />
                 </div>
 
-                <div className="bg-slate-800 rounded-3xl overflow-x-auto">                   <table className="min-w-[1100px] w-full text-right">
-                    <thead className="bg-slate-700">
-                        <tr>
-                            <th className="p-4">
-                                الراكب
-                            </th>
-
-                            <th className="p-4">
-                                المقعد
-                            </th>
-                            <th className="p-4">
-                                الهاتف
-                            </th>
-
-                            <th className="p-4">
-                                الجواز
-                            </th>
-
-                            <th className="p-4">
-                                الإيصال
-                            </th>
-                            <th className="p-4">
-                                الحالة
-                            </th>
-
-                            <th className="p-4">
-                                الإجراء
-                            </th>
-                            <th className="p-4"></th>
-
-                        </tr>
-                    </thead>
+                <div className="bg-slate-800 rounded-3xl overflow-x-auto">
 
 
 
-                    <tbody>
-                        {bookings
-                            .filter((booking) => {
-                                return (
-                                    booking.name
-                                        ?.toLowerCase()
-                                        .includes(
-                                            search.toLowerCase()
-                                        ) ||
-                                    booking.seat
-                                        ?.toLowerCase()
-                                        .includes(
-                                            search.toLowerCase()
-                                        )
-                                );
-                            })
-                            .map((booking) => (
-                                <tr
-                                    key={booking.id}
-                                    className="border-t border-slate-700"
-                                >
-                                    <td className="p-4">
-                                        {booking.name}
-                                    </td>
 
-                                    <td className="p-4">
-                                        {booking.seat}
-                                    </td>
+                    <table className="min-w-[1100px] w-full text-right">
+                        <thead className="bg-slate-700">
+                            <tr>
+                                <th className="p-4">
+                                    الراكب
+                                </th>
 
-                                    <td className="p-4">
-                                        {booking.phone}
-                                    </td>
+                                <th className="p-4">
+                                    المقعد
+                                </th>
+                                <th className="p-4">
+                                    الهاتف
+                                </th>
 
-                                    <td className="p-4">
-                                        {booking.passport}
-                                    </td>
+                                <th className="p-4">
+                                    الجواز
+                                </th>
 
-                                    <td className="p-4 text-center">                                            {booking.paymentImage && (
-                                        <img
-                                            src={booking.paymentImage}
-                                            alt="Payment"
-                                            onClick={() =>
-                                                booking.paymentImage &&
-                                                window.open(
-                                                    booking.paymentImage,
-                                                    "_blank"
-                                                )
-                                            }
-                                            className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
-                                        />
-                                    )}
-                                    </td>
+                                <th className="p-4">
+                                    الإيصال
+                                </th>
+                                <th className="p-4">
+                                    الحالة
+                                </th>
 
-                                    <td className="p-4">
-                                        {booking.status === "confirmed"
-                                            ? "مؤكد"
-                                            : "قيد المراجعة"}
-                                    </td>
+                                <th className="p-4">
+                                    الإجراء
+                                </th>
+                                <th className="p-4"></th>
 
-                                    <td className="p-4">
-                                        {booking.status !==
-                                            "confirmed" && (
-                                                <button
-                                                    onClick={() =>
-                                                        confirmBooking(
-                                                            booking.id
-                                                        )
-                                                    }
-                                                    className="bg-green-600 px-4 py-2 rounded-xl"
-                                                >
-                                                    تأكيد
-                                                </button>
-                                            )}
-                                    </td>
+                            </tr>
+                        </thead>
 
-                                    <td className="p-4">
+
+
+                        <tbody>
+                            {bookings
+                                .filter((booking) => {
+                                    return (
+                                        booking.name
+                                            ?.toLowerCase()
+                                            .includes(
+                                                search.toLowerCase()
+                                            ) ||
+                                        booking.seat
+                                            ?.toLowerCase()
+                                            .includes(
+                                                search.toLowerCase()
+                                            )
+                                    );
+                                })
+                                .map((booking) => (
+                                    <tr
+                                        key={booking.id}
+                                        className="border-t border-slate-700"
+                                    >
+                                        <td className="p-4">
+                                            {booking.name}
+                                        </td>
+
+                                        <td className="p-4">
+                                            {booking.seat}
+                                        </td>
+
+                                        <td className="p-4">
+                                            {booking.phone}
+                                        </td>
+
+                                        <td className="p-4">
+                                            {booking.passport}
+                                        </td>
+
+                                        <td className="p-4 text-center">                                            {booking.paymentImage && (
+                                            <img
+                                                src={booking.paymentImage}
+                                                alt="Payment"
+                                                onClick={() =>
+                                                    booking.paymentImage &&
+                                                    window.open(
+                                                        booking.paymentImage,
+                                                        "_blank"
+                                                    )
+                                                }
+                                                className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
+                                            />
+                                        )}
+                                        </td>
+
+                                        <td className="p-4">
+                                            {booking.status === "confirmed"
+                                                ? "مؤكد"
+                                                : "قيد المراجعة"}
+                                        </td>
+
+                                        <td className="p-4">
+                                            {booking.status !==
+                                                "confirmed" && (
+                                                    <button
+                                                        onClick={() =>
+                                                            confirmBooking(
+                                                                booking.id
+                                                            )
+                                                        }
+                                                        className="bg-green-600 px-4 py-2 rounded-xl"
+                                                    >
+                                                        تأكيد
+                                                    </button>
+                                                )}
+                                        </td>
+
+                                        <td className="p-4">
+                                            <button
+                                                onClick={() =>
+                                                    deleteBooking(booking.id)
+                                                }
+                                                className="bg-red-600 px-4 py-2 rounded-xl"
+                                            >
+                                                حذف
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+
+                    <button
+                        onClick={() =>
+                            setShowTripForm(
+                                !showTripForm
+                            )
+                        }
+                        className="fixed bottom-6 left-6 z-50 bg-blue-600 text-white px-6 py-4 rounded-full shadow-2xl"
+                    >
+                        إضافة رحلة
+                    </button>
+                    {showTripForm && (
+                        <div className="bg-blue-950 rounded-3xl p-6 mb-10">                        <h2 className="text-2xl font-bold mb-6">
+                            إضافة رحلة
+                        </h2>
+
+                            <div className="grid md:grid-cols-5 gap-4">
+
+                                <input
+                                    type="text"
+                                    placeholder="خط الرحلة"
+                                    value={route}
+                                    onChange={(e) =>
+                                        setRoute(e.target.value)
+                                    }
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
+
+                                <input
+                                    type="date" placeholder="التاريخ"
+                                    value={date}
+                                    onChange={(e) =>
+                                        setDate(e.target.value)
+                                    }
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
+
+                                <input
+                                    type="text"
+                                    placeholder="الوقت"
+                                    value={time}
+                                    onChange={(e) =>
+                                        setTime(e.target.value)
+                                    }
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
+
+                                <input
+                                    type="text"
+                                    placeholder="السعر"
+                                    value={price}
+                                    onChange={(e) =>
+                                        setPrice(e.target.value)
+                                    }
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
+
+                                <input
+                                    type="number"
+                                    placeholder="عدد المقاعد"
+                                    value={seats}
+                                    onChange={(e) =>
+                                        setSeats(e.target.value)
+                                    }
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
+
+                            </div>
+
+                            <button
+                                onClick={addTrip}
+                                className="bg-blue-600 mt-6 px-6 py-3 rounded-2xl"
+                            >
+                                إضافة الرحلة
+                            </button>
+                            <div className="mt-8 grid gap-4">
+                                {trips.map((trip) => (
+                                    <div
+                                        key={trip.id}
+                                        className="bg-slate-800 rounded-2xl p-4 flex items-center justify-between"
+                                    >
+                                        <div>
+                                            <h3 className="font-bold">
+                                                {trip.route}
+                                            </h3>
+
+                                            <p className="text-slate-400 text-sm">
+                                                {trip.date} - {trip.time}
+                                            </p>
+                                        </div>
+
                                         <button
                                             onClick={() =>
-                                                deleteBooking(booking.id)
+                                                deleteTrip(trip.id)
                                             }
                                             className="bg-red-600 px-4 py-2 rounded-xl"
                                         >
                                             حذف
                                         </button>
-                                    </td>
-                                </tr>
-                            ))}
-                    </tbody>
-                </table>
+                                    </div>
+                                ))}
+                            </div>
+
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

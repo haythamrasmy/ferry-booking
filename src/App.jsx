@@ -87,25 +87,27 @@ export default function FerryBookingWebsite() {
     }
   };
 
-  useEffect(() => {
-    fetchBookings();
+ useEffect(() => {
+  fetchBookings();
 
-    const unsubscribeTrips =
-      onSnapshot(
-        collection(db, "trips"),
-        (snapshot) => {
-          const tripsData =
-            snapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
+  const unsubscribeTrips =
+    onSnapshot(
+      collection(db, "trips"),
+      (snapshot) => {
+        const tripsData =
+          snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
-          setTrips(tripsData);
-          console.log(tripsData);
-        }
-      );
+        console.log(tripsData);
 
-    const unsubscribe = onAuthStateChanged(
+        setTrips(tripsData);
+      }
+    );
+
+  const unsubscribe =
+    onAuthStateChanged(
       auth,
       (user) => {
         if (user) {
@@ -116,14 +118,11 @@ export default function FerryBookingWebsite() {
       }
     );
 
-
-    return () => {
-      unsubscribe();
-      unsubscribeTrips();
-    };
-  }, []);
-
-
+  return () => {
+    unsubscribe();
+    unsubscribeTrips();
+  };
+}, []);
   const saveBooking = async () => {
     if (!selectedSeat) {
       alert("اختر مقعد أولًا");
@@ -309,9 +308,7 @@ export default function FerryBookingWebsite() {
                   <h3 className="font-bold text-lg">{trip.price}</h3>
                 </div>
 
-                <button className="bg-yellow-500 hover:bg-yellow-400 px-5 py-3 rounded-xl font-semibold transition">
-                  اختيار
-                </button>
+               
               </div>
             </div>
           ))}
