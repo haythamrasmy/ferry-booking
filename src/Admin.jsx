@@ -21,6 +21,9 @@ export default function Admin() {
     const [bookings, setBookings] =
         useState([]);
 
+const [trips, setTrips] =
+  useState([]);
+
     const [adminEmail, setAdminEmail] =
         useState("");
 
@@ -41,7 +44,19 @@ export default function Admin() {
     useEffect(() => {
         let unsubscribeBookings = null;
 
+const unsubscribeTrips =
+  onSnapshot(
+    collection(db, "trips"),
+    (snapshot) => {
+      const tripsData =
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
+      setTrips(tripsData);
+    }
+  );
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
@@ -62,6 +77,7 @@ export default function Admin() {
 
             if (unsubscribeBookings) {
                 unsubscribeBookings();
+                unsubscribeTrips();
             }
         };
     }, []);

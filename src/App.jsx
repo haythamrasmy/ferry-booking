@@ -6,6 +6,7 @@ import {
   collection,
   addDoc,
   getDocs,
+  onSnapshot,
 } from "firebase/firestore";
 
 import {
@@ -18,7 +19,7 @@ export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
 
 
-const seats = [
+  const seats = [
     "A1",
     "A2",
     "A3",
@@ -34,209 +35,211 @@ const seats = [
   ];
 
 
-  
+
 
   // Fixed invalid variable names
-const [bookedSeats, setBookedSeats] = useState([]);
+  const [bookedSeats, setBookedSeats] = useState([]);
   const lockedSeats = ["C1"];
   const [selectedSeat, setSelectedSeat] = useState("");
   const [name, setName] = useState("");
-const [passport, setPassport] = useState("");
-const [phone, setPhone] = useState("");
-const [email, setEmail] = useState("");
-const [paymentImage, setPaymentImage] =
-  useState("");
-const [bookings, setBookings] = useState([]);
-const [adminEmail, setAdminEmail] = useState("");
-const [adminPassword, setAdminPassword] = useState("");
-const [isAdmin, setIsAdmin] = useState(false);
+  const [passport, setPassport] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [paymentImage, setPaymentImage] =
+    useState("");
+  const [bookings, setBookings] = useState([]);
+  const [trips, setTrips] =
+    useState([]);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
-const trips = [
-  {
-    id: 1,
-    route: "أسوان ← وادي حلفا",
-    date: "10 مايو 2026",
-    time: "07:00 صباحًا",
-    seats: seats.length - bookedSeats.length,
-    price: "2500 جنيه",
-  },
 
-  {
-    id: 2,
-    route: "أسوان ← وادي حلفا",
-    date: "14 مايو 2026",
-    time: "09:00 صباحًا",
-    seats: seats.length - bookedSeats.length,
-    price: "2500 جنيه",
-  },
-];
 
-const fetchBookings = async () => {
-  try {
-    const querySnapshot = await getDocs(
-      collection(db, "bookings")
-    );
+  const fetchBookings = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "bookings")
+      );
 
-    const currentTime = Date.now();
+      const currentTime = Date.now();
 
-    const activeSeats = querySnapshot.docs
-      .filter((doc) => {
-        const data = doc.data();
+      const activeSeats = querySnapshot.docs
+        .filter((doc) => {
+          const data = doc.data();
 
-return !data.expiresAt || data.expiresAt > currentTime;
-      })
-      .map((doc) => doc.data().seat);
+          return !data.expiresAt || data.expiresAt > currentTime;
+        })
+        .map((doc) => doc.data().seat);
 
-    setBookedSeats(activeSeats);
+      setBookedSeats(activeSeats);
 
-    const bookingData = querySnapshot.docs.map(
-      (doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })
-    );
+      const bookingData = querySnapshot.docs.map(
+        (doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })
+      );
 
-    setBookings(bookingData);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-useEffect(() => {
-  fetchBookings();
-
-  const unsubscribe = onAuthStateChanged(
-    auth,
-    (user) => {
-      if (user) {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
+      setBookings(bookingData);
+    } catch (error) {
+      console.log(error);
     }
-  );
+  };
 
-  
-  return () => unsubscribe();
-}, []);
+  useEffect(() => {
+    fetchBookings();
 
+    const unsubscribeTrips =
+      onSnapshot(
+        collection(db, "trips"),
+        (snapshot) => {
+          const tripsData =
+            snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
 
- const saveBooking = async () => {
-  if (!selectedSeat) {
-  alert("اختر مقعد أولًا");
-  return;
-}
-  try {
-    const querySnapshot = await getDocs(
-  collection(db, "bookings")
-);
+          setTrips(tripsData);
+          console.log(tripsData);
+        }
+      );
 
-const currentTime = Date.now();
-
-const alreadyBooked =
-  querySnapshot.docs.some((doc) => {
-    const data = doc.data();
-
-    return (
-      data.seat === selectedSeat &&
-      (!data.expiresAt ||
-        data.expiresAt > currentTime)
-    );
-  });
-
-if (alreadyBooked) {
-  alert("هذا المقعد تم حجزه بالفعل");
-
-  return;
-}
-    await addDoc(collection(db, "bookings"), {
-  name,
-  passport,
-  phone,
-  email,
-  paymentImage,
-  seat: selectedSeat,
-  trip: "أسوان ← وادي حلفا",
-  status: "pending",
-  createdAt: new Date(),
-  expiresAt: Date.now() + 10 * 60 * 1000,
-});
-
-    alert("تم حفظ الحجز بنجاح");
-
-fetchBookings();
-
-setBookedSeats([...bookedSeats, selectedSeat]);
-    setName("");
-    setPassport("");
-    setPhone("");
-    setEmail("");
-  } catch (error) {
-
-console.log(error);
-alert(error.message);
-  }
-};
-const adminLogin = async () => {
-  try {
-    await signInWithEmailAndPassword(
+    const unsubscribe = onAuthStateChanged(
       auth,
-      adminEmail,
-      adminPassword
+      (user) => {
+        if (user) {
+          setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
+        }
+      }
     );
 
-    setIsAdmin(true);
 
-    alert("تم تسجيل دخول الأدمن");
-  } catch (error) {
-    console.log(error);
+    return () => {
+      unsubscribe();
+      unsubscribeTrips();
+    };
+  }, []);
 
-    alert("بيانات الأدمن غير صحيحة");
-  }
-};
 
-const adminLogout = async () => {
-  await signOut(auth);
+  const saveBooking = async () => {
+    if (!selectedSeat) {
+      alert("اختر مقعد أولًا");
+      return;
+    }
+    try {
+      const querySnapshot = await getDocs(
+        collection(db, "bookings")
+      );
 
-  setIsAdmin(false);
-};
+      const currentTime = Date.now();
+
+      const alreadyBooked =
+        querySnapshot.docs.some((doc) => {
+          const data = doc.data();
+
+          return (
+            data.seat === selectedSeat &&
+            (!data.expiresAt ||
+              data.expiresAt > currentTime)
+          );
+        });
+
+      if (alreadyBooked) {
+        alert("هذا المقعد تم حجزه بالفعل");
+
+        return;
+      }
+      await addDoc(collection(db, "bookings"), {
+        name,
+        passport,
+        phone,
+        email,
+        paymentImage,
+        seat: selectedSeat,
+        trip: "أسوان ← وادي حلفا",
+        status: "pending",
+        createdAt: new Date(),
+        expiresAt: Date.now() + 10 * 60 * 1000,
+      });
+
+      alert("تم حفظ الحجز بنجاح");
+
+      fetchBookings();
+
+      setBookedSeats([...bookedSeats, selectedSeat]);
+      setName("");
+      setPassport("");
+      setPhone("");
+      setEmail("");
+    } catch (error) {
+
+      console.log(error);
+      alert(error.message);
+    }
+  };
+  const adminLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(
+        auth,
+        adminEmail,
+        adminPassword
+      );
+
+      setIsAdmin(true);
+
+      alert("تم تسجيل دخول الأدمن");
+    } catch (error) {
+      console.log(error);
+
+      alert("بيانات الأدمن غير صحيحة");
+    }
+  };
+
+  const adminLogout = async () => {
+    await signOut(auth);
+
+    setIsAdmin(false);
+  };
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-slate-900 to-blue-900 text-white py-20 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-        <div className="text-center">
+          <div className="text-center">
             <img
-  src="/logo.png"
-  alt="Logo"
- className="w-24 mb-4 mx-auto"
-/>
+              src="/logo.png"
+              alt="Logo"
+              className="w-24 mb-4 mx-auto"
+            />
             <h1 className="text-2xl font-bold leading-tight mb-6">
               {companyName}
             </h1>
 
             <p className="text-lg text-slate-200 mb-8">
-             
+
             </p>
-<div className="flex justify-center">
-            <button className="hidden md:block bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
-              احجز الآن
-            </button>
+            <div className="flex justify-center">
+              <button className="hidden md:block bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
+                احجز الآن
+              </button>
+            </div>
           </div>
-   </div>
           <div>
             <img
-            
+
               src="/hero.jpg"
               alt="Nile Ferry"
               className="rounded-3xl shadow-2xl w-full object-cover max-h-[400px]"
             />
             <div className="md:hidden flex justify-center mt-6">
-  <button className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
-    احجز الآن
-  </button>
-</div>
+              <button className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
+                احجز الآن
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -297,8 +300,7 @@ const adminLogout = async () => {
               <div>
                 <p className="text-slate-500 text-sm">المقاعد المتبقية</p>
                 <h3 className="font-semibold text-green-600">
-                  {trip.seats}
-                </h3>
+                  {trip.seats - bookedSeats.length}                </h3>
               </div>
 
               <div className="flex items-center justify-between md:justify-end gap-4">
@@ -322,12 +324,12 @@ const adminLogout = async () => {
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold">اختر مقعدك</h2>
             <p className="text-red-600 font-bold mt-3 text-sm">
-  ⚠️ بعد اختيار المقعد وإتمام الحجز سيتم حجزه لمدة 10 دقائق فقط،
-  وإذا لم يتم تأكيد الدفع سيصبح متاحًا مرة أخرى.
-</p>
-             <p className="text-blue-700 font-bold mt-2">
-                المقعد المختار: {selectedSeat || "لا يوجد"}
-             </p>  
+              ⚠️ بعد اختيار المقعد وإتمام الحجز سيتم حجزه لمدة 10 دقائق فقط،
+              وإذا لم يتم تأكيد الدفع سيصبح متاحًا مرة أخرى.
+            </p>
+            <p className="text-blue-700 font-bold mt-2">
+              المقعد المختار: {selectedSeat || "لا يوجد"}
+            </p>
             <div className="flex gap-4 text-sm flex-wrap">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-500 rounded"></div>
@@ -357,16 +359,14 @@ const adminLogout = async () => {
                     key={seat}
                     onClick={() => setSelectedSeat(seat)}
                     disabled={isBooked || isLocked}
-                    className={`rounded-2xl py-5 font-bold transition ${
-                      
-                      isBooked
-                        ? "bg-red-500 text-white cursor-not-allowed"
-                        : isLocked
+                    className={`rounded-2xl py-5 font-bold transition ${isBooked
+                      ? "bg-red-500 text-white cursor-not-allowed"
+                      : isLocked
                         ? "bg-yellow-400 text-black cursor-not-allowed"
                         : selectedSeat === seat
-                        ? "bg-blue-700 text-white scale-105"
-                        : "bg-green-500 hover:scale-105 text-white"
-                    }`}
+                          ? "bg-blue-700 text-white scale-105"
+                          : "bg-green-500 hover:scale-105 text-white"
+                      }`}
                   >
                     {seat}
                   </button>
@@ -383,36 +383,36 @@ const adminLogout = async () => {
           <h2 className="text-3xl font-bold mb-8">بيانات الراكب</h2>
 
           <div className="grid md:grid-cols-2 gap-6">
-           <input
-  type="text"
-  placeholder="الاسم بالكامل"
-  value={name}
-  onChange={(e) => setName(e.target.value)}
-  className="border rounded-2xl p-4 outline-none"
-/>
+            <input
+              type="text"
+              placeholder="الاسم بالكامل"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-           <input
-  type="text"
-  placeholder="رقم جواز السفر"
-  value={passport}
-  onChange={(e) => setPassport(e.target.value)}
-  className="border rounded-2xl p-4 outline-none"
-/>
+            <input
+              type="text"
+              placeholder="رقم جواز السفر"
+              value={passport}
+              onChange={(e) => setPassport(e.target.value)}
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-         <input
-  type="text"
-  placeholder="رقم الهاتف"
-  value={phone}
-  onChange={(e) => setPhone(e.target.value)}
-  className="border rounded-2xl p-4 outline-none"
-/>
-<input
-  type="email"
-  placeholder="البريد الإلكتروني"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  className="border rounded-2xl p-4 outline-none"
-/>
+            <input
+              type="text"
+              placeholder="رقم الهاتف"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="border rounded-2xl p-4 outline-none"
+            />
+            <input
+              type="email"
+              placeholder="البريد الإلكتروني"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border rounded-2xl p-4 outline-none"
+            />
           </div>
 
           <div className="mt-8">
@@ -420,24 +420,24 @@ const adminLogout = async () => {
               ارفع صورة التحويل أو الدفع
             </label>
 
-           <input
-  type="file"
-  accept="image/*"
-  onChange={(e) => {
-    const file = e.target.files[0];
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
 
-    const reader = new FileReader();
+                const reader = new FileReader();
 
-    reader.onloadend = () => {
-      setPaymentImage(reader.result);
-    };
+                reader.onloadend = () => {
+                  setPaymentImage(reader.result);
+                };
 
-    if (file) {
-      reader.readAsDataURL(file);
-    }
-  }}
-  className="border rounded-2xl p-4 w-full"
-/>
+                if (file) {
+                  reader.readAsDataURL(file);
+                }
+              }}
+              className="border rounded-2xl p-4 w-full"
+            />
           </div>
 
           <div className="mt-10 flex items-center justify-between flex-wrap gap-6">
@@ -445,12 +445,12 @@ const adminLogout = async () => {
               <p className="text-slate-500">طريقة الدفع</p>
               <h3 className="font-bold text-xl">InstaPay / Paymob</h3>
             </div>
-          <button
-  onClick={saveBooking}
-  className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg transition"
->
-  تأكيد الحجز
-</button>
+            <button
+              onClick={saveBooking}
+              className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg transition"
+            >
+              تأكيد الحجز
+            </button>
           </div>
         </div>
       </section>
