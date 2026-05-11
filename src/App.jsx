@@ -1,12 +1,18 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "./firebase";
+import jsPDF from "jspdf";
+
+import QRCode from "qrcode";
+
+import JsBarcode from "jsbarcode";
 
 import {
   collection,
   addDoc,
   getDocs,
   onSnapshot,
+  doc,
 } from "firebase/firestore";
 
 import {
@@ -48,6 +54,8 @@ export default function FerryBookingWebsite() {
   const [paymentImage, setPaymentImage] =
     useState("");
   const [bookings, setBookings] = useState([]);
+  const [userBooking, setUserBooking] =
+    useState(null);
   const [trips, setTrips] =
     useState([]);
   const [adminEmail, setAdminEmail] = useState("");
@@ -87,50 +95,283 @@ export default function FerryBookingWebsite() {
     }
   };
 
- useEffect(() => {
-  fetchBookings();
+  useEffect(() => {
+    const unsubscribeBookings =
+      onSnapshot(
+        collection(db, "bookings"),
+        (snapshot) => {
+          const currentTime =
+            Date.now();
 
-  const unsubscribeTrips =
-    onSnapshot(
-      collection(db, "trips"),
-      (snapshot) => {
-       const currentTime = Date.now();
+          const bookingData =
+            snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
 
-const tripsData = snapshot.docs
-  .map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }))
-  .filter(
-    (trip) =>
-      currentTime <
-      trip.tripTimestamp +
-        86400000
-  );
+          setBookings(bookingData);
 
-        console.log(tripsData);
+          const activeSeats =
+            bookingData
+              .filter(
+                (booking) =>
+                  !booking.expiresAt ||
+                  booking.expiresAt >
+                  currentTime
+              )
+              .map(
+                (booking) =>
+                  booking.seat
+              );
 
-        setTrips(tripsData);
-      }
-    );
-
-  const unsubscribe =
-    onAuthStateChanged(
-      auth,
-      (user) => {
-        if (user) {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
+          setBookedSeats(
+            activeSeats
+          );
         }
+      );
+    const unsubscribeTrips =
+      onSnapshot(
+        collection(db, "trips"),
+        (snapshot) => {
+          const currentTime = Date.now();
+
+          const tripsData = snapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter(
+              (trip) =>
+                !trip.tripTimestamp ||
+                currentTime <
+                trip.tripTimestamp +
+                86400000
+            );
+
+          console.log(tripsData);
+
+          setTrips(tripsData);
+        }
+      );
+
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        (user) => {
+          if (user) {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        }
+      );
+
+    return () => {
+      unsubscribe();
+      unsubscribeTrips();
+      unsubscribeBookings();
+    };
+
+
+  },
+
+    []);
+
+
+  useEffect(() => {
+    if (!userBooking) return;
+
+    const unsubscribe =
+      onSnapshot(
+        doc(
+          db,
+          "bookings",
+          userBooking.id
+        ),
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const data =
+              docSnap.data();
+
+            setUserBooking({
+              id: docSnap.id,
+              ...data,
+            });
+          }
+        }
+      );
+
+    return () => unsubscribe();
+  }, [userBooking]);
+
+  const generateTicketPDF = async (
+    booking
+  ) => {
+    const doc = new jsPDF();
+
+    doc.setDrawColor(0, 51, 102);
+
+    doc.rect(10, 10, 190, 277);
+
+    doc.setFontSize(28);
+
+    doc.setTextColor(0, 51, 102);
+
+    doc.setFontSize(22);
+
+    const logo = "/logo.png";
+
+    doc.addImage(
+      logo,
+      "PNG",
+      20,
+      15,
+      30,
+      30
+    );
+
+    doc.text(
+      "Wadi El Nile Ferry Ticket",
+      20,
+      20
+    );
+
+    doc.setFontSize(14);
+
+    doc.setTextColor(120);
+
+    doc.setFontSize(60);
+
+    doc.text(
+      "WNF",
+      70,
+      160,
+      {
+        angle: 45,
       }
     );
 
-  return () => {
-    unsubscribe();
-    unsubscribeTrips();
+    doc.setTextColor(0);
+    doc.setFontSize(14);
+
+    doc.text(
+      `Ticket ID: ${booking.ticketId}`,
+      20,
+      60
+    );
+
+    doc.text(
+      `Passenger: ${booking.name}`,
+      20,
+      80
+    );
+
+    doc.text(
+      `Passport: ${booking.passport}`,
+      20,
+      100
+    );
+
+    doc.text(
+      `Seat: ${booking.seat}`,
+      20,
+      120
+    );
+
+    doc.text(
+      `Trip: ${booking.trip}`,
+      20,
+      140
+    );
+
+    doc.text(
+      `Issued: ${new Date().toLocaleDateString()}`,
+      20,
+      160
+    );
+
+    const qrData =
+      await QRCode.toDataURL(
+JSON.stringify({
+  ticketId:
+    booking.ticketId,
+
+  name:
+    booking.name,
+
+  passport:
+    booking.passport,
+
+  seat:
+    booking.seat,
+
+  trip:
+    booking.trip,
+
+  status:
+    booking.status,
+})      );
+
+    doc.addImage(
+      qrData,
+      "PNG",
+      140,
+      30,
+      50,
+      50
+    );
+
+    const canvas =
+      document.createElement("canvas");
+
+    JsBarcode(
+      canvas,
+      booking.ticketId,
+      {
+        format: "CODE128",
+      }
+    );
+
+    const barcode =
+      canvas.toDataURL("image/png");
+
+    doc.line(20, 170, 190, 170);
+
+    doc.setFontSize(11);
+
+    doc.text(
+      "Please arrive 2 hours before departure.",
+      20,
+      185
+    );
+
+    doc.text(
+      "Keep this ticket during the whole trip.",
+      20,
+      195
+    );
+
+    doc.text(
+      "Wadi El Nile River Transport Authority",
+      20,
+      260
+    );
+
+    doc.addImage(
+      barcode,
+      "PNG",
+      20,
+      120,
+      150,
+      25
+    );
+
+    doc.save(
+      `${booking.ticketId}.pdf`
+    );
   };
-}, []);
+
+
   const saveBooking = async () => {
     if (!selectedSeat) {
       alert("اختر مقعد أولًا");
@@ -159,22 +400,47 @@ const tripsData = snapshot.docs
 
         return;
       }
-      await addDoc(collection(db, "bookings"), {
+      const ticketId =
+        "WND-" +
+        Math.floor(
+          100000 + Math.random() * 900000
+        );
+
+
+      const bookingRef =
+        await addDoc(
+          collection(db, "bookings"), {
+          ticketId,
+          name,
+          passport,
+          phone,
+          email,
+          paymentImage,
+          seat: selectedSeat,
+          trip: trips[0]?.route,
+          status: "pending",
+          createdAt: new Date(),
+          expiresAt: Date.now() + 10 * 60 * 1000,
+        });
+
+      setUserBooking({
+        id: bookingRef.id,
+
+        ticketId,
+
         name,
         passport,
-        phone,
-        email,
-        paymentImage,
+
         seat: selectedSeat,
-        trip: "أسوان ← وادي حلفا",
+
+        trip:
+          trips[0]?.route,
+
         status: "pending",
-        createdAt: new Date(),
-        expiresAt: Date.now() + 10 * 60 * 1000,
       });
 
       alert("تم حفظ الحجز بنجاح");
 
-      fetchBookings();
 
       setBookedSeats([...bookedSeats, selectedSeat]);
       setName("");
@@ -307,7 +573,14 @@ const tripsData = snapshot.docs
               <div>
                 <p className="text-slate-500 text-sm">المقاعد المتبقية</p>
                 <h3 className="font-semibold text-green-600">
-                  {trip.seats - bookedSeats.length}                </h3>
+                  {
+                    trip.seats -
+                    bookings.filter(
+                      (booking) =>
+                        booking.trip ===
+                        trip.route
+                    ).length
+                  }                          </h3>
               </div>
 
               <div className="flex items-center justify-between md:justify-end gap-4">
@@ -316,7 +589,7 @@ const tripsData = snapshot.docs
                   <h3 className="font-bold text-lg">{trip.price}</h3>
                 </div>
 
-               
+
               </div>
             </div>
           ))}
@@ -456,8 +729,24 @@ const tripsData = snapshot.docs
             >
               تأكيد الحجز
             </button>
+
+            {userBooking?.status ===
+              "confirmed" && (
+                <button
+                  onClick={() =>
+                    generateTicketPDF(
+                      userBooking
+                    )
+                  }
+                  className="bg-green-600 text-white px-8 py-4 rounded-2xl"
+                >
+                  تحميل التذكرة
+                </button>
+              )}
           </div>
+
         </div>
+
       </section>
 
 

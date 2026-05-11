@@ -61,19 +61,19 @@ export default function Admin() {
     useEffect(() => {
         let unsubscribeBookings = null;
 
-const unsubscribeTrips =
-  onSnapshot(
-    collection(db, "trips"),
-    (snapshot) => {
-      const tripsData =
-        snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const unsubscribeTrips =
+            onSnapshot(
+                collection(db, "trips"),
+                (snapshot) => {
+                    const tripsData =
+                        snapshot.docs.map((doc) => ({
+                            id: doc.id,
+                            ...doc.data(),
+                        }));
 
-      setTrips(tripsData);
-    }
-  );
+                    setTrips(tripsData);
+                }
+            );
 
 
         const unsubscribe =
@@ -488,97 +488,108 @@ const unsubscribeTrips =
                         إضافة رحلة
                     </button>
                     {showTripForm && (
-                        <div className="bg-blue-950 rounded-3xl p-6 mb-10">                        <h2 className="text-2xl font-bold mb-6">
-                            إضافة رحلة
-                        </h2>
+                        <div className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-6">
 
-                            <div className="grid md:grid-cols-5 gap-4">
-
-                                <input
-                                    type="text"
-                                    placeholder="خط الرحلة"
-                                    value={route}
-                                    onChange={(e) =>
-                                        setRoute(e.target.value)
+                            <div className="bg-blue-950 rounded-3xl p-6 w-full max-w-4xl shadow-2xl relative">
+                                <h2 className="text-2xl font-bold mb-6 pr-12 text-right">
+                                    إضافة رحلة
+                                </h2>
+                                <button
+                                    onClick={() =>
+                                        setShowTripForm(false)
                                     }
-                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                />
+                                    className="absolute top-4 left-4 bg-white/20 hover:bg-white/30 backdrop-blur-md w-10 h-10 rounded-full transition"
+                                >
+                                    ✕
+                                </button>
+                                <div className="grid md:grid-cols-5 gap-4">
 
-                                <input
-                                    type="date" placeholder="التاريخ"
-                                    value={date}
-                                    onChange={(e) =>
-                                        setDate(e.target.value)
-                                    }
-                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                />
+                                    <input
+                                        type="text"
+                                        placeholder="خط الرحلة"
+                                        value={route}
+                                        onChange={(e) =>
+                                            setRoute(e.target.value)
+                                        }
+                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                    />
 
-                                <input
-                                    type="text"
-                                    placeholder="الوقت"
-                                    value={time}
-                                    onChange={(e) =>
-                                        setTime(e.target.value)
-                                    }
-                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                />
+                                    <input
+                                        type="date" placeholder="التاريخ"
+                                        value={date}
+                                        onChange={(e) =>
+                                            setDate(e.target.value)
+                                        }
+                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                    />
 
-                                <input
-                                    type="text"
-                                    placeholder="السعر"
-                                    value={price}
-                                    onChange={(e) =>
-                                        setPrice(e.target.value)
-                                    }
-                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                />
+                                    <input
+                                        type="time"
+                                        placeholder="الوقت"
+                                        value={time}
+                                        onChange={(e) =>
+                                            setTime(e.target.value)
+                                        }
+                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                    />
 
-                                <input
-                                    type="number"
-                                    placeholder="عدد المقاعد"
-                                    value={seats}
-                                    onChange={(e) =>
-                                        setSeats(e.target.value)
-                                    }
-                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                />
+                                    <input
+                                        type="text"
+                                        placeholder="السعر"
+                                        value={price}
+                                        onChange={(e) =>
+                                            setPrice(e.target.value)
+                                        }
+                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                    />
 
-                            </div>
+                                    <input
+                                        type="number"
+                                        placeholder="عدد المقاعد"
+                                        value={seats}
+                                        onChange={(e) =>
+                                            setSeats(e.target.value)
+                                        }
+                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                    />
 
-                            <button
-                                onClick={addTrip}
-                                className="bg-blue-600 mt-6 px-6 py-3 rounded-2xl"
-                            >
-                                إضافة الرحلة
-                            </button>
-                            <div className="mt-8 grid gap-4">
-                                {trips.map((trip) => (
-                                    <div
-                                        key={trip.id}
-                                        className="bg-slate-800 rounded-2xl p-4 flex items-center justify-between"
-                                    >
-                                        <div>
-                                            <h3 className="font-bold">
-                                                {trip.route}
-                                            </h3>
+                                </div>
 
-                                            <p className="text-slate-400 text-sm">
-                                                {trip.date} - {trip.time}
-                                            </p>
-                                        </div>
-
-                                        <button
-                                            onClick={() =>
-                                                deleteTrip(trip.id)
-                                            }
-                                            className="bg-red-600 px-4 py-2 rounded-xl"
+                                <button
+                                    onClick={addTrip}
+                                    className="bg-blue-600 mt-6 px-6 py-3 rounded-2xl"
+                                >
+                                    إضافة الرحلة
+                                </button>
+                                <div className="mt-8 grid gap-4">
+                                    {trips.map((trip) => (
+                                        <div
+                                            key={trip.id}
+                                            className="bg-slate-800 rounded-2xl p-4 flex items-center justify-between"
                                         >
-                                            حذف
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
+                                            <div>
+                                                <h3 className="font-bold">
+                                                    {trip.route}
+                                                </h3>
 
+                                                <p className="text-slate-400 text-sm">
+                                                    {trip.date} - {trip.time}
+                                                </p>
+                                            </div>
+
+                                            <button
+                                                onClick={() =>
+                                                    deleteTrip(trip.id)
+                                                }
+                                                className="bg-red-600 px-4 py-2 rounded-xl"
+                                            >
+                                                حذف
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                            </div>
                         </div>
                     )}
                 </div>
