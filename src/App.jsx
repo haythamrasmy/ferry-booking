@@ -499,7 +499,7 @@ JSON.stringify({
    className="
   absolute
   -bottom-4
-  -right-31
+  -right-25
   w-24
   md:w-45
   opacity-150
