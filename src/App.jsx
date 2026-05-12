@@ -483,11 +483,31 @@ JSON.stringify({
       <section className="bg-gradient-to-r from-slate-900 to-blue-900 text-white py-20 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div className="text-center">
-            <img
-              src="/logo.png"
-              alt="Logo"
-              className="w-24 mb-4 mx-auto"
-            />
+            <div className="relative w-fit mx-auto mb-4">
+
+  {/* Old Logo */}
+  <img
+    src="/logo.png"
+    alt="Main Logo"
+    className="w-30 md:w-37 opacity-95"
+  />
+
+  {/* 3A Logo */}
+  <img
+    src="/3a-logo.png"
+    alt="3A Logo"
+   className="
+  absolute
+  -bottom-4
+  -right-31
+  w-24
+  md:w-45
+  opacity-150
+  drop-shadow-xl
+"
+  />
+
+</div>
             <h1 className="text-2xl font-bold leading-tight mb-6">
               {companyName}
             </h1>
@@ -501,6 +521,7 @@ JSON.stringify({
               </button>
             </div>
           </div>
+
           <div>
             <img
 
@@ -508,6 +529,8 @@ JSON.stringify({
               alt="Nile Ferry"
               className="rounded-3xl shadow-2xl w-full object-cover max-h-[400px]"
             />
+
+
             <div className="md:hidden flex justify-center mt-6">
               <button className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
                 احجز الآن
