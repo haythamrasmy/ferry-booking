@@ -603,7 +603,7 @@ const saveShipment = async () => {
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-slate-900 to-blue-900 text-white py-20 px-6">
+      <section className="bg-gradient-to-br from-[#dbeafe] via-[#93c5fd] to-[#2563eb] text-white py-20 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <div className="text-center">
             <div className="relative w-fit mx-auto mb-4">
@@ -621,12 +621,12 @@ const saveShipment = async () => {
     alt="3A Logo"
    className="
   absolute
-  -bottom-4
-  -right-25
-  w-24
-  md:w-45
-  opacity-150
-  drop-shadow-xl
+  -bottom-6
+  -right-16
+  w-32
+  md:w-40
+  opacity-100
+  drop-shadow-2xl
 "
   />
 
