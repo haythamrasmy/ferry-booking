@@ -602,223 +602,241 @@ export default function FerryBookingWebsite() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#eaf4ff] min-h-screen">
+    {/* Hero Section */}
+<section className="relative overflow-hidden bg-[#eef5fb]">
 
-        {/* Top Navbar */}
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative z-20">
+  {/* Top Area */}
+  <div className="max-w-7xl mx-auto px-6 pt-6 relative z-20">
 
-          {/* Nav Links */}
-          <div className="hidden md:flex items-center gap-12 text-blue-950 font-bold text-lg">
+    {/* Navbar */}
+    <div className="flex items-start justify-between">
 
-            <a href="#" className="border-b-4 border-blue-600 pb-2">
-              الرئيسية
-            </a>
+      {/* Nav Links */}
+      <div className="
+        hidden
+        md:flex
+        items-center
+        gap-14
+        text-blue-950
+        font-bold
+        text-2xl
+        pt-6
+      ">
 
-            <a href="#">
-              حجز رحلة
-            </a>
+        <a
+          href="#"
+          className="
+            text-blue-600
+            border-b-4
+            border-blue-600
+            pb-2
+          "
+        >
+          الرئيسية
+        </a>
 
-            <a href="#">
-              حجوزاتي
-            </a>
+        <a href="#" className="hover:text-blue-500 transition">
+          حجز رحلة
+        </a>
 
-            <a href="#">
-              الشحن
-            </a>
+        <a href="#" className="hover:text-blue-500 transition">
+          حجوزاتي
+        </a>
 
-            <a href="#">
-              تتبع شحنتك
-            </a>
+        <a href="#" className="hover:text-blue-500 transition">
+          الشحن
+        </a>
 
-            <a href="#">
-              تواصل معنا
-            </a>
+        <a href="#" className="hover:text-blue-500 transition">
+          تتبع شحنتك
+        </a>
 
-          </div>
+        <a href="#" className="hover:text-blue-500 transition">
+          تواصل معنا
+        </a>
 
-          {/* Top Left Logos */}
-          <div className="
-      bg-white/70
-      backdrop-blur-md
-      px-6
-      py-4
-      rounded-bl-[40px]
-      rounded-tr-[40px]
-      shadow-xl
-      flex
+      </div>
+
+      {/* Small Top Banner */}
+      <div className="
+        bg-white/90
+        shadow-xl
+        rounded-[35px]
+        px-6
+        py-4
+        flex
+        items-center
+        gap-4
+      ">
+
+        <img
+          src="/logo.png"
+          alt="Logo"
+          className="w-16"
+        />
+
+        <img
+          src="/3a-logo.png"
+          alt="3A"
+          className="w-16"
+        />
+
+        <div className="
+          text-blue-950
+          font-black
+          text-2xl
+          leading-tight
+        ">
+          هيئة وادي النيل
+          <br />
+
+          <span className="text-lg font-bold">
+            للملاحة النهرية
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    {/* Main Hero */}
+    <div className="
+      grid
+      md:grid-cols-[1.2fr_1fr]
+      gap-16
       items-center
-      gap-4
+      py-16
     ">
 
-            <img
-              src="/logo.png"
-              alt="Logo"
-              className="w-20"
-            />
+      {/* Ferry Image */}
+      <div>
 
-            <img
-              src="/3a-logo.png"
-              alt="3A"
-              className="w-20"
-            />
-
-            <div className="text-blue-950 font-black text-3xl leading-tight">
-              هيئة وادي النيل
-              <br />
-              <span className="text-xl font-bold">
-                للملاحة النهرية
-              </span>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* Main Hero */}
         <div className="
-    max-w-7xl
-    mx-auto
-    grid
-    md:grid-cols-2
-    gap-16
-    items-center
-    px-6
-    pt-10
-    pb-32
-    relative
-    z-10
-  ">
-
-          {/* Ferry Image */}
-          <div className="relative">
-
-            <div className="
-        rounded-[40px]
-        overflow-hidden
-        border-[6px]
-        border-white/70
-        shadow-2xl
-      ">
-
-              <img
-                src="/hero.jpg"
-                alt="Ferry"
-                className="
-            w-full
-h-[720px]
-            object-cover
-          "
-              />
-
-            </div>
-
-          </div>
-
-          {/* Hero Content */}
-          <div className="text-center md:text-right">
-
-            {/* Large Logos */}
-            <div className="
-        flex
-        items-center
-        justify-center
-        md:justify-end
-        gap-6
-        mb-10
-      ">
-
-              <img
-                src="/logo.png"
-                alt="Logo"
-                className="
-            w-28
-md:w-32
-            drop-shadow-2xl
-          "
-              />
-
-              <img
-                src="/3a-logo.png"
-                alt="3A"
-                className="
-            w-28
-md:w-32
-            drop-shadow-2xl
-          "
-              />
-
-            </div>
-
-            {/* Title */}
-            <h1 className="
-        text-5xl
-        md:text-7xl
-        font-black
-        leading-tight
-        text-blue-950
-        mb-8
-      ">
-              هيئة وادي النيل
-              <br />
-              للملاحة النهرية
-            </h1>
-
-            {/* Subtitle */}
-            <p className="
-        text-2xl
-        text-blue-900/70
-        mb-12
-        leading-loose
-      ">
-              نربط الأماكن .. نوصل بأمان
-            </p>
-
-            {/* Divider */}
-            <div className="
-        flex
-        items-center
-        justify-center
-        md:justify-end
-        gap-4
-        mb-12
-      ">
-
-              <div className="h-[2px] w-32 bg-blue-600" />
-
-              <div className="text-5xl text-blue-700">
-                ⚓
-              </div>
-
-              <div className="h-[2px] w-32 bg-blue-600" />
-
-            </div>
-
-            {/* CTA */}
-            <button
-              className="
-          bg-yellow-400
-          hover:bg-yellow-300
-          text-black
-          px-14
-          py-5
-          rounded-3xl
-          text-3xl
-          font-black
+          rounded-[40px]
+          overflow-hidden
+          border-[6px]
+          border-white
           shadow-2xl
-          transition
-          hover:scale-105
-        "
-            >
-              احجز الآن
-            </button>
+        ">
 
-          </div>
+          <img
+            src="/hero.jpg"
+            alt="Ferry"
+            className="
+              w-full
+              h-[500px]
+              object-cover
+            "
+          />
 
         </div>
 
-        {/* Bottom Waves */}
+      </div>
+
+      {/* Right Content */}
+      <div className="text-center md:text-right">
+
+        {/* Big Logos */}
         <div className="
+          flex
+          items-center
+          justify-center
+          md:justify-end
+          gap-6
+          mb-8
+        ">
+
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="
+              w-32
+              md:w-40
+            "
+          />
+
+          <img
+            src="/3a-logo.png"
+            alt="3A"
+            className="
+              w-32
+              md:w-40
+            "
+          />
+
+        </div>
+
+        {/* Title */}
+        <h1 className="
+          text-5xl
+          md:text-7xl
+          font-black
+          leading-tight
+          text-blue-950
+          mb-6
+        ">
+          هيئة وادي النيل
+          <br />
+          للملاحة النهرية
+        </h1>
+
+        {/* Subtitle */}
+        <p className="
+          text-2xl
+          text-blue-900/70
+          mb-10
+        ">
+          نربط الأماكن .. نوصل بأمان
+        </p>
+
+        {/* Divider */}
+        <div className="
+          flex
+          items-center
+          justify-center
+          md:justify-end
+          gap-4
+          mb-10
+        ">
+
+          <div className="h-[2px] w-32 bg-blue-600" />
+
+          <div className="text-5xl text-blue-700">
+            ⚓
+          </div>
+
+          <div className="h-[2px] w-32 bg-blue-600" />
+
+        </div>
+
+        {/* CTA */}
+        <button
+          className="
+            bg-yellow-400
+            hover:bg-yellow-300
+            text-black
+            px-14
+            py-5
+            rounded-[28px]
+            text-3xl
+            font-black
+            shadow-2xl
+            transition
+            hover:scale-105
+          "
+        >
+          احجز الآن
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* Bottom Waves */}
+  <div className="
     absolute
     bottom-0
     left-0
@@ -827,40 +845,23 @@ md:w-32
     leading-none
   ">
 
-          <svg
-            viewBox="0 0 1440 320"
-            className="w-full h-auto"
-            preserveAspectRatio="none"
-          >
-            <path
-              fill="#1d4ed8"
-              fillOpacity="1"
-              d="M0,288L80,272C160,256,320,224,480,224C640,224,800,256,960,272C1120,288,1280,288,1360,288L1440,288L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-            />
+    <svg
+      viewBox="0 0 1440 320"
+      className="w-full"
+      preserveAspectRatio="none"
+    >
 
-          </svg>
+      <path
+        fill="#1d4ed8"
+        fillOpacity="1"
+        d="M0,256L80,245.3C160,235,320,213,480,224C640,235,800,277,960,282.7C1120,288,1280,256,1360,240L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+      />
 
-        </div>
+    </svg>
 
-        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+  </div>
 
-  <svg
-    viewBox="0 0 1440 320"
-    className="w-full"
-    preserveAspectRatio="none"
-  >
-
-    <path
-      fill="#2563eb"
-      fillOpacity="1"
-      d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,224C1120,235,1280,213,1360,202.7L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-    />
-
-  </svg>
-
-</div>
-
-      </section>
+</section>
       ```
 
 
