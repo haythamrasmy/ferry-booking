@@ -603,7 +603,9 @@ export default function FerryBookingWebsite() {
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-[#edf3f9]">
+      <section 
+      dir="rtl"
+      className="relative overflow-hidden bg-[#edf3f9]">
 
         {/* Top Area */}
         <div className="max-w-[1500px] mx-auto px-6 pt-6 relative z-20">
@@ -706,8 +708,8 @@ text-xl
 md:grid-cols-[1.4fr_1fr]
       gap-16
       items-center
-      py-16
-    ">
+pt-8
+pb-20    ">
 
             {/* Ferry Image */}
             <div>
@@ -816,10 +818,10 @@ md:w-48
             bg-yellow-400
             hover:bg-yellow-300
             text-black
-            px-14
-            py-5
-            rounded-[28px]
-            text-3xl
+          px-16
+py-5
+rounded-[26px]
+text-[42px]
             font-black
             shadow-2xl
             transition
