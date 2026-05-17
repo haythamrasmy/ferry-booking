@@ -62,66 +62,66 @@ export default function FerryBookingWebsite() {
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-const [senderName, setSenderName] = useState("");
-const [senderPhone, setSenderPhone] = useState("");
+  const [senderName, setSenderName] = useState("");
+  const [senderPhone, setSenderPhone] = useState("");
 
-const [receiverName, setReceiverName] = useState("");
-const [receiverPhone, setReceiverPhone] = useState("");
+  const [receiverName, setReceiverName] = useState("");
+  const [receiverPhone, setReceiverPhone] = useState("");
 
-const [cargoType, setCargoType] = useState("");
-const [weight, setWeight] = useState("");
+  const [cargoType, setCargoType] = useState("");
+  const [weight, setWeight] = useState("");
 
-const [quantity, setQuantity] = useState("");
-const [destination, setDestination] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [destination, setDestination] = useState("");
 
-const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState("");
 
-const [shipmentPaymentImage, setShipmentPaymentImage] =
-  useState("");
-const [trackingNumber, setTrackingNumber] =
-  useState("");
+  const [shipmentPaymentImage, setShipmentPaymentImage] =
+    useState("");
+  const [trackingNumber, setTrackingNumber] =
+    useState("");
 
-const [trackedShipment, setTrackedShipment] =
-  useState(null);
+  const [trackedShipment, setTrackedShipment] =
+    useState(null);
 
 
   const trackShipment = async () => {
 
-  try {
+    try {
 
-    const querySnapshot =
-      await getDocs(
-        collection(db, "shipments")
-      );
+      const querySnapshot =
+        await getDocs(
+          collection(db, "shipments")
+        );
 
-    const shipment =
-      querySnapshot.docs.find(
-        (doc) =>
-          doc.data().trackingId ===
-          trackingNumber
-      );
+      const shipment =
+        querySnapshot.docs.find(
+          (doc) =>
+            doc.data().trackingId ===
+            trackingNumber
+        );
 
-    if (shipment) {
+      if (shipment) {
 
-      setTrackedShipment({
-        id: shipment.id,
-        ...shipment.data(),
-      });
+        setTrackedShipment({
+          id: shipment.id,
+          ...shipment.data(),
+        });
 
-    } else {
+      } else {
 
-      alert("رقم التتبع غير موجود");
+        alert("رقم التتبع غير موجود");
 
-      setTrackedShipment(null);
+        setTrackedShipment(null);
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert(error.message);
     }
-
-  } catch (error) {
-
-    console.log(error);
-
-    alert(error.message);
-  }
-};
+  };
 
   const fetchBookings = async () => {
     try {
@@ -351,25 +351,25 @@ const [trackedShipment, setTrackedShipment] =
 
     const qrData =
       await QRCode.toDataURL(
-JSON.stringify({
-  ticketId:
-    booking.ticketId,
+        JSON.stringify({
+          ticketId:
+            booking.ticketId,
 
-  name:
-    booking.name,
+          name:
+            booking.name,
 
-  passport:
-    booking.passport,
+          passport:
+            booking.passport,
 
-  seat:
-    booking.seat,
+          seat:
+            booking.seat,
 
-  trip:
-    booking.trip,
+          trip:
+            booking.trip,
 
-  status:
-    booking.status,
-})      );
+          status:
+            booking.status,
+        }));
 
     doc.addImage(
       qrData,
@@ -441,7 +441,7 @@ JSON.stringify({
         collection(db, "bookings")
       );
 
-     
+
       const currentTime = Date.now();
 
       const alreadyBooked =
@@ -514,67 +514,67 @@ JSON.stringify({
     }
   };
 
-const saveShipment = async () => {
+  const saveShipment = async () => {
 
-  try {
+    try {
 
-    const trackingId =
-      "WND-CARGO-" +
-      Math.floor(
-        100000 + Math.random() * 900000
+      const trackingId =
+        "WND-CARGO-" +
+        Math.floor(
+          100000 + Math.random() * 900000
+        );
+
+      await addDoc(
+        collection(db, "shipments"),
+        {
+          trackingId,
+
+          senderName,
+          senderPhone,
+
+          receiverName,
+          receiverPhone,
+
+          cargoType,
+          weight,
+          quantity,
+          destination,
+
+          notes,
+
+          paymentImage:
+            shipmentPaymentImage,
+
+          status: "pending",
+
+          createdAt:
+            serverTimestamp(),
+        }
       );
 
-    await addDoc(
-      collection(db, "shipments"),
-      {
-        trackingId,
+      alert("تم تسجيل الشحنة بنجاح");
 
-        senderName,
-        senderPhone,
+      setSenderName("");
+      setSenderPhone("");
 
-        receiverName,
-        receiverPhone,
+      setReceiverName("");
+      setReceiverPhone("");
 
-        cargoType,
-        weight,
-        quantity,
-        destination,
+      setCargoType("");
+      setWeight("");
 
-        notes,
+      setQuantity("");
+      setDestination("");
 
-        paymentImage:
-          shipmentPaymentImage,
+      setNotes("");
 
-        status: "pending",
+    } catch (error) {
 
-        createdAt:
-          serverTimestamp(),
-      }
-    );
+      console.log(error);
 
-    alert("تم تسجيل الشحنة بنجاح");
-
-    setSenderName("");
-    setSenderPhone("");
-
-    setReceiverName("");
-    setReceiverPhone("");
-
-    setCargoType("");
-    setWeight("");
-
-    setQuantity("");
-    setDestination("");
-
-    setNotes("");
-
-  } catch (error) {
-
-    console.log(error);
-
-    alert(error.message);
-  }
-};
+      alert(error.message);
+    }
+  };
 
   const adminLogin = async () => {
     try {
@@ -602,43 +602,43 @@ const saveShipment = async () => {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
- {/* Hero Section */}
-<section className="relative overflow-hidden bg-[#eaf4ff] min-h-screen">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-[#eaf4ff] min-h-screen">
 
-  {/* Top Navbar */}
-  <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative z-20">
+        {/* Top Navbar */}
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative z-20">
 
-    {/* Nav Links */}
-    <div className="hidden md:flex items-center gap-12 text-blue-950 font-bold text-lg">
+          {/* Nav Links */}
+          <div className="hidden md:flex items-center gap-12 text-blue-950 font-bold text-lg">
 
-      <a href="#" className="border-b-4 border-blue-600 pb-2">
-        الرئيسية
-      </a>
+            <a href="#" className="border-b-4 border-blue-600 pb-2">
+              الرئيسية
+            </a>
 
-      <a href="#">
-        حجز رحلة
-      </a>
+            <a href="#">
+              حجز رحلة
+            </a>
 
-      <a href="#">
-        حجوزاتي
-      </a>
+            <a href="#">
+              حجوزاتي
+            </a>
 
-      <a href="#">
-        الشحن
-      </a>
+            <a href="#">
+              الشحن
+            </a>
 
-      <a href="#">
-        تتبع شحنتك
-      </a>
+            <a href="#">
+              تتبع شحنتك
+            </a>
 
-      <a href="#">
-        تواصل معنا
-      </a>
+            <a href="#">
+              تواصل معنا
+            </a>
 
-    </div>
+          </div>
 
-    {/* Top Left Logos */}
-    <div className="
+          {/* Top Left Logos */}
+          <div className="
       bg-white/70
       backdrop-blur-md
       px-6
@@ -651,32 +651,32 @@ const saveShipment = async () => {
       gap-4
     ">
 
-      <img
-        src="/logo.png"
-        alt="Logo"
-        className="w-20"
-      />
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-20"
+            />
 
-      <img
-        src="/3a-logo.png"
-        alt="3A"
-        className="w-20"
-      />
+            <img
+              src="/3a-logo.png"
+              alt="3A"
+              className="w-20"
+            />
 
-      <div className="text-blue-950 font-black text-3xl leading-tight">
-        هيئة وادي النيل
-        <br />
-        <span className="text-xl font-bold">
-          للملاحة النهرية
-        </span>
-      </div>
+            <div className="text-blue-950 font-black text-3xl leading-tight">
+              هيئة وادي النيل
+              <br />
+              <span className="text-xl font-bold">
+                للملاحة النهرية
+              </span>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-  {/* Main Hero */}
-  <div className="
+        {/* Main Hero */}
+        <div className="
     max-w-7xl
     mx-auto
     grid
@@ -690,10 +690,10 @@ const saveShipment = async () => {
     z-10
   ">
 
-    {/* Ferry Image */}
-    <div className="relative">
+          {/* Ferry Image */}
+          <div className="relative">
 
-      <div className="
+            <div className="
         rounded-[40px]
         overflow-hidden
         border-[6px]
@@ -701,25 +701,25 @@ const saveShipment = async () => {
         shadow-2xl
       ">
 
-        <img
-          src="/hero.jpg"
-          alt="Ferry"
-          className="
+              <img
+                src="/hero.jpg"
+                alt="Ferry"
+                className="
             w-full
-            h-[650px]
+h-[720px]
             object-cover
           "
-        />
+              />
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-    {/* Hero Content */}
-    <div className="text-center md:text-right">
+          {/* Hero Content */}
+          <div className="text-center md:text-right">
 
-      {/* Large Logos */}
-      <div className="
+            {/* Large Logos */}
+            <div className="
         flex
         items-center
         justify-center
@@ -728,30 +728,30 @@ const saveShipment = async () => {
         mb-10
       ">
 
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="
-            w-36
-            md:w-44
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="
+            w-28
+md:w-32
             drop-shadow-2xl
           "
-        />
+              />
 
-        <img
-          src="/3a-logo.png"
-          alt="3A"
-          className="
-            w-36
-            md:w-44
+              <img
+                src="/3a-logo.png"
+                alt="3A"
+                className="
+            w-28
+md:w-32
             drop-shadow-2xl
           "
-        />
+              />
 
-      </div>
+            </div>
 
-      {/* Title */}
-      <h1 className="
+            {/* Title */}
+            <h1 className="
         text-5xl
         md:text-7xl
         font-black
@@ -759,23 +759,23 @@ const saveShipment = async () => {
         text-blue-950
         mb-8
       ">
-        هيئة وادي النيل
-        <br />
-        للملاحة النهرية
-      </h1>
+              هيئة وادي النيل
+              <br />
+              للملاحة النهرية
+            </h1>
 
-      {/* Subtitle */}
-      <p className="
+            {/* Subtitle */}
+            <p className="
         text-2xl
         text-blue-900/70
         mb-12
         leading-loose
       ">
-        نربط الأماكن .. نوصل بأمان
-      </p>
+              نربط الأماكن .. نوصل بأمان
+            </p>
 
-      {/* Divider */}
-      <div className="
+            {/* Divider */}
+            <div className="
         flex
         items-center
         justify-center
@@ -784,41 +784,41 @@ const saveShipment = async () => {
         mb-12
       ">
 
-        <div className="h-[2px] w-32 bg-blue-600" />
+              <div className="h-[2px] w-32 bg-blue-600" />
 
-        <div className="text-5xl text-blue-700">
-          ⚓
-        </div>
+              <div className="text-5xl text-blue-700">
+                ⚓
+              </div>
 
-        <div className="h-[2px] w-32 bg-blue-600" />
+              <div className="h-[2px] w-32 bg-blue-600" />
 
-      </div>
+            </div>
 
-      {/* CTA */}
-      <button
-        className="
+            {/* CTA */}
+            <button
+              className="
           bg-yellow-400
           hover:bg-yellow-300
           text-black
-          px-14
-          py-5
-          rounded-3xl
-          text-3xl
+         px-16
+py-6
+rounded-[30px]
+text-4xl
           font-black
           shadow-2xl
           transition
           hover:scale-105
         "
-      >
-        احجز الآن
-      </button>
+            >
+              احجز الآن
+            </button>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-  {/* Bottom Waves */}
-  <div className="
+        {/* Bottom Waves */}
+        <div className="
     absolute
     bottom-0
     left-0
@@ -827,23 +827,23 @@ const saveShipment = async () => {
     leading-none
   ">
 
-    <svg
-      viewBox="0 0 1440 320"
-      className="w-full h-auto"
-      preserveAspectRatio="none"
-    >
-      <path
-        fill="#1d4ed8"
-        fillOpacity="1"
-        d="M0,288L80,272C160,256,320,224,480,224C640,224,800,256,960,272C1120,288,1280,288,1360,288L1440,288L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-      />
+          <svg
+            viewBox="0 0 1440 320"
+            className="w-full h-auto"
+            preserveAspectRatio="none"
+          >
+            <path
+              fill="#1d4ed8"
+              fillOpacity="1"
+              d="M0,288L80,272C160,256,320,224,480,224C640,224,800,256,960,272C1120,288,1280,288,1360,288L1440,288L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+            />
 
-    </svg>
+          </svg>
 
-  </div>
+        </div>
 
-</section>
-```
+      </section>
+      ```
 
 
       {/* Search Section */}
@@ -1077,111 +1077,111 @@ const saveShipment = async () => {
         </div>
 
       </section>
-{/* Cargo Booking */}
-<section className="max-w-5xl mx-auto px-6 py-16">
-  <div className="bg-white rounded-3xl shadow-xl p-8">
+      {/* Cargo Booking */}
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <div className="bg-white rounded-3xl shadow-xl p-8">
 
-    <h2 className="text-3xl font-bold mb-8">
-      حجز شحنة
-    </h2>
+          <h2 className="text-3xl font-bold mb-8">
+            حجز شحنة
+          </h2>
 
-    <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
 
-      <input
-        type="text"
-        placeholder="اسم المرسل"
-        value={senderName}
-        onChange={(e) =>
-          setSenderName(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="اسم المرسل"
+              value={senderName}
+              onChange={(e) =>
+                setSenderName(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-      <input
-        type="text"
-        placeholder="رقم المرسل"
-        value={senderPhone}
-        onChange={(e) =>
-          setSenderPhone(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="رقم المرسل"
+              value={senderPhone}
+              onChange={(e) =>
+                setSenderPhone(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-      <input
-        type="text"
-        placeholder="اسم المستلم"
-        value={receiverName}
-        onChange={(e) =>
-          setReceiverName(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="اسم المستلم"
+              value={receiverName}
+              onChange={(e) =>
+                setReceiverName(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-      <input
-        type="text"
-        placeholder="رقم المستلم"
-        value={receiverPhone}
-        onChange={(e) =>
-          setReceiverPhone(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="رقم المستلم"
+              value={receiverPhone}
+              onChange={(e) =>
+                setReceiverPhone(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-      <input
-        type="text"
-        placeholder="نوع البضاعة"
-        value={cargoType}
-        onChange={(e) =>
-          setCargoType(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="نوع البضاعة"
+              value={cargoType}
+              onChange={(e) =>
+                setCargoType(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-      <input
-        type="text"
-        placeholder="الوزن"
-        value={weight}
-        onChange={(e) =>
-          setWeight(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="الوزن"
+              value={weight}
+              onChange={(e) =>
+                setWeight(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-      <input
-        type="text"
-        placeholder="الكمية"
-        value={quantity}
-        onChange={(e) =>
-          setQuantity(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="الكمية"
+              value={quantity}
+              onChange={(e) =>
+                setQuantity(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-      <input
-        type="text"
-        placeholder="الوجهة"
-        value={destination}
-        onChange={(e) =>
-          setDestination(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none"
-      />
+            <input
+              type="text"
+              placeholder="الوجهة"
+              value={destination}
+              onChange={(e) =>
+                setDestination(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none"
+            />
 
-    </div>
+          </div>
 
-    <textarea
-      placeholder="ملاحظات إضافية"
-      value={notes}
-      onChange={(e) =>
-        setNotes(e.target.value)
-      }
-      className="border rounded-2xl p-4 outline-none w-full mt-6 min-h-[120px]"
-    />
+          <textarea
+            placeholder="ملاحظات إضافية"
+            value={notes}
+            onChange={(e) =>
+              setNotes(e.target.value)
+            }
+            className="border rounded-2xl p-4 outline-none w-full mt-6 min-h-[120px]"
+          />
 
 
-    <button
-  onClick={saveShipment}
-  className="
+          <button
+            onClick={saveShipment}
+            className="
     bg-blue-700
     hover:bg-blue-800
     text-white
@@ -1194,37 +1194,37 @@ const saveShipment = async () => {
     transition
     mt-6
   "
->
-  تسجيل الشحنة
-</button>
+          >
+            تسجيل الشحنة
+          </button>
 
-  </div>
-</section>
+        </div>
+      </section>
 
-{/* Shipment Tracking */}
-<section className="max-w-4xl mx-auto px-6 py-16">
+      {/* Shipment Tracking */}
+      <section className="max-w-4xl mx-auto px-6 py-16">
 
-  <div className="bg-white rounded-3xl shadow-xl p-8">
+        <div className="bg-white rounded-3xl shadow-xl p-8">
 
-    <h2 className="text-3xl font-bold mb-8">
-      تتبع الشحنة
-    </h2>
+          <h2 className="text-3xl font-bold mb-8">
+            تتبع الشحنة
+          </h2>
 
-    <div className="flex gap-4 flex-col md:flex-row">
+          <div className="flex gap-4 flex-col md:flex-row">
 
-      <input
-        type="text"
-        placeholder="أدخل رقم التتبع"
-        value={trackingNumber}
-        onChange={(e) =>
-          setTrackingNumber(e.target.value)
-        }
-        className="border rounded-2xl p-4 outline-none flex-1"
-      />
+            <input
+              type="text"
+              placeholder="أدخل رقم التتبع"
+              value={trackingNumber}
+              onChange={(e) =>
+                setTrackingNumber(e.target.value)
+              }
+              className="border rounded-2xl p-4 outline-none flex-1"
+            />
 
-      <button
-        onClick={trackShipment}
-        className="
+            <button
+              onClick={trackShipment}
+              className="
           bg-blue-700
           hover:bg-blue-800
           text-white
@@ -1233,66 +1233,66 @@ const saveShipment = async () => {
           rounded-2xl
           font-semibold
         "
-      >
-        تتبع
-      </button>
+            >
+              تتبع
+            </button>
 
-    </div>
+          </div>
 
-    {trackedShipment && (
+          {trackedShipment && (
 
-      <div className="mt-8 border rounded-3xl p-6 bg-slate-50">
+            <div className="mt-8 border rounded-3xl p-6 bg-slate-50">
 
-        <h3 className="text-2xl font-bold mb-4">
-          بيانات الشحنة
-        </h3>
+              <h3 className="text-2xl font-bold mb-4">
+                بيانات الشحنة
+              </h3>
 
-        <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
 
-          <p>
-            <strong>رقم التتبع:</strong>
-            {" "}
-            {trackedShipment.trackingId}
-          </p>
+                <p>
+                  <strong>رقم التتبع:</strong>
+                  {" "}
+                  {trackedShipment.trackingId}
+                </p>
 
-          <p>
-            <strong>الحالة:</strong>
-            {" "}
-            {trackedShipment.status}
-          </p>
+                <p>
+                  <strong>الحالة:</strong>
+                  {" "}
+                  {trackedShipment.status}
+                </p>
 
-          <p>
-            <strong>المرسل:</strong>
-            {" "}
-            {trackedShipment.senderName}
-          </p>
+                <p>
+                  <strong>المرسل:</strong>
+                  {" "}
+                  {trackedShipment.senderName}
+                </p>
 
-          <p>
-            <strong>المستلم:</strong>
-            {" "}
-            {trackedShipment.receiverName}
-          </p>
+                <p>
+                  <strong>المستلم:</strong>
+                  {" "}
+                  {trackedShipment.receiverName}
+                </p>
 
-          <p>
-            <strong>نوع البضاعة:</strong>
-            {" "}
-            {trackedShipment.cargoType}
-          </p>
+                <p>
+                  <strong>نوع البضاعة:</strong>
+                  {" "}
+                  {trackedShipment.cargoType}
+                </p>
 
-          <p>
-            <strong>الوجهة:</strong>
-            {" "}
-            {trackedShipment.destination}
-          </p>
+                <p>
+                  <strong>الوجهة:</strong>
+                  {" "}
+                  {trackedShipment.destination}
+                </p>
+
+              </div>
+
+            </div>
+          )}
 
         </div>
 
-      </div>
-    )}
-
-  </div>
-
-</section>
+      </section>
 
       {/* Footer */}
       <footer className="bg-black text-slate-400 py-8 px-6 text-center">
