@@ -602,50 +602,141 @@ const saveShipment = async () => {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
-     {/* Hero Section */}
-<section className="relative overflow-hidden bg-gradient-to-br from-[#dbeafe] via-[#93c5fd] to-[#2563eb] py-20 px-6">
+  استبدل الـ Hero Section بالكامل بالكود ده، وهيطلع قريب جدًا من التصميم اللي في الصورة 🔥
 
-  <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+```jsx id="u8m2qx"
+{/* Hero Section */}
+<section className="relative overflow-hidden bg-[#eaf4ff] min-h-screen">
+
+  {/* Top Navbar */}
+  <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-6 relative z-20">
+
+    {/* Nav Links */}
+    <div className="hidden md:flex items-center gap-12 text-blue-950 font-bold text-lg">
+
+      <a href="#" className="border-b-4 border-blue-600 pb-2">
+        الرئيسية
+      </a>
+
+      <a href="#">
+        حجز رحلة
+      </a>
+
+      <a href="#">
+        حجوزاتي
+      </a>
+
+      <a href="#">
+        الشحن
+      </a>
+
+      <a href="#">
+        تتبع شحنتك
+      </a>
+
+      <a href="#">
+        تواصل معنا
+      </a>
+
+    </div>
+
+    {/* Top Left Logos */}
+    <div className="
+      bg-white/70
+      backdrop-blur-md
+      px-6
+      py-4
+      rounded-bl-[40px]
+      rounded-tr-[40px]
+      shadow-xl
+      flex
+      items-center
+      gap-4
+    ">
+
+      <img
+        src="/logo.png"
+        alt="Logo"
+        className="w-20"
+      />
+
+      <img
+        src="/3a-logo.png"
+        alt="3A"
+        className="w-20"
+      />
+
+      <div className="text-blue-950 font-black text-3xl leading-tight">
+        هيئة وادي النيل
+        <br />
+        <span className="text-xl font-bold">
+          للملاحة النهرية
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* Main Hero */}
+  <div className="
+    max-w-7xl
+    mx-auto
+    grid
+    md:grid-cols-2
+    gap-16
+    items-center
+    px-6
+    pt-10
+    pb-32
+    relative
+    z-10
+  ">
 
     {/* Ferry Image */}
     <div className="relative">
 
-      <img
-        src="/hero.jpg"
-        alt="Nile Ferry"
-        className="
-          rounded-[40px]
-          shadow-2xl
-          w-full
-          object-cover
-          border-4
-          border-white/40
-        "
-      />
-
-      {/* Glow */}
       <div className="
-        absolute
-        inset-0
         rounded-[40px]
-        bg-blue-500/10
-        backdrop-blur-[2px]
-      " />
+        overflow-hidden
+        border-[6px]
+        border-white/70
+        shadow-2xl
+      ">
+
+        <img
+          src="/hero.jpg"
+          alt="Ferry"
+          className="
+            w-full
+            h-[650px]
+            object-cover
+          "
+        />
+
+      </div>
 
     </div>
 
     {/* Hero Content */}
-    <div className="text-center md:text-right relative z-10">
+    <div className="text-center md:text-right">
 
-      {/* Logos */}
-      <div className="flex items-center justify-center md:justify-end gap-4 mb-8">
+      {/* Large Logos */}
+      <div className="
+        flex
+        items-center
+        justify-center
+        md:justify-end
+        gap-6
+        mb-10
+      ">
 
         <img
           src="/logo.png"
-          alt="Wadi El Nile"
+          alt="Logo"
           className="
-            w-28
-            md:w-36
+            w-36
+            md:w-44
             drop-shadow-2xl
           "
         />
@@ -654,8 +745,8 @@ const saveShipment = async () => {
           src="/3a-logo.png"
           alt="3A"
           className="
-            w-28
-            md:w-36
+            w-36
+            md:w-44
             drop-shadow-2xl
           "
         />
@@ -664,12 +755,12 @@ const saveShipment = async () => {
 
       {/* Title */}
       <h1 className="
-        text-4xl
-        md:text-6xl
+        text-5xl
+        md:text-7xl
         font-black
         leading-tight
         text-blue-950
-        mb-6
+        mb-8
       ">
         هيئة وادي النيل
         <br />
@@ -678,14 +769,33 @@ const saveShipment = async () => {
 
       {/* Subtitle */}
       <p className="
-        text-lg
-        md:text-2xl
-        text-blue-900/80
-        mb-10
+        text-2xl
+        text-blue-900/70
+        mb-12
         leading-loose
       ">
         نربط الأماكن .. نوصل بأمان
       </p>
+
+      {/* Divider */}
+      <div className="
+        flex
+        items-center
+        justify-center
+        md:justify-end
+        gap-4
+        mb-12
+      ">
+
+        <div className="h-[2px] w-32 bg-blue-600" />
+
+        <div className="text-5xl text-blue-700">
+          ⚓
+        </div>
+
+        <div className="h-[2px] w-32 bg-blue-600" />
+
+      </div>
 
       {/* CTA */}
       <button
@@ -693,11 +803,11 @@ const saveShipment = async () => {
           bg-yellow-400
           hover:bg-yellow-300
           text-black
-          px-10
-          py-4
-          rounded-2xl
-          font-bold
-          text-xl
+          px-14
+          py-5
+          rounded-3xl
+          text-3xl
+          font-black
           shadow-2xl
           transition
           hover:scale-105
@@ -716,13 +826,28 @@ const saveShipment = async () => {
     bottom-0
     left-0
     w-full
-    h-32
-    bg-gradient-to-t
-    from-blue-900/30
-    to-transparent
-  " />
+    overflow-hidden
+    leading-none
+  ">
+
+    <svg
+      viewBox="0 0 1440 320"
+      className="w-full h-auto"
+      preserveAspectRatio="none"
+    >
+      <path
+        fill="#1d4ed8"
+        fillOpacity="1"
+        d="M0,288L80,272C160,256,320,224,480,224C640,224,800,256,960,272C1120,288,1280,288,1360,288L1440,288L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+      />
+
+    </svg>
+
+  </div>
 
 </section>
+```
+
 
       {/* Search Section */}
       <section className="max-w-6xl mx-auto px-6 -mt-10">
