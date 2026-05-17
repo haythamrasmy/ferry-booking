@@ -13,6 +13,7 @@ import {
   getDocs,
   onSnapshot,
   doc,
+  serverTimestamp,
 } from "firebase/firestore";
 
 import {
@@ -396,6 +397,69 @@ JSON.stringify({
       const querySnapshot = await getDocs(
         collection(db, "bookings")
       );
+
+      const saveShipment = async () => {
+
+  try {
+
+    const trackingId =
+      "WND-CARGO-" +
+      Math.floor(
+        100000 + Math.random() * 900000
+      );
+
+    await addDoc(
+      collection(db, "shipments"),
+      {
+        trackingId,
+
+        senderName,
+        senderPhone,
+
+        receiverName,
+        receiverPhone,
+
+        cargoType,
+        weight,
+        quantity,
+        destination,
+
+        notes,
+
+        paymentImage:
+          shipmentPaymentImage,
+
+        status: "pending",
+
+        createdAt:
+          serverTimestamp(),
+      }
+    );
+
+    alert("تم تسجيل الشحنة بنجاح");
+
+    setSenderName("");
+    setSenderPhone("");
+
+    setReceiverName("");
+    setReceiverPhone("");
+
+    setCargoType("");
+    setWeight("");
+
+    setQuantity("");
+    setDestination("");
+
+    setNotes("");
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(error.message);
+  }
+
+};
 
       const currentTime = Date.now();
 
@@ -886,6 +950,26 @@ JSON.stringify({
       }
       className="border rounded-2xl p-4 outline-none w-full mt-6 min-h-[120px]"
     />
+
+
+    <button
+  onClick={saveShipment}
+  className="
+    bg-blue-700
+    hover:bg-blue-800
+    text-white
+    px-8
+    py-4
+    rounded-2xl
+    font-semibold
+    text-lg
+    shadow-lg
+    transition
+    mt-6
+  "
+>
+  تسجيل الشحنة
+</button>
 
   </div>
 </section>
