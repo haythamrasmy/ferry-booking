@@ -61,7 +61,22 @@ export default function FerryBookingWebsite() {
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+const [senderName, setSenderName] = useState("");
+const [senderPhone, setSenderPhone] = useState("");
 
+const [receiverName, setReceiverName] = useState("");
+const [receiverPhone, setReceiverPhone] = useState("");
+
+const [cargoType, setCargoType] = useState("");
+const [weight, setWeight] = useState("");
+
+const [quantity, setQuantity] = useState("");
+const [destination, setDestination] = useState("");
+
+const [notes, setNotes] = useState("");
+
+const [shipmentPaymentImage, setShipmentPaymentImage] =
+  useState("");
 
 
   const fetchBookings = async () => {
@@ -771,7 +786,109 @@ JSON.stringify({
         </div>
 
       </section>
+{/* Cargo Booking */}
+<section className="max-w-5xl mx-auto px-6 py-16">
+  <div className="bg-white rounded-3xl shadow-xl p-8">
 
+    <h2 className="text-3xl font-bold mb-8">
+      حجز شحنة
+    </h2>
+
+    <div className="grid md:grid-cols-2 gap-6">
+
+      <input
+        type="text"
+        placeholder="اسم المرسل"
+        value={senderName}
+        onChange={(e) =>
+          setSenderName(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+      <input
+        type="text"
+        placeholder="رقم المرسل"
+        value={senderPhone}
+        onChange={(e) =>
+          setSenderPhone(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+      <input
+        type="text"
+        placeholder="اسم المستلم"
+        value={receiverName}
+        onChange={(e) =>
+          setReceiverName(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+      <input
+        type="text"
+        placeholder="رقم المستلم"
+        value={receiverPhone}
+        onChange={(e) =>
+          setReceiverPhone(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+      <input
+        type="text"
+        placeholder="نوع البضاعة"
+        value={cargoType}
+        onChange={(e) =>
+          setCargoType(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+      <input
+        type="text"
+        placeholder="الوزن"
+        value={weight}
+        onChange={(e) =>
+          setWeight(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+      <input
+        type="text"
+        placeholder="الكمية"
+        value={quantity}
+        onChange={(e) =>
+          setQuantity(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+      <input
+        type="text"
+        placeholder="الوجهة"
+        value={destination}
+        onChange={(e) =>
+          setDestination(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none"
+      />
+
+    </div>
+
+    <textarea
+      placeholder="ملاحظات إضافية"
+      value={notes}
+      onChange={(e) =>
+        setNotes(e.target.value)
+      }
+      className="border rounded-2xl p-4 outline-none w-full mt-6 min-h-[120px]"
+    />
+
+  </div>
+</section>
 
       {/* Footer */}
       <footer className="bg-black text-slate-400 py-8 px-6 text-center">
