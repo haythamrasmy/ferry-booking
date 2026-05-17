@@ -602,10 +602,7 @@ const saveShipment = async () => {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
-  استبدل الـ Hero Section بالكامل بالكود ده، وهيطلع قريب جدًا من التصميم اللي في الصورة 🔥
-
-```jsx id="u8m2qx"
-{/* Hero Section */}
+ {/* Hero Section */}
 <section className="relative overflow-hidden bg-[#eaf4ff] min-h-screen">
 
   {/* Top Navbar */}
