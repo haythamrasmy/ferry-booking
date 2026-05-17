@@ -800,10 +800,10 @@ md:w-32
           bg-yellow-400
           hover:bg-yellow-300
           text-black
-         px-16
-py-6
-rounded-[30px]
-text-4xl
+          px-14
+          py-5
+          rounded-3xl
+          text-3xl
           font-black
           shadow-2xl
           transition
@@ -841,6 +841,24 @@ text-4xl
           </svg>
 
         </div>
+
+        <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+
+  <svg
+    viewBox="0 0 1440 320"
+    className="w-full"
+    preserveAspectRatio="none"
+  >
+
+    <path
+      fill="#2563eb"
+      fillOpacity="1"
+      d="M0,224L80,208C160,192,320,160,480,165.3C640,171,800,213,960,224C1120,235,1280,213,1360,202.7L1440,192L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+    />
+
+  </svg>
+
+</div>
 
       </section>
       ```
