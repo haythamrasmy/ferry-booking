@@ -602,17 +602,17 @@ export default function FerryBookingWebsite() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
-    {/* Hero Section */}
-<section className="relative overflow-hidden bg-[#eef5fb]">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-[#edf3f9]">
 
-  {/* Top Area */}
-  <div className="max-w-7xl mx-auto px-6 pt-6 relative z-20">
+        {/* Top Area */}
+        <div className="max-w-[1500px] mx-auto px-6 pt-6 relative z-20">
 
-    {/* Navbar */}
-    <div className="flex items-start justify-between">
+          {/* Navbar */}
+          <div className="flex items-start justify-between">
 
-      {/* Nav Links */}
-      <div className="
+            {/* Nav Links */}
+            <div className="
         hidden
         md:flex
         items-center
@@ -623,96 +623,96 @@ export default function FerryBookingWebsite() {
         pt-6
       ">
 
-        <a
-          href="#"
-          className="
+              <a
+                href="#"
+                className="
             text-blue-600
             border-b-4
             border-blue-600
             pb-2
           "
-        >
-          الرئيسية
-        </a>
+              >
+                الرئيسية
+              </a>
 
-        <a href="#" className="hover:text-blue-500 transition">
-          حجز رحلة
-        </a>
+              <a href="#" className="hover:text-blue-500 transition">
+                حجز رحلة
+              </a>
 
-        <a href="#" className="hover:text-blue-500 transition">
-          حجوزاتي
-        </a>
+              <a href="#" className="hover:text-blue-500 transition">
+                حجوزاتي
+              </a>
 
-        <a href="#" className="hover:text-blue-500 transition">
-          الشحن
-        </a>
+              <a href="#" className="hover:text-blue-500 transition">
+                الشحن
+              </a>
 
-        <a href="#" className="hover:text-blue-500 transition">
-          تتبع شحنتك
-        </a>
+              <a href="#" className="hover:text-blue-500 transition">
+                تتبع شحنتك
+              </a>
 
-        <a href="#" className="hover:text-blue-500 transition">
-          تواصل معنا
-        </a>
+              <a href="#" className="hover:text-blue-500 transition">
+                تواصل معنا
+              </a>
 
-      </div>
+            </div>
 
-      {/* Small Top Banner */}
-      <div className="
+            {/* Small Top Banner */}
+            <div className="
         bg-white/90
         shadow-xl
         rounded-[35px]
-        px-6
-        py-4
+        px-5
+py-3
         flex
         items-center
         gap-4
       ">
 
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="w-16"
-        />
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-14"
+              />
 
-        <img
-          src="/3a-logo.png"
-          alt="3A"
-          className="w-16"
-        />
+              <img
+                src="/3a-logo.png"
+                alt="3A"
+                className="w-14"
+              />
 
-        <div className="
+              <div className="
           text-blue-950
           font-black
-          text-2xl
+text-xl
           leading-tight
         ">
-          هيئة وادي النيل
-          <br />
+                هيئة وادي النيل
+                <br />
 
-          <span className="text-lg font-bold">
-            للملاحة النهرية
-          </span>
+                <span className="text-lg font-bold">
+                  للملاحة النهرية
+                </span>
 
-        </div>
+              </div>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-    {/* Main Hero */}
-    <div className="
+          {/* Main Hero */}
+          <div className="
       grid
-      md:grid-cols-[1.2fr_1fr]
+md:grid-cols-[1.4fr_1fr]
       gap-16
       items-center
       py-16
     ">
 
-      {/* Ferry Image */}
-      <div>
+            {/* Ferry Image */}
+            <div>
 
-        <div className="
+              <div className="
           rounded-[40px]
           overflow-hidden
           border-[6px]
@@ -720,25 +720,25 @@ export default function FerryBookingWebsite() {
           shadow-2xl
         ">
 
-          <img
-            src="/hero.jpg"
-            alt="Ferry"
-            className="
+                <img
+                  src="/hero.jpg"
+                  alt="Ferry"
+                  className="
               w-full
-              h-[500px]
-              object-cover
-            "
-          />
+h-[720px]
+object-cover
+object-center            "
+                />
 
-        </div>
+              </div>
 
-      </div>
+            </div>
 
-      {/* Right Content */}
-      <div className="text-center md:text-right">
+            {/* Right Content */}
+            <div className="text-center md:text-right">
 
-        {/* Big Logos */}
-        <div className="
+              {/* Big Logos */}
+              <div className="
           flex
           items-center
           justify-center
@@ -747,28 +747,28 @@ export default function FerryBookingWebsite() {
           mb-8
         ">
 
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="
+                <img
+                  src="/logo.png"
+                  alt="Logo"
+                  className="
+             w-40
+md:w-48
+            "
+                />
+
+                <img
+                  src="/3a-logo.png"
+                  alt="3A"
+                  className="
               w-32
               md:w-40
             "
-          />
+                />
 
-          <img
-            src="/3a-logo.png"
-            alt="3A"
-            className="
-              w-32
-              md:w-40
-            "
-          />
+              </div>
 
-        </div>
-
-        {/* Title */}
-        <h1 className="
+              {/* Title */}
+              <h1 className="
           text-5xl
           md:text-7xl
           font-black
@@ -776,22 +776,22 @@ export default function FerryBookingWebsite() {
           text-blue-950
           mb-6
         ">
-          هيئة وادي النيل
-          <br />
-          للملاحة النهرية
-        </h1>
+                هيئة وادي النيل
+                <br />
+                للملاحة النهرية
+              </h1>
 
-        {/* Subtitle */}
-        <p className="
+              {/* Subtitle */}
+              <p className="
           text-2xl
           text-blue-900/70
           mb-10
         ">
-          نربط الأماكن .. نوصل بأمان
-        </p>
+                نربط الأماكن .. نوصل بأمان
+              </p>
 
-        {/* Divider */}
-        <div className="
+              {/* Divider */}
+              <div className="
           flex
           items-center
           justify-center
@@ -800,19 +800,19 @@ export default function FerryBookingWebsite() {
           mb-10
         ">
 
-          <div className="h-[2px] w-32 bg-blue-600" />
+                <div className="h-[2px] w-32 bg-blue-600" />
 
-          <div className="text-5xl text-blue-700">
-            ⚓
-          </div>
+                <div className="text-5xl text-blue-700">
+                  ⚓
+                </div>
 
-          <div className="h-[2px] w-32 bg-blue-600" />
+                <div className="h-[2px] w-32 bg-blue-600" />
 
-        </div>
+              </div>
 
-        {/* CTA */}
-        <button
-          className="
+              {/* CTA */}
+              <button
+                className="
             bg-yellow-400
             hover:bg-yellow-300
             text-black
@@ -825,18 +825,18 @@ export default function FerryBookingWebsite() {
             transition
             hover:scale-105
           "
-        >
-          احجز الآن
-        </button>
+              >
+                احجز الآن
+              </button>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-  {/* Bottom Waves */}
-  <div className="
+        {/* Bottom Waves */}
+        <div className="
     absolute
     bottom-0
     left-0
@@ -845,23 +845,23 @@ export default function FerryBookingWebsite() {
     leading-none
   ">
 
-    <svg
-      viewBox="0 0 1440 320"
-      className="w-full"
-      preserveAspectRatio="none"
-    >
+          <svg
+            viewBox="0 0 1440 320"
+            className="w-full"
+            preserveAspectRatio="none"
+          >
 
-      <path
-        fill="#1d4ed8"
-        fillOpacity="1"
-        d="M0,256L80,245.3C160,235,320,213,480,224C640,235,800,277,960,282.7C1120,288,1280,256,1360,240L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-      />
+            <path
+              fill="#1d4ed8"
+              fillOpacity="1"
+              d="M0,256L80,245.3C160,235,320,213,480,224C640,235,800,277,960,282.7C1120,288,1280,256,1360,240L1440,224L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+            />
 
-    </svg>
+          </svg>
 
-  </div>
+        </div>
 
-</section>
+      </section>
       ```
 
 
