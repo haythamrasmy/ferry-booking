@@ -398,69 +398,7 @@ JSON.stringify({
         collection(db, "bookings")
       );
 
-      const saveShipment = async () => {
-
-  try {
-
-    const trackingId =
-      "WND-CARGO-" +
-      Math.floor(
-        100000 + Math.random() * 900000
-      );
-
-    await addDoc(
-      collection(db, "shipments"),
-      {
-        trackingId,
-
-        senderName,
-        senderPhone,
-
-        receiverName,
-        receiverPhone,
-
-        cargoType,
-        weight,
-        quantity,
-        destination,
-
-        notes,
-
-        paymentImage:
-          shipmentPaymentImage,
-
-        status: "pending",
-
-        createdAt:
-          serverTimestamp(),
-      }
-    );
-
-    alert("تم تسجيل الشحنة بنجاح");
-
-    setSenderName("");
-    setSenderPhone("");
-
-    setReceiverName("");
-    setReceiverPhone("");
-
-    setCargoType("");
-    setWeight("");
-
-    setQuantity("");
-    setDestination("");
-
-    setNotes("");
-
-  } catch (error) {
-
-    console.log(error);
-
-    alert(error.message);
-  }
-
-};
-
+     
       const currentTime = Date.now();
 
       const alreadyBooked =
@@ -532,6 +470,69 @@ JSON.stringify({
       alert(error.message);
     }
   };
+
+const saveShipment = async () => {
+
+  try {
+
+    const trackingId =
+      "WND-CARGO-" +
+      Math.floor(
+        100000 + Math.random() * 900000
+      );
+
+    await addDoc(
+      collection(db, "shipments"),
+      {
+        trackingId,
+
+        senderName,
+        senderPhone,
+
+        receiverName,
+        receiverPhone,
+
+        cargoType,
+        weight,
+        quantity,
+        destination,
+
+        notes,
+
+        paymentImage:
+          shipmentPaymentImage,
+
+        status: "pending",
+
+        createdAt:
+          serverTimestamp(),
+      }
+    );
+
+    alert("تم تسجيل الشحنة بنجاح");
+
+    setSenderName("");
+    setSenderPhone("");
+
+    setReceiverName("");
+    setReceiverPhone("");
+
+    setCargoType("");
+    setWeight("");
+
+    setQuantity("");
+    setDestination("");
+
+    setNotes("");
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(error.message);
+  }
+};
+
   const adminLogin = async () => {
     try {
       await signInWithEmailAndPassword(
