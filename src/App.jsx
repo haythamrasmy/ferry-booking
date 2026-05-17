@@ -602,66 +602,127 @@ const saveShipment = async () => {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#dbeafe] via-[#93c5fd] to-[#2563eb] text-white py-20 px-6">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-          <div className="text-center">
-            <div className="relative w-fit mx-auto mb-4">
+     {/* Hero Section */}
+<section className="relative overflow-hidden bg-gradient-to-br from-[#dbeafe] via-[#93c5fd] to-[#2563eb] py-20 px-6">
 
-  {/* Old Logo */}
-  <img
-    src="/logo.png"
-    alt="Main Logo"
-    className="w-30 md:w-37 opacity-95"
-  />
+  <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-center">
 
-  {/* 3A Logo */}
-  <img
-    src="/3a-logo.png"
-    alt="3A Logo"
-   className="
-  absolute
-  -bottom-6
-  -right-16
-  w-32
-  md:w-40
-  opacity-100
-  drop-shadow-2xl
-"
-  />
+    {/* Ferry Image */}
+    <div className="relative">
 
-</div>
-            <h1 className="text-2xl font-bold leading-tight mb-6">
-              {companyName}
-            </h1>
+      <img
+        src="/hero.jpg"
+        alt="Nile Ferry"
+        className="
+          rounded-[40px]
+          shadow-2xl
+          w-full
+          object-cover
+          border-4
+          border-white/40
+        "
+      />
 
-            <p className="text-lg text-slate-200 mb-8">
+      {/* Glow */}
+      <div className="
+        absolute
+        inset-0
+        rounded-[40px]
+        bg-blue-500/10
+        backdrop-blur-[2px]
+      " />
 
-            </p>
-            <div className="flex justify-center">
-              <button className="hidden md:block bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
-                احجز الآن
-              </button>
-            </div>
-          </div>
+    </div>
 
-          <div>
-            <img
+    {/* Hero Content */}
+    <div className="text-center md:text-right relative z-10">
 
-              src="/hero.jpg"
-              alt="Nile Ferry"
-              className="rounded-3xl shadow-2xl w-full object-cover max-h-[400px]"
-            />
+      {/* Logos */}
+      <div className="flex items-center justify-center md:justify-end gap-4 mb-8">
 
+        <img
+          src="/logo.png"
+          alt="Wadi El Nile"
+          className="
+            w-28
+            md:w-36
+            drop-shadow-2xl
+          "
+        />
 
-            <div className="md:hidden flex justify-center mt-6">
-              <button className="bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-2xl font-semibold shadow-lg transition">
-                احجز الآن
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+        <img
+          src="/3a-logo.png"
+          alt="3A"
+          className="
+            w-28
+            md:w-36
+            drop-shadow-2xl
+          "
+        />
+
+      </div>
+
+      {/* Title */}
+      <h1 className="
+        text-4xl
+        md:text-6xl
+        font-black
+        leading-tight
+        text-blue-950
+        mb-6
+      ">
+        هيئة وادي النيل
+        <br />
+        للملاحة النهرية
+      </h1>
+
+      {/* Subtitle */}
+      <p className="
+        text-lg
+        md:text-2xl
+        text-blue-900/80
+        mb-10
+        leading-loose
+      ">
+        نربط الأماكن .. نوصل بأمان
+      </p>
+
+      {/* CTA */}
+      <button
+        className="
+          bg-yellow-400
+          hover:bg-yellow-300
+          text-black
+          px-10
+          py-4
+          rounded-2xl
+          font-bold
+          text-xl
+          shadow-2xl
+          transition
+          hover:scale-105
+        "
+      >
+        احجز الآن
+      </button>
+
+    </div>
+
+  </div>
+
+  {/* Bottom Waves */}
+  <div className="
+    absolute
+    bottom-0
+    left-0
+    w-full
+    h-32
+    bg-gradient-to-t
+    from-blue-900/30
+    to-transparent
+  " />
+
+</section>
 
       {/* Search Section */}
       <section className="max-w-6xl mx-auto px-6 -mt-10">
