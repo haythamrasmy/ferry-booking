@@ -78,7 +78,50 @@ const [notes, setNotes] = useState("");
 
 const [shipmentPaymentImage, setShipmentPaymentImage] =
   useState("");
+const [trackingNumber, setTrackingNumber] =
+  useState("");
 
+const [trackedShipment, setTrackedShipment] =
+  useState(null);
+
+
+  const trackShipment = async () => {
+
+  try {
+
+    const querySnapshot =
+      await getDocs(
+        collection(db, "shipments")
+      );
+
+    const shipment =
+      querySnapshot.docs.find(
+        (doc) =>
+          doc.data().trackingId ===
+          trackingNumber
+      );
+
+    if (shipment) {
+
+      setTrackedShipment({
+        id: shipment.id,
+        ...shipment.data(),
+      });
+
+    } else {
+
+      alert("رقم التتبع غير موجود");
+
+      setTrackedShipment(null);
+    }
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(error.message);
+  }
+};
 
   const fetchBookings = async () => {
     try {
@@ -973,6 +1016,99 @@ const saveShipment = async () => {
 </button>
 
   </div>
+</section>
+
+{/* Shipment Tracking */}
+<section className="max-w-4xl mx-auto px-6 py-16">
+
+  <div className="bg-white rounded-3xl shadow-xl p-8">
+
+    <h2 className="text-3xl font-bold mb-8">
+      تتبع الشحنة
+    </h2>
+
+    <div className="flex gap-4 flex-col md:flex-row">
+
+      <input
+        type="text"
+        placeholder="أدخل رقم التتبع"
+        value={trackingNumber}
+        onChange={(e) =>
+          setTrackingNumber(e.target.value)
+        }
+        className="border rounded-2xl p-4 outline-none flex-1"
+      />
+
+      <button
+        onClick={trackShipment}
+        className="
+          bg-blue-700
+          hover:bg-blue-800
+          text-white
+          px-8
+          py-4
+          rounded-2xl
+          font-semibold
+        "
+      >
+        تتبع
+      </button>
+
+    </div>
+
+    {trackedShipment && (
+
+      <div className="mt-8 border rounded-3xl p-6 bg-slate-50">
+
+        <h3 className="text-2xl font-bold mb-4">
+          بيانات الشحنة
+        </h3>
+
+        <div className="grid md:grid-cols-2 gap-4">
+
+          <p>
+            <strong>رقم التتبع:</strong>
+            {" "}
+            {trackedShipment.trackingId}
+          </p>
+
+          <p>
+            <strong>الحالة:</strong>
+            {" "}
+            {trackedShipment.status}
+          </p>
+
+          <p>
+            <strong>المرسل:</strong>
+            {" "}
+            {trackedShipment.senderName}
+          </p>
+
+          <p>
+            <strong>المستلم:</strong>
+            {" "}
+            {trackedShipment.receiverName}
+          </p>
+
+          <p>
+            <strong>نوع البضاعة:</strong>
+            {" "}
+            {trackedShipment.cargoType}
+          </p>
+
+          <p>
+            <strong>الوجهة:</strong>
+            {" "}
+            {trackedShipment.destination}
+          </p>
+
+        </div>
+
+      </div>
+    )}
+
+  </div>
+
 </section>
 
       {/* Footer */}
