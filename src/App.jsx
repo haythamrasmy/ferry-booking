@@ -814,7 +814,8 @@ mt-2          "
         {/* Subtitle */}
         <p
           className="
-text-[20px]mt-3          
+text-[20px]
+mt-3          
   text-blue-900/70
 mb-14
           "
@@ -852,7 +853,8 @@ mb-14
            px-12
 py-3
 rounded-[22px]
-text-[24px]            font-black
+text-[24px]         
+   font-black
             shadow-xl
             transition
             hover:scale-105
@@ -925,7 +927,6 @@ text-[24px]            font-black
   </div>
 
 </section>
-      ```
 
 
       {/* Search Section */}
