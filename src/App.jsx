@@ -684,11 +684,14 @@ export default function FerryBookingWebsite() {
       {/* Small Top Banner */}
       <div
         className="
-          bg-white/95
-          shadow-lg
-          rounded-[28px]
-          px-4
-          py-2
+         bg-white/55
+backdrop-blur-xl
+shadow-md
+rounded-[32px]
+px-5
+py-3
+border
+border-white/40
           flex
           items-center
           gap-4
@@ -698,14 +701,17 @@ export default function FerryBookingWebsite() {
         <img
           src="/logo.png"
           alt="Logo"
-          className="w-14"
-        />
+className="
+w-10  opacity-85
+"        />
 
         <img
           src="/3a-logo.png"
           alt="3A"
-          className="w-14"
-        />
+className="
+w-10
+  opacity-85
+"        />
 
         <div
           className="
@@ -743,48 +749,62 @@ export default function FerryBookingWebsite() {
       {/* Right Content */}
       <div className="text-center md:text-right">
 
-        {/* Big Logos */}
-        <div
-          className="
-            flex
-            items-center
-            justify-center
-            md:justify-end
-            gap-4
-            mb-6
-          "
-        >
+       {/* Big Logos */}
+<div
+  className="
+    flex
+    items-center
+    justify-center
+    md:justify-end
+    mb-4
+    relative
+    h-[150px]
+    mt-6
+  "
+>
 
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="
-              w-32
-              md:w-40
-            "
-          />
+  {/* 3A Logo */}
+  <img
+    src="/3a-logo.png"
+    alt="3A"
+    className="
+      w-28
+      md:w-36
+      opacity-75
+      relative
+      z-10
+      translate-x-4
+      drop-shadow-xl
+    "
+  />
 
-          <img
-            src="/3a-logo.png"
-            alt="3A"
-            className="
-              w-32
-              md:w-40
-            "
-          />
+  {/* Nile Logo */}
+  <img
+    src="/logo.png"
+    alt="Logo"
+    className="
+      w-28
+      md:w-36
+      opacity-80
+      relative
+      -mr-10
+      mix-blend-multiply
+      drop-shadow-xl
+    "
+  />
 
-        </div>
+</div>
 
         {/* Title */}
         <h1
           className="
-            text-5xl
-            md:text-[82px]
+            text-3xl
+md:text-[58px]
             font-black
             leading-[1.05]
             text-blue-950
-            mb-6
-          "
+mb-4
+mt-2          "
         >
           هيئة وادي النيل
           <br />
@@ -794,13 +814,12 @@ export default function FerryBookingWebsite() {
         {/* Subtitle */}
         <p
           className="
-            text-[34px]
-            text-blue-900/70
-            mb-10
+text-[20px]mt-3          
+  text-blue-900/70
+mb-14
           "
         >
-          نربط الأماكن .. نوصل بأمان
-        </p>
+ثمرة التكامل بين شطري وادي النيل        </p>
 
         {/* Divider */}
         <div
@@ -830,11 +849,10 @@ export default function FerryBookingWebsite() {
             bg-yellow-400
             hover:bg-yellow-300
             text-black
-            px-14
-            py-4
-            rounded-[24px]
-            text-[38px]
-            font-black
+           px-12
+py-3
+rounded-[22px]
+text-[24px]            font-black
             shadow-xl
             transition
             hover:scale-105
