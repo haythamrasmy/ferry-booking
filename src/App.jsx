@@ -602,21 +602,90 @@ export default function FerryBookingWebsite() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
-    {/* Hero Section */}
+   ```jsx
+{/* HERO SECTION */}
 <section
   dir="rtl"
   className="
     relative
     overflow-hidden
-    bg-[#edf3f9]
+    min-h-screen
+    bg-[#edf5ff]
   "
 >
 
-  {/* Top Area */}
-  <div className="max-w-[1500px] mx-auto px-6 pt-4 relative z-20">
+  {/* Background Glow Effects */}
+  <div className="absolute inset-0 overflow-hidden">
 
-    {/* Navbar */}
-    <div className="flex items-start justify-between">
+    {/* Top Right Glow */}
+    <div
+      className="
+        absolute
+        top-[-250px]
+        right-[-180px]
+        w-[850px]
+        h-[850px]
+        rounded-full
+        bg-blue-400/20
+        blur-3xl
+      "
+    />
+
+    {/* Bottom Left Glow */}
+    <div
+      className="
+        absolute
+        bottom-[-300px]
+        left-[-200px]
+        w-[950px]
+        h-[950px]
+        rounded-full
+        bg-blue-700/20
+        blur-3xl
+      "
+    />
+
+    {/* Decorative Dots Left */}
+    <div
+      className="
+        absolute
+        top-0
+        left-0
+        w-[280px]
+        h-[280px]
+        opacity-20
+      "
+      style={{
+        backgroundImage:
+          "radial-gradient(#2563eb 2px, transparent 2px)",
+        backgroundSize: "22px 22px",
+      }}
+    />
+
+    {/* Decorative Dots Bottom Right */}
+    <div
+      className="
+        absolute
+        bottom-0
+        right-0
+        w-[320px]
+        h-[320px]
+        opacity-20
+      "
+      style={{
+        backgroundImage:
+          "radial-gradient(#2563eb 2px, transparent 2px)",
+        backgroundSize: "22px 22px",
+      }}
+    />
+
+  </div>
+
+  {/* MAIN CONTAINER */}
+  <div className="relative z-20 max-w-[1550px] mx-auto px-6 pt-6">
+
+    {/* NAVBAR */}
+    <div className="flex items-center justify-between mb-12">
 
       {/* Nav Links */}
       <div
@@ -625,10 +694,9 @@ export default function FerryBookingWebsite() {
           md:flex
           items-center
           gap-14
-          text-blue-950
+          text-[#082b84]
           font-bold
-          text-[22px]
-          pt-2
+          text-[26px]
         "
       >
 
@@ -636,7 +704,7 @@ export default function FerryBookingWebsite() {
           href="#"
           className="
             text-blue-600
-            border-b-4
+            border-b-[4px]
             border-blue-600
             pb-2
           "
@@ -681,50 +749,53 @@ export default function FerryBookingWebsite() {
 
       </div>
 
-      {/* Small Top Banner */}
+      {/* Top Banner */}
       <div
         className="
-         bg-white/55
-backdrop-blur-xl
-shadow-md
-rounded-[32px]
-px-5
-py-3
-border
-border-white/40
+          bg-white/70
+          backdrop-blur-xl
+          shadow-lg
+          rounded-[34px]
+          px-7
+          py-4
+          border
+          border-white/50
           flex
           items-center
-          gap-4
+          gap-5
         "
       >
 
         <img
           src="/logo.png"
           alt="Logo"
-className="
-w-10  opacity-85
-"        />
+          className="w-16 h-16 object-contain"
+        />
 
         <img
           src="/3a-logo.png"
           alt="3A"
-className="
-w-10
-  opacity-85
-"        />
+          className="w-16 h-16 object-contain"
+        />
 
         <div
           className="
-            text-blue-950
+            text-[#082b84]
             font-black
-            text-xl
+            text-[34px]
             leading-tight
           "
         >
           هيئة وادي النيل
+
           <br />
 
-          <span className="text-base font-bold">
+          <span
+            className="
+              text-[24px]
+              font-bold
+            "
+          >
             للملاحة النهرية
           </span>
 
@@ -734,77 +805,101 @@ w-10
 
     </div>
 
-    {/* Main Hero */}
+    {/* HERO CONTENT */}
     <div
       className="
         grid
-        md:grid-cols-[1fr_1.4fr]
-        gap-16
+        md:grid-cols-[1.25fr_1fr]
+        gap-14
         items-center
-        pt-2
-        pb-8
+        pb-32
       "
     >
 
-      {/* Right Content */}
-      <div className="text-center md:text-right">
+      {/* LEFT IMAGE */}
+      <div>
 
-       {/* Big Logos */}
-<div
-  className="
-    flex
-    items-center
-    justify-center
-    md:justify-end
-    mb-4
-    relative
-    h-[150px]
-    mt-6
-  "
->
+        <div
+          className="
+            relative
+            rounded-[42px]
+            overflow-hidden
+            border-[3px]
+            border-white/70
+            shadow-[0_25px_80px_rgba(37,99,235,0.35)]
+            bg-white
+          "
+        >
 
-  {/* 3A Logo */}
-  <img
-    src="/3a-logo.png"
-    alt="3A"
-    className="
-      w-28
-      md:w-36
-      opacity-75
-      relative
-      z-10
-      translate-x-4
-      drop-shadow-xl
-    "
-  />
+          <img
+            src="/hero.jpg"
+            alt="Ferry"
+            className="
+              w-full
+              h-[700px]
+              object-cover
+              object-center
+            "
+          />
 
-  {/* Nile Logo */}
-  <img
-    src="/logo.png"
-    alt="Logo"
-    className="
-      w-28
-      md:w-36
-      opacity-80
-      relative
-      -mr-10
-      mix-blend-multiply
-      drop-shadow-xl
-    "
-  />
+        </div>
 
-</div>
+      </div>
 
-        {/* Title */}
+      {/* RIGHT CONTENT */}
+      <div
+        className="
+          text-center
+          md:text-right
+        "
+      >
+
+        {/* Logos */}
+        <div
+          className="
+            flex
+            items-center
+            justify-center
+            md:justify-end
+            gap-7
+            mb-10
+          "
+        >
+
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="
+              w-44
+              h-44
+              object-contain
+              drop-shadow-xl
+            "
+          />
+
+          <img
+            src="/3a-logo.png"
+            alt="3A"
+            className="
+              w-44
+              h-44
+              object-contain
+              drop-shadow-xl
+            "
+          />
+
+        </div>
+
+        {/* Main Title */}
         <h1
           className="
-            text-3xl
-md:text-[58px]
+            text-[72px]
+            md:text-[92px]
             font-black
-            leading-[1.05]
-            text-blue-950
-mb-4
-mt-2          "
+            leading-[1.03]
+            text-[#082b84]
+            mb-8
+          "
         >
           هيئة وادي النيل
           <br />
@@ -814,12 +909,14 @@ mt-2          "
         {/* Subtitle */}
         <p
           className="
-text-[20px]mt-3          
-  text-blue-900/70
-mb-14
+            text-[32px]
+            text-blue-900/70
+            mb-12
+            font-medium
           "
         >
-ثمرة التكامل بين شطري وادي النيل        </p>
+          نربط الأماكن .. نوصل الأمان
+        </p>
 
         {/* Divider */}
         <div
@@ -828,32 +925,33 @@ mb-14
             items-center
             justify-center
             md:justify-end
-            gap-4
-            mb-10
+            gap-5
+            mb-14
           "
         >
 
-          <div className="h-[2px] w-32 bg-blue-600" />
+          <div className="h-[2px] w-40 bg-blue-500" />
 
-          <div className="text-5xl text-blue-700">
+          <div className="text-[48px] text-[#082b84]">
             ⚓
           </div>
 
-          <div className="h-[2px] w-32 bg-blue-600" />
+          <div className="h-[2px] w-40 bg-blue-500" />
 
         </div>
 
         {/* CTA */}
         <button
           className="
-            bg-yellow-400
+            bg-[#ffc21a]
             hover:bg-yellow-300
-            text-black
-           px-12
-py-3
-rounded-[22px]
-text-[24px]            font-black
-            shadow-xl
+            text-[#082b84]
+            px-16
+            py-5
+            rounded-[26px]
+            text-[42px]
+            font-black
+            shadow-[0_12px_30px_rgba(255,193,7,0.45)]
             transition
             hover:scale-105
           "
@@ -863,61 +961,45 @@ text-[24px]            font-black
 
       </div>
 
-      {/* Ferry Image */}
-      <div>
-
-        <div
-          className="
-            rounded-[40px]
-            overflow-hidden
-            border-[6px]
-            border-white
-            shadow-2xl
-          "
-        >
-
-          <img
-            src="/hero.jpg"
-            alt="Ferry"
-            className="
-              w-full
-              h-[520px]
-              object-cover
-              object-center
-              scale-[1.02]
-            "
-          />
-
-        </div>
-
-      </div>
-
     </div>
 
   </div>
 
-  {/* Bottom Waves */}
-  <div
-    className="
-      absolute
-      bottom-0
-      left-0
-      w-full
-      overflow-hidden
-      leading-none
-    "
-  >
+  {/* WAVES */}
+  <div className="absolute bottom-0 left-0 w-full">
 
     <svg
-      viewBox="0 0 1440 220"
+      viewBox="0 0 1440 320"
       className="w-full"
       preserveAspectRatio="none"
     >
 
+      {/* Dark Wave */}
       <path
-        fill="#1d4ed8"
+        fill="#0038c7"
         fillOpacity="1"
-        d="M0,160L80,154.7C160,149,320,139,480,149.3C640,160,800,192,960,197.3C1120,203,1280,181,1360,170.7L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+        d="M0,256L80,245.3C160,235,320,213,480,202.7C640,192,800,192,960,208C1120,224,1280,256,1360,272L1440,288L1440,320L0,320Z"
+      />
+
+      {/* Medium Wave */}
+      <path
+        fill="#0a58ff"
+        fillOpacity="0.75"
+        d="M0,288L80,266.7C160,245,320,203,480,181.3C640,160,800,160,960,181.3C1120,203,1280,245,1360,266.7L1440,288L1440,320L0,320Z"
+      />
+
+      {/* Light Wave */}
+      <path
+        fill="#7ec3ff"
+        fillOpacity="0.55"
+        d="M0,288L80,282.7C160,277,320,267,480,240C640,213,800,171,960,176C1120,181,1280,235,1360,261.3L1440,288L1440,320L0,320Z"
+      />
+
+      {/* White Highlight */}
+      <path
+        fill="#ffffff"
+        fillOpacity="0.95"
+        d="M0,288L80,272C160,256,320,224,480,218.7C640,213,800,235,960,240C1120,245,1280,235,1360,229.3L1440,224L1440,320L0,320Z"
       />
 
     </svg>
@@ -925,7 +1007,8 @@ text-[24px]            font-black
   </div>
 
 </section>
-      ```
+```
+
 
 
       {/* Search Section */}
