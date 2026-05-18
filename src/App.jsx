@@ -602,25 +602,25 @@ export default function FerryBookingWebsite() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
-    {/* Hero Section */}
-<section
-  dir="rtl"
-  className="
+      {/* Hero Section */}
+      <section
+        dir="rtl"
+        className="
     relative
     overflow-hidden
     bg-[#edf3f9]
   "
->
+      >
 
-  {/* Top Area */}
-  <div className="max-w-[1500px] mx-auto px-6 pt-4 relative z-20">
+        {/* Top Area */}
+        <div className="max-w-[1500px] mx-auto px-6 pt-4 relative z-20">
 
-    {/* Navbar */}
-    <div className="flex items-start justify-between">
+          {/* Navbar */}
+          <div className="flex items-start justify-between">
 
-      {/* Nav Links */}
-      <div
-        className="
+            {/* Nav Links */}
+            <div
+              className="
           hidden
           md:flex
           items-center
@@ -630,60 +630,60 @@ export default function FerryBookingWebsite() {
           text-[22px]
           pt-2
         "
-      >
+            >
 
-        <a
-          href="#"
-          className="
+              <a
+                href="#"
+                className="
             text-blue-600
             border-b-4
             border-blue-600
             pb-2
           "
-        >
-          الرئيسية
-        </a>
+              >
+                الرئيسية
+              </a>
 
-        <a
-          href="#"
-          className="hover:text-blue-500 transition"
-        >
-          حجز رحلة
-        </a>
+              <a
+                href="#"
+                className="hover:text-blue-500 transition"
+              >
+                حجز رحلة
+              </a>
 
-        <a
-          href="#"
-          className="hover:text-blue-500 transition"
-        >
-          حجوزاتي
-        </a>
+              <a
+                href="#"
+                className="hover:text-blue-500 transition"
+              >
+                حجوزاتي
+              </a>
 
-        <a
-          href="#"
-          className="hover:text-blue-500 transition"
-        >
-          الشحن
-        </a>
+              <a
+                href="#"
+                className="hover:text-blue-500 transition"
+              >
+                الشحن
+              </a>
 
-        <a
-          href="#"
-          className="hover:text-blue-500 transition"
-        >
-          تتبع شحنتك
-        </a>
+              <a
+                href="#"
+                className="hover:text-blue-500 transition"
+              >
+                تتبع شحنتك
+              </a>
 
-        <a
-          href="#"
-          className="hover:text-blue-500 transition"
-        >
-          تواصل معنا
-        </a>
+              <a
+                href="#"
+                className="hover:text-blue-500 transition"
+              >
+                تواصل معنا
+              </a>
 
-      </div>
+            </div>
 
-      {/* Small Top Banner */}
-      <div
-        className="
+            {/* Small Top Banner */}
+            <div
+              className="
          bg-white/55
 backdrop-blur-xl
 shadow-md
@@ -696,47 +696,47 @@ border-white/40
           items-center
           gap-4
         "
-      >
+            >
 
-        <img
-          src="/logo.png"
-          alt="Logo"
-className="
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="
 w-10  opacity-85
 "        />
 
-        <img
-          src="/3a-logo.png"
-          alt="3A"
-className="
+              <img
+                src="/3a-logo.png"
+                alt="3A"
+                className="
 w-10
   opacity-85
 "        />
 
-        <div
-          className="
+              <div
+                className="
             text-blue-950
             font-black
             text-xl
             leading-tight
           "
-        >
-          هيئة وادي النيل
-          <br />
+              >
+                هيئة وادي النيل
+                <br />
 
-          <span className="text-base font-bold">
-            للملاحة النهرية
-          </span>
+                <span className="text-base font-bold">
+                  للملاحة النهرية
+                </span>
 
-        </div>
+              </div>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-    {/* Main Hero */}
-    <div
-      className="
+          {/* Main Hero */}
+          <div
+            className="
         grid
         md:grid-cols-[1fr_1.4fr]
         gap-16
@@ -744,14 +744,14 @@ w-10
         pt-2
         pb-8
       "
-    >
+          >
 
-      {/* Right Content */}
-      <div className="text-center md:text-right">
+            {/* Right Content */}
+            <div className="text-center md:text-right">
 
-       {/* Big Logos */}
-<div
-  className="
+              {/* Big Logos */}
+              <div
+                className="
     flex
     items-center
     justify-center
@@ -761,13 +761,13 @@ w-10
     h-[150px]
     mt-6
   "
->
+              >
 
-  {/* 3A Logo */}
-  <img
-    src="/3a-logo.png"
-    alt="3A"
-    className="
+                {/* 3A Logo */}
+                <img
+                  src="/3a-logo.png"
+                  alt="3A"
+                  className="
       w-28
       md:w-36
       opacity-75
@@ -776,13 +776,13 @@ w-10
       translate-x-4
       drop-shadow-xl
     "
-  />
+                />
 
-  {/* Nile Logo */}
-  <img
-    src="/logo.png"
-    alt="Logo"
-    className="
+                {/* Nile Logo */}
+                <img
+                  src="/logo.png"
+                  alt="Logo"
+                  className="
       w-28
       md:w-36
       opacity-80
@@ -791,13 +791,13 @@ w-10
       mix-blend-multiply
       drop-shadow-xl
     "
-  />
+                />
 
-</div>
+              </div>
 
-        {/* Title */}
-        <h1
-          className="
+              {/* Title */}
+              <h1
+                className="
             text-3xl
 md:text-[58px]
             font-black
@@ -805,26 +805,26 @@ md:text-[58px]
             text-blue-950
 mb-4
 mt-2          "
-        >
-          هيئة وادي النيل
-          <br />
-          للملاحة النهرية
-        </h1>
+              >
+                هيئة وادي النيل
+                <br />
+                للملاحة النهرية
+              </h1>
 
-        {/* Subtitle */}
-        <p
-          className="
+              {/* Subtitle */}
+              <p
+                className="
 text-[20px]
 mt-3          
   text-blue-900/70
 mb-14
           "
-        >
-ثمرة التكامل بين شطري وادي النيل        </p>
+              >
+                ثمرة التكامل بين شطري وادي النيل        </p>
 
-        {/* Divider */}
-        <div
-          className="
+              {/* Divider */}
+              <div
+                className="
             flex
             items-center
             justify-center
@@ -832,21 +832,21 @@ mb-14
             gap-4
             mb-10
           "
-        >
+              >
 
-          <div className="h-[2px] w-32 bg-blue-600" />
+                <div className="h-[2px] w-32 bg-blue-600" />
 
-          <div className="text-5xl text-blue-700">
-            ⚓
-          </div>
+                <div className="text-5xl text-blue-700">
+                  ⚓
+                </div>
 
-          <div className="h-[2px] w-32 bg-blue-600" />
+                <div className="h-[2px] w-32 bg-blue-600" />
 
-        </div>
+              </div>
 
-        {/* CTA */}
-        <button
-          className="
+              {/* CTA */}
+              <button
+                className="
             bg-yellow-400
             hover:bg-yellow-300
             text-black
@@ -859,48 +859,48 @@ text-[24px]
             transition
             hover:scale-105
           "
-        >
-          احجز الآن
-        </button>
+              >
+                احجز الآن
+              </button>
 
-      </div>
+            </div>
 
-      {/* Ferry Image */}
-      <div>
+            {/* Ferry Image */}
+            <div>
 
-        <div
-          className="
+              <div
+                className="
             rounded-[40px]
             overflow-hidden
             border-[6px]
             border-white
             shadow-2xl
           "
-        >
+              >
 
-          <img
-            src="/hero.jpg"
-            alt="Ferry"
-            className="
+                <img
+                  src="/hero.jpg"
+                  alt="Ferry"
+                  className="
               w-full
               h-[520px]
               object-cover
               object-center
               scale-[1.02]
             "
-          />
+                />
+
+              </div>
+
+            </div>
+
+          </div>
 
         </div>
 
-      </div>
-
-    </div>
-
-  </div>
-
-  {/* Bottom Waves */}
-  <div
-    className="
+        {/* Bottom Waves */}
+        <div
+          className="
       absolute
       bottom-0
       left-0
@@ -908,25 +908,25 @@ text-[24px]
       overflow-hidden
       leading-none
     "
-  >
+        >
 
-    <svg
-      viewBox="0 0 1440 220"
-      className="w-full"
-      preserveAspectRatio="none"
-    >
+          <svg
+            viewBox="0 0 1440 220"
+            className="w-full"
+            preserveAspectRatio="none"
+          >
 
-      <path
-        fill="#1d4ed8"
-        fillOpacity="1"
-        d="M0,160L80,154.7C160,149,320,139,480,149.3C640,160,800,192,960,197.3C1120,203,1280,181,1360,170.7L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-      />
+            <path
+              fill="#1d4ed8"
+              fillOpacity="1"
+              d="M0,160L80,154.7C160,149,320,139,480,149.3C640,160,800,192,960,197.3C1120,203,1280,181,1360,170.7L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+            />
 
-    </svg>
+          </svg>
 
-  </div>
+        </div>
 
-</section>
+      </section>
 
 
       {/* Search Section */}
