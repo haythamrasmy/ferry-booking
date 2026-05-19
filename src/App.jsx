@@ -68,13 +68,13 @@ export default function FerryBookingWebsite() {
   const [receiverName, setReceiverName] = useState("");
   const [receiverPhone, setReceiverPhone] = useState("");
 
-  const [cargoType, setCargoType] = useState("");
-  const [weight, setWeight] = useState("");
-
-  const [quantity, setQuantity] = useState("");
+ 
   const [destination, setDestination] = useState("");
 
   const [notes, setNotes] = useState("");
+
+  const [selectedCargo, setSelectedCargo] =
+  useState({});
 
   const [shipmentPaymentImage, setShipmentPaymentImage] =
     useState("");
@@ -83,6 +83,25 @@ export default function FerryBookingWebsite() {
 
   const [trackedShipment, setTrackedShipment] =
     useState(null);
+
+    const cargoItems = [
+  "ثلاجه 11 قدم",
+  "ثلاجه 14 قدم",
+  "غساله اتوماتيك",
+  "بوتاجاز 4 عين",
+  "بوتاجاز 5 عين",
+  "بوتاجاز 6 عين",
+  "التكييف الصحراوي",
+  "شاشه 32 بوصه",
+  "شاشه 43",
+  "غرفة نوم كامله",
+  "طقم مكتب 3 كرسي",
+  "طقم مكتب 6 كرسي",
+  "سرير 120 إلى 100",
+  "مرتبة سرير متر",
+  "التروسيكل / توك توك صندوق",
+  "شنطه شخصيه",
+];
 
 
   const trackShipment = async () => {
@@ -123,6 +142,37 @@ export default function FerryBookingWebsite() {
     }
   };
 
+const updateCargoQuantity = (
+  item,
+  amount
+) => {
+
+  setSelectedCargo((prev) => {
+
+    const current =
+      prev[item] || 0;
+
+    const updated =
+      current + amount;
+
+    if (updated <= 0) {
+
+      const copy = { ...prev };
+
+      delete copy[item];
+
+      return copy;
+    }
+
+    return {
+      ...prev,
+      [item]: updated,
+    };
+
+  });
+
+};
+
   const fetchBookings = async () => {
     try {
       const querySnapshot = await getDocs(
@@ -153,6 +203,7 @@ export default function FerryBookingWebsite() {
       console.log(error);
     }
   };
+
 
   useEffect(() => {
     const unsubscribeBookings =
@@ -514,68 +565,67 @@ export default function FerryBookingWebsite() {
     }
   };
 
-  const saveShipment = async () => {
 
-    try {
+const saveShipment = async () => {
 
-      const trackingId =
-        "WND-CARGO-" +
-        Math.floor(
-          100000 + Math.random() * 900000
-        );
+  try {
 
-      await addDoc(
-        collection(db, "shipments"),
-        {
-          trackingId,
-
-          senderName,
-          senderPhone,
-
-          receiverName,
-          receiverPhone,
-
-          cargoType,
-          weight,
-          quantity,
-          destination,
-
-          notes,
-
-          paymentImage:
-            shipmentPaymentImage,
-
-          status: "pending",
-
-          createdAt:
-            serverTimestamp(),
-        }
+    const trackingId =
+      "WND-CARGO-" +
+      Math.floor(
+        100000 + Math.random() * 900000
       );
 
-      alert("تم تسجيل الشحنة بنجاح");
+    await addDoc(
+      collection(db, "shipments"),
+      {
+        trackingId,
 
-      setSenderName("");
-      setSenderPhone("");
+        senderName,
+        senderPhone,
 
-      setReceiverName("");
-      setReceiverPhone("");
+        receiverName,
+        receiverPhone,
 
-      setCargoType("");
-      setWeight("");
+        cargo: selectedCargo,
 
-      setQuantity("");
-      setDestination("");
+        destination,
 
-      setNotes("");
+        notes,
 
-    } catch (error) {
+        paymentImage:
+          shipmentPaymentImage,
 
-      console.log(error);
+        status: "pending",
 
-      alert(error.message);
-    }
-  };
+        createdAt:
+          serverTimestamp(),
+      }
+    );
 
+    alert("تم تسجيل الشحنة بنجاح");
+
+    setSenderName("");
+    setSenderPhone("");
+
+    setReceiverName("");
+    setReceiverPhone("");
+
+    setDestination("");
+
+    setNotes("");
+
+    setSelectedCargo({});
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert(error.message);
+
+  }
+
+};
   const adminLogin = async () => {
     try {
       await signInWithEmailAndPassword(
@@ -1210,36 +1260,88 @@ text-[24px]
               className="border rounded-2xl p-4 outline-none"
             />
 
-            <input
-              type="text"
-              placeholder="نوع البضاعة"
-              value={cargoType}
-              onChange={(e) =>
-                setCargoType(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
+           
 
-            <input
-              type="text"
-              placeholder="الوزن"
-              value={weight}
-              onChange={(e) =>
-                setWeight(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
+           <div className="md:col-span-2 mt-6">
 
-            <input
-              type="text"
-              placeholder="الكمية"
-              value={quantity}
-              onChange={(e) =>
-                setQuantity(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
+  <h3 className="text-2xl font-bold mb-6 text-blue-900">
+    البضائع المشحونة
+  </h3>
 
+  <div className="space-y-4">
+
+    {cargoItems.map((item) => (
+
+      <div
+        key={item}
+        className="
+          flex
+          items-center
+          justify-between
+          bg-slate-50
+          rounded-2xl
+          p-4
+          border
+        "
+      >
+
+        <span className="font-bold text-lg">
+          {item}
+        </span>
+
+        <div className="flex items-center gap-4">
+
+          <button
+            type="button"
+            onClick={() =>
+              updateCargoQuantity(item, -1)
+            }
+            className="
+              w-10
+              h-10
+              rounded-full
+              bg-red-500
+              text-white
+              text-xl
+              font-bold
+            "
+          >
+            -
+          </button>
+
+          <span className="text-xl font-bold w-8 text-center">
+            {selectedCargo[item] || 0}
+          </span>
+
+          <button
+            type="button"
+            onClick={() =>
+              updateCargoQuantity(item, 1)
+            }
+            className="
+              w-10
+              h-10
+              rounded-full
+              bg-green-600
+              text-white
+              text-xl
+              font-bold
+            "
+          >
+            +
+          </button>
+
+        </div>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</div>
+
+            
             <input
               type="text"
               placeholder="الوجهة"
@@ -1356,11 +1458,42 @@ text-[24px]
                   {trackedShipment.receiverName}
                 </p>
 
-                <p>
-                  <strong>نوع البضاعة:</strong>
-                  {" "}
-                  {trackedShipment.cargoType}
-                </p>
+                <div className="md:col-span-2">
+
+  <strong>البضائع:</strong>
+
+  <div className="mt-3 space-y-2">
+
+    {trackedShipment.cargo &&
+      Object.entries(
+        trackedShipment.cargo
+      ).map(([item, qty]) => (
+
+        <div
+          key={item}
+          className="
+            flex
+            justify-between
+            bg-white
+            border
+            rounded-xl
+            p-3
+          "
+        >
+
+          <span>{item}</span>
+
+          <span>
+            {qty} قطعة
+          </span>
+
+        </div>
+
+      ))}
+
+  </div>
+
+</div>
 
                 <p>
                   <strong>الوجهة:</strong>
