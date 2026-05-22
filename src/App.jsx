@@ -7,6 +7,8 @@ import QRCode from "qrcode";
 
 import JsBarcode from "jsbarcode";
 
+import { motion } from "framer-motion";
+import cairoFont from "../public/fonts/Cairo-Regular.ttf";
 import {
   collection,
   addDoc,
@@ -23,6 +25,8 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
+
+
 
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
@@ -423,6 +427,16 @@ export default function FerryBookingWebsite() {
   ) => {
     const doc = new jsPDF();
 
+    doc.addFont(
+      cairoFont,
+      "Cairo",
+      "normal"
+    );
+
+    doc.setFont(
+      "Cairo"
+    );
+
     doc.setDrawColor(0, 51, 102);
 
     doc.rect(10, 10, 190, 277);
@@ -651,12 +665,20 @@ export default function FerryBookingWebsite() {
 
           doc.setFontSize(12);
 
-          doc.text(
-            `${item} x ${qty}`,
-            20,
-            cargoY
-          );
+          const safeText =
+            String(item || "");
 
+          const safeY =
+            typeof cargoY === "number"
+              ? cargoY
+              : 20;
+
+          doc.text(
+            safeText
+             ,
+            20,
+            safeY
+          );
           cargoY += 12;
 
           for (
@@ -672,7 +694,7 @@ export default function FerryBookingWebsite() {
 
             JsBarcode(
               cargoCanvas,
-              `${booking.trackingId} | ${item} | ${i}/${qty}`,
+              `${booking.trackingId}_${i}-${qty}`,
               {
                 format: "CODE128",
               }
@@ -700,7 +722,16 @@ export default function FerryBookingWebsite() {
               18
             );
 
-            cargoY += 25;
+            cargoY += 24;
+
+            doc.setFontSize(11);
+            doc.text(
+              item.split("").reverse().join(""),
+              20,
+              cargoY
+            );
+
+            cargoY += 12;
 
             if (cargoY > 250) {
 
@@ -997,6 +1028,7 @@ export default function FerryBookingWebsite() {
   };
 
   return (
+
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
       {/* Hero Section */}
       <section
@@ -1038,11 +1070,11 @@ export default function FerryBookingWebsite() {
           className="
     absolute
     inset-0
-    bg-black/45
-  "
+bg-black/55  "
         />
 
         {/* Top Area */}
+
         <div className="
   max-w-[1500px]
   mx-auto
@@ -1051,7 +1083,8 @@ export default function FerryBookingWebsite() {
   relative
   z-20
   w-full
-">
+"
+        >
 
           {/* Navbar */}
           <div className="flex items-start justify-between">
@@ -1073,9 +1106,9 @@ text-white
               <a
                 href="#"
                 className="
-            text-blue-600
+text-white
             border-b-4
-            border-blue-600
+border-white
             pb-2
           "
               >
@@ -1122,8 +1155,7 @@ text-white
             {/* Small Top Banner */}
             <div
               className="
-bg-white/10backdrop-blur-xl
-shadow-md
+bg-white/10 backdrop-blur-xlshadow-md
 rounded-[32px]
 px-5
 py-3
@@ -1158,7 +1190,7 @@ text-white
             leading-tight
           "
               >
-               3A   international
+                3A   international
 
                 <br />
 
@@ -1178,19 +1210,41 @@ text-white
 items-center
 justify-center
         gap-16
-        items-center
         pt-2
         pb-8
       "
           >
 
             {/* Right Content */}
-            <div className="text-center
-max-w-4xl
-mx-auto">
+            <motion.div
+              initial={{
+                opacity: 0,
+                y: 60,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              transition={{
+                duration: 1.2,
+              }}
+              className="
+    text-center
+    max-w-4xl
+    mx-auto
+  "
+            >
 
               {/* Big Logos */}
-              <div
+
+              <motion.div
+                animate={{
+                  y: [0, -8, 0],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 4,
+                }}
                 className="
     flex
     items-center
@@ -1232,8 +1286,7 @@ mx-auto">
       drop-shadow-xl
     "
                 />
-
-              </div>
+              </motion.div>
 
               {/* Title */}
               <h1
@@ -1242,8 +1295,7 @@ mx-auto">
 md:text-[58px]
             font-black
             leading-[1.05]
-text-whitemb-4
-mt-2          "
+text-white mb-4mt-2          "
               >
                 هيئة وادي النيل
                 <br />
@@ -1255,8 +1307,7 @@ mt-2          "
                 className="
 text-[20px]
 mt-3          
-text-white/80mb-14
-          "
+text-white/80 mb-14          "
               >
                 ثمرة التكامل بين شطري وادي النيل        </p>
 
@@ -1283,34 +1334,42 @@ text-white/80mb-14
               </div>
 
               {/* CTA */}
-              <button
-                className="
-           bg-white
-hover:bg-slate-200
-            text-black
-           px-12
-py-3
-rounded-[22px]
-text-[24px]         
-   font-black
-            shadow-xl
-            transition
-            hover:scale-105
-          "
-              >
-                احجز الآن
-              </button>
+              <motion.button
 
-            </div>
+                whileHover={{
+                  scale: 1.06,
+                }}
+
+                whileTap={{
+                  scale: 0.96,
+                }}
+
+                className="
+    bg-white
+    hover:bg-slate-200
+    text-black
+    px-12
+    py-3
+    rounded-[22px]
+    text-[24px]
+    font-black
+    shadow-xl
+    transition
+  "
+              >
+
+                احجز الآن
+              </motion.button>
+            </motion.div>
 
 
           </div>
 
-        </div>
 
-        {/* Bottom Waves */}
-        <div
-          className="
+
+          {/* Bottom Waves */}
+          <div
+            className="
       absolute
       bottom-0
       left-0
@@ -1318,50 +1377,141 @@ text-[24px]
       overflow-hidden
       leading-none
     "
-        >
-
-          <svg
-            viewBox="0 0 1440 220"
-            className="w-full"
-            preserveAspectRatio="none"
           >
 
-            <path
-              fill="#1d4ed8"
-              fillOpacity="1"
-              d="M0,160L80,154.7C160,149,320,139,480,149.3C640,160,800,192,960,197.3C1120,203,1280,181,1360,170.7L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
-            />
+            <svg
+              viewBox="0 0 1440 220"
+              className="w-full"
+              preserveAspectRatio="none"
+            >
 
-          </svg>
+              <path
+                fill="#1d4ed8"
+                fillOpacity="1"
+                d="M0,160L80,154.7C160,149,320,139,480,149.3C640,160,800,192,960,197.3C1120,203,1280,181,1360,170.7L1440,160L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
+              />
+
+            </svg>
+
+          </div>
 
         </div>
 
       </section>
 
+      {/* Floating Search Card */}
 
-      {/* Search Section */}
-      <section className="max-w-6xl mx-auto px-6 -mt-10">
-        <div className="bg-white rounded-3xl shadow-xl p-6 grid md:grid-cols-4 gap-4">
-          <input
-            type="date"
-            className="border rounded-xl p-3 outline-none"
-          />
+      <section
+        className="
+    relative
+    z-30
+    max-w-7xl
+    mx-auto
+    px-6
+    -mt-24
+  "
+      >
 
-          <select className="border rounded-xl p-3 outline-none">
-            <option>راكب واحد</option>
-            <option>راكبين</option>
-            <option>3 ركاب</option>
-          </select>
+        <div
+          className="
+      backdrop-blur-2xl
+      bg-white/10
+      border
+      border-white/20
+      rounded-[40px]
+      shadow-2xl
+      p-6
+    "
+        >
 
-          <select className="border rounded-xl p-3 outline-none">
-            <option>اقتصادي</option>
-            <option>VIP</option>
-          </select>
+          <div
+            className="
+        grid
+        md:grid-cols-4
+        gap-4
+      "
+          >
 
-          <button className="bg-blue-700 hover:bg-blue-800 text-white rounded-xl p-3 font-semibold transition">
-            بحث عن الرحلات
-          </button>
+            <input
+              type="date"
+              className="
+          bg-white/10
+          border
+          border-white/20
+          rounded-2xl
+          p-4
+          outline-none
+          text-white
+          placeholder:text-white/60
+        "
+            />
+
+            <select
+              className="
+          bg-white/10
+          border
+          border-white/20
+          rounded-2xl
+          p-4
+          outline-none
+          text-white
+        "
+            >
+
+              <option className="text-black">
+                راكب واحد
+              </option>
+
+              <option className="text-black">
+                راكبين
+              </option>
+
+              <option className="text-black">
+                3 ركاب
+              </option>
+
+            </select>
+
+            <select
+              className="
+          bg-white/10
+          border
+          border-white/20
+          rounded-2xl
+          p-4
+          outline-none
+          text-white
+        "
+            >
+
+              <option className="text-black">
+                كابينة
+              </option>
+
+              <option className="text-black">
+                درجة ثانية
+              </option>
+
+            </select>
+
+            <button
+              className="
+          bg-white
+          hover:bg-slate-200
+          text-black
+          rounded-2xl
+          p-4
+          font-black
+          transition
+        "
+            >
+              بحث عن الرحلات
+            </button>
+
+          </div>
+
         </div>
+
       </section>
 
 
