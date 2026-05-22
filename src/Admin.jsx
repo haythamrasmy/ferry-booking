@@ -332,6 +332,8 @@ export default function Admin() {
                     route,
                     date,
                     time,
+                    tripTimestamp:
+    new Date(date).getTime(),
                     cabinPrice,
 
                     secondClassPrice,
