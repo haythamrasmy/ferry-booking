@@ -29,7 +29,7 @@ import {
 import ArabicReshaper
   from "arabic-reshaper";
 
-
+import logo from "./assets/logo.png";
 
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
@@ -438,13 +438,13 @@ export default function FerryBookingWebsite() {
     const logo = "/logo.png";
 
     doc.addImage(
-      logo,
-      "PNG",
-      20,
-      15,
-      30,
-      30
-    );
+  logo,
+  "PNG",
+  15,
+  10,
+  40,
+  40
+);
 
     doc.text(
       "Wadi El Nile Ferry Ticket",
