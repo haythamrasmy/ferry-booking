@@ -26,7 +26,10 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 
+import ArabicReshaper
+  from "arabic-reshaper";
 
+ 
 
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
@@ -61,7 +64,10 @@ export default function FerryBookingWebsite() {
     setPassportImage
   ] = useState("");
 
-
+const [
+  scannedCode,
+  setScannedCode
+] = useState("");
 
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -675,7 +681,7 @@ export default function FerryBookingWebsite() {
 
           doc.text(
             safeText
-             ,
+            ,
             20,
             safeY
           );
@@ -706,11 +712,12 @@ export default function FerryBookingWebsite() {
               );
 
             doc.text(
-              `${item} (${i}/${qty})`,
+              ArabicReshaper.convertArabic(
+                `${item} (${i}/${qty})`
+              ),
               20,
               cargoY
             );
-
             cargoY += 8;
 
             doc.addImage(
@@ -724,9 +731,10 @@ export default function FerryBookingWebsite() {
 
             cargoY += 24;
 
-            doc.setFontSize(11);
             doc.text(
-              item.split("").reverse().join(""),
+              ArabicReshaper.convertArabic(
+                item
+              ),
               20,
               cargoY
             );

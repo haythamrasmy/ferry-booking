@@ -17,6 +17,9 @@ import {
     onAuthStateChanged,
 } from "firebase/auth";
 
+import { Html5QrcodeScanner }
+from "html5-qrcode";
+
 export default function Admin() {
     const [bookings, setBookings] =
         useState([]);
@@ -80,6 +83,11 @@ export default function Admin() {
     const [showTripForm, setShowTripForm] =
         useState(false);
 
+        const [
+  scannedCode,
+  setScannedCode
+] = useState("");
+
     useEffect(() => {
         let unsubscribeBookings = null;
 
@@ -122,7 +130,44 @@ export default function Admin() {
         };
     }, []);
 
-    const fetchBookings = () => {
+   useEffect(() => {
+
+  const scanner =
+    new Html5QrcodeScanner(
+      "reader",
+      {
+        qrbox: {
+          width: 250,
+          height: 250,
+        },
+        fps: 5,
+      },
+      false
+    );
+
+  scanner.render(
+
+    (decodedText) => {
+
+      setScannedCode(
+        decodedText
+      );
+
+    },
+
+    (error) => {
+      console.log(error);
+    }
+
+  );
+
+  return () => {
+    scanner.clear();
+  };
+
+}, []);
+
+
         return onSnapshot(
             collection(db, "bookings"),
             (snapshot) => {
@@ -935,6 +980,49 @@ export default function Admin() {
   </div>
 
 )}
+<div
+  className="
+    mt-16
+    bg-white
+    rounded-3xl
+    p-8
+    shadow-xl
+  "
+>
+
+  <h2
+    className="
+      text-3xl
+      font-bold
+      mb-6
+    "
+  >
+    ماسح التذاكر
+  </h2>
+
+  <div id="reader" />
+
+  {scannedCode && (
+
+    <div
+      className="
+        mt-6
+        p-4
+        bg-green-100
+        rounded-2xl
+        font-bold
+      "
+    >
+
+      الكود:
+      {" "}
+      {scannedCode}
+
+    </div>
+
+  )}
+
+</div>
+
         </div>
     );
-}
