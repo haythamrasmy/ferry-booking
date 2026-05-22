@@ -567,7 +567,9 @@ export default function FerryBookingWebsite() {
       50,
       50
     );
-
+localStorage.removeItem(
+  "pendingBooking"
+);
     const canvas =
       document.createElement("canvas");
 
@@ -1428,8 +1430,7 @@ text-white/80 mb-14          "
     max-w-7xl
     mx-auto
     px-6
-mt-6 md:-mt-24
-  "
+-mt-10 md:-mt-24  "
       >
 
         <div
@@ -1615,6 +1616,7 @@ placeholder:text-black/50        "
                   >
                     المتبقي درجة ثانية:
                     {trip.secondClassTickets}
+                    
                   </p>
                   <p>
                     كابينة:

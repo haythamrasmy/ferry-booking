@@ -18,7 +18,7 @@ import {
 } from "firebase/auth";
 
 import { Html5QrcodeScanner }
-from "html5-qrcode";
+    from "html5-qrcode";
 
 export default function Admin() {
     const [bookings, setBookings] =
@@ -83,10 +83,10 @@ export default function Admin() {
     const [showTripForm, setShowTripForm] =
         useState(false);
 
-        const [
-  scannedCode,
-  setScannedCode
-] = useState("");
+    const [
+        scannedCode,
+        setScannedCode
+    ] = useState("");
 
     useEffect(() => {
         let unsubscribeBookings = null;
@@ -132,94 +132,95 @@ export default function Admin() {
 
 
 
-const fetchBookings = () => {
+    const fetchBookings = () => {
 
-    return onSnapshot(
-        collection(db, "bookings"),
-        (snapshot) => {
+        return onSnapshot(
+            collection(db, "bookings"),
+            (snapshot) => {
 
-            const currentTime =
-                Date.now();
+                const currentTime =
+                    Date.now();
 
-            const bookingData =
-                snapshot.docs
-                    .filter((doc) => {
+                const bookingData =
+                    snapshot.docs
+                        .filter((doc) => {
 
-                        const data =
-                            doc.data();
+                            const data =
+                                doc.data();
 
-                        return (
-                            !data.expiresAt ||
-                            data.expiresAt >
-                            currentTime
+                            return (
+                                !data.expiresAt ||
+                                data.expiresAt >
+                                currentTime
+                            );
+
+                        })
+                        .map((doc) => ({
+                            id: doc.id,
+                            ...doc.data(),
+                        }))
+                        .sort(
+                            (a, b) =>
+                                b.createdAt?.seconds -
+                                a.createdAt?.seconds
                         );
 
-                    })
-                    .map((doc) => ({
-                        id: doc.id,
-                        ...doc.data(),
-                    }))
-                    .sort(
-                        (a, b) =>
-                            b.createdAt?.seconds -
-                            a.createdAt?.seconds
-                    );
+                setBookings(
+                    bookingData
+                );
 
-            setBookings(
-                bookingData
+            }
+        );
+
+    };
+
+
+    useEffect(() => {
+
+        if (!isAdmin) return;
+
+        const readerElement =
+            document.getElementById(
+                "reader"
             );
 
-        }
-    );
+        if (!readerElement) return;
 
-};
+        const scanner =
+            new Html5QrcodeScanner(
+                "reader",
+                {
+                    qrbox: {
+                        width: 250,
+                        height: 250,
+                    },
+                    fps: 10,
+                },
+                false
+            );
 
+        scanner.render(
 
- useEffect(() => {
+            (decodedText) => {
 
-  if (!isAdmin) return;
+                setScannedCode(
+                    decodedText
+                );
 
-  const readerElement =
-    document.getElementById(
-      "reader"
-    );
+                alert(
+                    `تم المسح: ${decodedText}`
+                );
 
-  if (!readerElement) return;
+            },
 
-  const scanner =
-    new Html5QrcodeScanner(
-      "reader",
-      {
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-        fps: 5,
-      },
-      false
-    );
+            () => { }
 
-  scanner.render(
+        );
+        return () => {
+            scanner.clear();
+        };
 
-    (decodedText) => {
-
-      setScannedCode(
-        decodedText
-      );
-
-    },
-
-    (error) => {
-      console.log(error);
-    }
-
-  );
-
-  return () => {
-    scanner.clear();
-  };
-
-}, [isAdmin]);
+    }, [isAdmin]);
 
     const confirmBooking = async (id) => {
 
@@ -251,7 +252,7 @@ const fetchBookings = () => {
             ) {
 
                 if (
-                    trip.cabinTickets <= 0
+                    trip.remainingCabinTickets <= 0
                 ) {
 
                     alert(
@@ -268,16 +269,15 @@ const fetchBookings = () => {
                         trip.id
                     ),
                     {
-                        cabinTickets:
-                            trip.cabinTickets - 1,
+                        remainingCabinTickets:
+                            trip.remainingCabinTickets - 1,
                     }
                 );
 
             } else {
 
                 if (
-                    trip.secondClassTickets <=
-                    0
+                    trip.remainingSecondClassTickets <= 0
                 ) {
 
                     alert(
@@ -294,8 +294,8 @@ const fetchBookings = () => {
                         trip.id
                     ),
                     {
-                        secondClassTickets:
-                            trip.secondClassTickets - 1,
+                        remainingSecondClassTickets:
+                            trip.remainingSecondClassTickets - 1,
                     }
                 );
 
@@ -331,13 +331,17 @@ const fetchBookings = () => {
 
                     secondClassPrice,
 
-                    cabinTickets:
+                    totalCabinTickets:
                         Number(cabinTickets),
 
-                    secondClassTickets:
+                    remainingCabinTickets:
+                        Number(cabinTickets),
+
+                    totalSecondClassTickets:
                         Number(secondClassTickets),
-                    tripTimestamp:
-                        new Date(date).getTime(),
+
+                    remainingSecondClassTickets:
+                        Number(secondClassTickets),
                 }
             );
 
@@ -409,8 +413,8 @@ const fetchBookings = () => {
                                 trip.id
                             ),
                             {
-                                cabinTickets:
-                                    trip.cabinTickets + 1,
+                                remainingCabinTickets:
+                                    trip.remainingCabinTickets + 1,
                             }
                         );
 
@@ -543,7 +547,7 @@ const fetchBookings = () => {
     return (
         <div className="min-h-screen bg-slate-900 text-white p-10">
             <div className="max-w-6xl mx-auto">
-                <div className="flex items-center justify-between mb-10">
+                <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-10">
                     <h1 className="text-4xl font-bold">
                         لوحة التحكم
                     </h1>
@@ -930,15 +934,13 @@ const fetchBookings = () => {
                                                     <p className="text-sm text-green-400 mt-2">
 
                                                         المتبقي كابينة:
-                                                        {trip.cabinTickets}
-
+                                                        {trip.remainingCabinTickets}
                                                     </p>
 
                                                     <p className="text-sm text-yellow-400">
 
                                                         المتبقي درجة ثانية:
-                                                        {trip.secondClassTickets}
-
+                                                        {trip.remainingSecondClassTickets}
                                                     </p>
 
                                                     <p className="text-sm text-slate-300">
@@ -973,11 +975,11 @@ const fetchBookings = () => {
 
             {previewImage && (
 
-  <div
-    onClick={() =>
-      setPreviewImage("")
-    }
-    className="
+                <div
+                    onClick={() =>
+                        setPreviewImage("")
+                    }
+                    className="
       fixed
       inset-0
       bg-black/80
@@ -987,65 +989,65 @@ const fetchBookings = () => {
       z-50
       p-6
     "
-  >
+                >
 
-    <img
-      src={previewImage}
-      alt="Preview"
-      className="
+                    <img
+                        src={previewImage}
+                        alt="Preview"
+                        className="
         max-w-full
         max-h-full
         rounded-3xl
         shadow-2xl
       "
-    />
+                    />
 
-  </div>
+                </div>
 
-)}
-<div
-  className="
+            )}
+            <div
+                className="
     mt-16
     bg-white
     rounded-3xl
     p-8
     shadow-xl
   "
->
+            >
 
-  <h2
-    className="
+                <h2
+                    className="
       text-3xl
       font-bold
       mb-6
     "
-  >
-    ماسح التذاكر
-  </h2>
+                >
+                    ماسح التذاكر
+                </h2>
 
-  <div id="reader" />
+                <div id="reader" />
 
-  {scannedCode && (
+                {scannedCode && (
 
-    <div
-      className="
+                    <div
+                        className="
         mt-6
         p-4
         bg-green-100
         rounded-2xl
         font-bold
       "
-    >
+                    >
 
-      الكود:
-      {" "}
-      {scannedCode}
+                        الكود:
+                        {" "}
+                        {scannedCode}
 
-    </div>
+                    </div>
 
-  )}
+                )}
 
-</div>
+            </div>
 
         </div>
 
