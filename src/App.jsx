@@ -1350,7 +1350,7 @@ text-white/80 mb-14          "
 
                   document
                     .getElementById(
-                      "booking-section"
+                      "available-trips"
                     )
                     ?.scrollIntoView({
                       behavior: "smooth",
@@ -1452,8 +1452,23 @@ text-white/80 mb-14          "
         gap-4
       "
           >
+<div className="flex flex-col">
 
-            <input
+  <label
+    className="
+      text-sm
+      text-black
+      mb-2
+      font-semibold
+    "
+  >
+    تاريخ الرحلة
+  </label>
+
+  <input
+
+
+            
               type="date"
               className="
           bg-white/10
@@ -1466,7 +1481,7 @@ text-white/80 mb-14          "
 placeholder:text-black/50        "
             />
 
-
+</div>
             <select
               className="
     bg-white
@@ -1539,7 +1554,8 @@ placeholder:text-black/50        "
         </section>
       )}
 
-      <section className="max-w-5xl mx-auto px-6 py-16">
+      <section id="available-trips" className="max-w-5xl mx-auto px-6 py-16">
+
 
         <div className="bg-white rounded-3xl shadow-xl p-8">
 
