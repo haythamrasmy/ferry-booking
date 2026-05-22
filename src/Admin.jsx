@@ -199,6 +199,11 @@ export default function Admin() {
                 false
             );
 
+        document.documentElement.style.setProperty(
+            "--qr-color",
+            "black"
+        );
+
         scanner.render(
 
             (decodedText) => {
@@ -980,8 +985,8 @@ export default function Admin() {
                         setPreviewImage("")
                     }
                     className="
-      fixed
-      inset-0
+      relative
+w-full
       bg-black/80
       flex
       items-center
@@ -1025,8 +1030,15 @@ export default function Admin() {
                     ماسح التذاكر
                 </h2>
 
-                <div id="reader" />
-
+                <div
+                    id="reader"
+                    className="
+    text-black
+    bg-white
+    p-4
+    rounded-2xl
+  "
+                ></div>
                 {scannedCode && (
 
                     <div

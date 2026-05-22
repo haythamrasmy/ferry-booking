@@ -1,1 +1,30 @@
 @import "tailwindcss";
+
+#reader {
+  color: black !important;
+}
+
+#reader * {
+  color: black !important;
+}
+
+#reader button {
+  background: #2563eb !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 12px !important;
+  padding: 8px 14px !important;
+}
+
+#reader select {
+  color: black !important;
+  background: white !important;
+}
+
+html,
+body,
+#root {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
