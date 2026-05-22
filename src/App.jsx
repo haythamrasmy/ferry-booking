@@ -922,38 +922,7 @@ tripId: selectedTrip?.id,
         }
       );
 
-      if (
-        selectedTicketType ===
-        "Cabin"
-      ) {
-
-        await updateDoc(
-          doc(
-            db,
-            "trips",
-            selectedTrip.id
-          ),
-          {
-            remainingCabinTickets:
-              selectedTrip.remainingCabinTickets - 1,
-          }
-        );
-
-      } else {
-
-        await updateDoc(
-          doc(
-            db,
-            "trips",
-            selectedTrip.id
-          ),
-          {
-            remainingSecondClassTickets:
-selectedTrip.remainingSecondClassTickets - 1
-          }
-        );
-
-      }
+    
 
       setUserBooking({
         id: bookingRef.id,
