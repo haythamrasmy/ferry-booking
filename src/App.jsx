@@ -314,16 +314,29 @@ export default function FerryBookingWebsite() {
             }))
             .filter((trip) => {
 
-              const tripStillValid =
-                !trip.tripTimestamp ||
-                currentTime <
-                trip.tripTimestamp +
-                86400000;
+             const tripDate =
+  new Date(trip.date);
+
+tripDate.setHours(
+  23,
+  59,
+  59,
+  999
+);
+
+const tripStillValid =
+  currentTime <
+  tripDate.getTime();
 
               const hasTickets =
-                trip.cabinTickets > 0 ||
-                trip.secondClassTickets >
-                0;
+
+  (trip.remainingCabinTickets ??
+    trip.cabinTickets ??
+    0) > 0 ||
+
+  (trip.remainingSecondClassTickets ??
+    trip.secondClassTickets ??
+    0) > 0;
 
               return (
                 tripStillValid &&
@@ -567,9 +580,9 @@ export default function FerryBookingWebsite() {
       50,
       50
     );
-localStorage.removeItem(
-  "pendingBooking"
-);
+    localStorage.removeItem(
+      "pendingBooking"
+    );
     const canvas =
       document.createElement("canvas");
 
@@ -702,7 +715,7 @@ localStorage.removeItem(
 
             JsBarcode(
               cargoCanvas,
-             `${booking.trackingId}-${i}`,
+              `${booking.trackingId}-${i}`,
               {
                 format: "CODE128",
               }
@@ -860,7 +873,7 @@ localStorage.removeItem(
       ) {
 
         if (
-          updatedTrip.cabinTickets <=
+          updatedTrip.remainingCabinTickets <=
           0
         ) {
 
@@ -874,7 +887,7 @@ localStorage.removeItem(
       } else {
 
         if (
-          updatedTrip.secondClassTickets <=
+          updatedTrip.remainingSecondClassTickets <=
           0
         ) {
 
@@ -901,7 +914,8 @@ localStorage.removeItem(
           cargo: selectedCargo,
           ticketType:
             selectedTicketType,
-          trip: selectedTrip?.route,
+trip: selectedTrip?.route,
+tripId: selectedTrip?.id,
           status: "pending",
           createdAt: new Date(),
           expiresAt:
@@ -951,9 +965,8 @@ localStorage.removeItem(
             selectedTrip.id
           ),
           {
-            cabinTickets:
-              selectedTrip.cabinTickets -
-              1,
+            remainingCabinTickets:
+              selectedTrip.remainingCabinTickets - 1,
           }
         );
 
@@ -966,9 +979,8 @@ localStorage.removeItem(
             selectedTrip.id
           ),
           {
-            secondClassTickets:
-              selectedTrip.secondClassTickets -
-              1,
+            remainingSecondClassTickets:
+selectedTrip.remainingSecondClassTickets - 1
           }
         );
 
@@ -986,8 +998,8 @@ localStorage.removeItem(
 
         ticketType:
           selectedTicketType,
-        trip: selectedTrip?.route,
-
+trip: selectedTrip?.route,
+tripId: selectedTrip?.id,
         status: "pending",
       });
       localStorage.setItem(
@@ -1452,25 +1464,25 @@ text-white/80 mb-14          "
         gap-4
       "
           >
-<div className="flex flex-col">
+            <div className="flex flex-col">
 
-  <label
-    className="
+              <label
+                className="
       text-sm
       text-black
       mb-2
       font-semibold
     "
-  >
-    تاريخ الرحلة
-  </label>
+              >
+                تاريخ الرحلة
+              </label>
 
-  <input
+              <input
 
 
-            
-              type="date"
-              className="
+
+                type="date"
+                className="
           bg-white/10
           border
           border-white/20
@@ -1479,9 +1491,9 @@ text-white/80 mb-14          "
           outline-none
           text-black
 placeholder:text-black/50        "
-            />
+              />
 
-</div>
+            </div>
             <select
               className="
     bg-white
@@ -1603,37 +1615,51 @@ placeholder:text-black/50        "
                   <p>
                     عدد تذاكر الدرجة الثانية:
                     {" "}
-                    {trip.secondClassTickets || 0}
+                    {trip.totalSecondClassTickets || 0}
                   </p>
 
                   <p>
                     عدد الكبائن:
                     {" "}
-                    {trip.cabinTickets || 0}
+                    {trip.totalCabinTickets || 0}
                   </p>
 
                   <p
                     className={
-                      trip.cabinTickets <= 3
+(
+  trip.remainingCabinTickets ??
+  trip.cabinTickets ??
+  0
+) <= 3
                         ? "text-red-600 font-bold"
                         : "text-green-700"
                     }
                   >
                     المتبقي كابينة:
-                    {trip.cabinTickets}
+{
+  trip.remainingCabinTickets ??
+  trip.cabinTickets ??
+  0
+}
                   </p>
 
                   <p
                     className={
-                      trip.secondClassTickets <= 5
+                      (
+  trip.remainingSecondClassTickets ??
+  trip.secondClassTickets ??
+  0
+) <= 5
                         ? "text-red-600 font-bold"
                         : "text-green-700"
                     }
                   >
                     المتبقي درجة ثانية:
-                    {trip.secondClassTickets}
-                    
-                  </p>
+{
+  trip.remainingSecondClassTickets ??
+  trip.secondClassTickets ??
+  0
+}                  </p>
                   <p>
                     كابينة:
                     {trip.cabinPrice} ج.م
@@ -1664,8 +1690,11 @@ placeholder:text-black/50        "
             onClick={() => {
 
               if (
-                selectedTrip?.cabinTickets <=
-                0
+              (
+  selectedTrip?.remainingCabinTickets ??
+  selectedTrip?.cabinTickets ??
+  0
+) <= 0
               ) {
                 alert(
                   "الكبائن غير متاحة"
@@ -1711,8 +1740,11 @@ placeholder:text-black/50        "
             onClick={() => {
 
               if (
-                selectedTrip?.secondClassTickets <=
-                0
+            (
+  selectedTrip?.remainingSecondClassTickets ??
+  selectedTrip?.secondClassTickets ??
+  0
+) <= 0
               ) {
                 alert(
                   "الدرجة الثانية غير متاحة"

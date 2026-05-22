@@ -241,8 +241,8 @@ export default function Admin() {
             const trip =
                 trips.find(
                     (t) =>
-                        t.route === booking.trip
-                );
+t.id === booking.tripId
+                                );
 
             if (!trip) {
 
@@ -434,8 +434,8 @@ export default function Admin() {
                                 trip.id
                             ),
                             {
-                                secondClassTickets:
-                                    trip.secondClassTickets + 1,
+                                remainingSecondClassTickets:
+    trip.remainingSecondClassTickets + 1,
                             }
                         );
 
