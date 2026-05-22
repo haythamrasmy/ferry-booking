@@ -312,38 +312,7 @@ export default function FerryBookingWebsite() {
               id: doc.id,
               ...doc.data(),
             }))
-            .filter((trip) => {
-
-             const tripDate =
-  new Date(trip.date);
-
-tripDate.setHours(
-  23,
-  59,
-  59,
-  999
-);
-
-const tripStillValid =
-  currentTime <
-  tripDate.getTime();
-
-              const hasTickets =
-
-  (trip.remainingCabinTickets ??
-    trip.cabinTickets ??
-    0) > 0 ||
-
-  (trip.remainingSecondClassTickets ??
-    trip.secondClassTickets ??
-    0) > 0;
-
-              return (
-                tripStillValid &&
-                hasTickets
-              );
-
-            });
+           
 
           console.log(tripsData);
 
