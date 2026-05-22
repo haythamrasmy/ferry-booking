@@ -168,19 +168,31 @@ export default function Admin() {
 }, []);
 
 
-        return onSnapshot(
-            collection(db, "bookings"),
-            (snapshot) => {
-                const currentTime = Date.now();
+    };
 
-                const bookingData = snapshot.docs
+
+    const fetchBookings = () => {
+
+    return onSnapshot(
+        collection(db, "bookings"),
+        (snapshot) => {
+
+            const currentTime =
+                Date.now();
+
+            const bookingData =
+                snapshot.docs
                     .filter((doc) => {
-                        const data = doc.data();
+
+                        const data =
+                            doc.data();
 
                         return (
                             !data.expiresAt ||
-                            data.expiresAt > currentTime
+                            data.expiresAt >
+                            currentTime
                         );
+
                     })
                     .map((doc) => ({
                         id: doc.id,
@@ -192,11 +204,14 @@ export default function Admin() {
                             a.createdAt?.seconds
                     );
 
+            setBookings(
+                bookingData
+            );
 
-                setBookings(bookingData);
-            }
-        );
-    };
+        }
+    );
+
+};
 
     const confirmBooking = async (id) => {
 
