@@ -792,10 +792,30 @@ export default function Admin() {
                         إضافة رحلة
                     </button>
                     {showTripForm && (
-                        <div className="fixed inset-0 bg-black/60 z-40 flex items-center justify-center p-6">
-
-                            <div className="bg-blue-950 rounded-3xl p-6 w-full max-w-4xl shadow-2xl relative">
-                                <h2 className="text-2xl font-bold mb-6 pr-12 text-right">
+<div
+  className="
+    fixed
+    inset-0
+    bg-black/60
+    z-40
+    overflow-y-auto
+    p-6
+  "
+>
+<div
+  className="
+    bg-blue-950
+    rounded-3xl
+    p-6
+    w-full
+    max-w-4xl
+    shadow-2xl
+    relative
+    my-10
+    mx-auto
+  "
+>
+                                    <h2 className="text-2xl font-bold mb-6 pr-12 text-right">
                                     إضافة رحلة
                                 </h2>
                                 <button
