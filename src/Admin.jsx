@@ -50,11 +50,33 @@ export default function Admin() {
     const [time, setTime] =
         useState("");
 
-    const [price, setPrice] =
-        useState("");
+    const [
+        previewImage,
+        setPreviewImage
+    ] = useState("");
 
-    const [seats, setSeats] =
-        useState("");
+
+
+    const [
+        cabinTickets,
+        setCabinTickets,
+    ] = useState("");
+
+    const [
+        secondClassTickets,
+        setSecondClassTickets,
+    ] = useState("");
+
+    const [
+        cabinPrice,
+        setCabinPrice,
+    ] = useState("");
+
+    const [
+        secondClassPrice,
+        setSecondClassPrice,
+    ] = useState("");
+
     const [showTripForm, setShowTripForm] =
         useState(false);
 
@@ -132,7 +154,85 @@ export default function Admin() {
     };
 
     const confirmBooking = async (id) => {
+
         try {
+
+            const booking =
+                bookings.find(
+                    (b) => b.id === id
+                );
+
+            if (!booking) return;
+
+            const trip =
+                trips.find(
+                    (t) =>
+                        t.route === booking.trip
+                );
+
+            if (!trip) {
+
+                alert("الرحلة غير موجودة");
+
+                return;
+            }
+
+            if (
+                booking.ticketType ===
+                "Cabin"
+            ) {
+
+                if (
+                    trip.cabinTickets <= 0
+                ) {
+
+                    alert(
+                        "لا توجد كبائن متاحة"
+                    );
+
+                    return;
+                }
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "trips",
+                        trip.id
+                    ),
+                    {
+                        cabinTickets:
+                            trip.cabinTickets - 1,
+                    }
+                );
+
+            } else {
+
+                if (
+                    trip.secondClassTickets <=
+                    0
+                ) {
+
+                    alert(
+                        "لا توجد تذاكر درجة ثانية متاحة"
+                    );
+
+                    return;
+                }
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "trips",
+                        trip.id
+                    ),
+                    {
+                        secondClassTickets:
+                            trip.secondClassTickets - 1,
+                    }
+                );
+
+            }
+
             await updateDoc(
                 doc(db, "bookings", id),
                 {
@@ -140,22 +240,15 @@ export default function Admin() {
                     expiresAt: null,
                 }
             );
-        } catch (error) {
-            console.log(error);
-        }
-    };
 
-    const deleteBooking = async (id) => {
-        try {
-            await deleteDoc(doc(db, "bookings", id));
-
-            fetchBookings();
-
-            alert("تم حذف الحجز");
+            alert("تم تأكيد الحجز");
 
         } catch (error) {
+
             console.log(error);
+
         }
+
     };
 
     const addTrip = async () => {
@@ -166,8 +259,15 @@ export default function Admin() {
                     route,
                     date,
                     time,
-                    price,
-                    seats: Number(seats),
+                    cabinPrice,
+
+                    secondClassPrice,
+
+                    cabinTickets:
+                        Number(cabinTickets),
+
+                    secondClassTickets:
+                        Number(secondClassTickets),
                     tripTimestamp:
                         new Date(date).getTime(),
                 }
@@ -178,8 +278,11 @@ export default function Admin() {
             setRoute("");
             setDate("");
             setTime("");
-            setPrice("");
-            setSeats("");
+            setCabinPrice("");
+            setSecondClassPrice("");
+            setCabinTickets("");
+            setSecondClassTickets("");
+
 
         } catch (error) {
             console.log(error);
@@ -197,6 +300,88 @@ export default function Admin() {
         } catch (error) {
             console.log(error);
         }
+    };
+
+    const deleteBooking = async (
+        id
+    ) => {
+
+        try {
+
+            const booking =
+                bookings.find(
+                    (b) => b.id === id
+                );
+
+            if (!booking) return;
+
+            if (
+                booking.status ===
+                "confirmed"
+            ) {
+
+                const trip =
+                    trips.find(
+                        (t) =>
+                            t.route ===
+                            booking.trip
+                    );
+
+                if (trip) {
+
+                    if (
+                        booking.ticketType ===
+                        "Cabin"
+                    ) {
+
+                        await updateDoc(
+                            doc(
+                                db,
+                                "trips",
+                                trip.id
+                            ),
+                            {
+                                cabinTickets:
+                                    trip.cabinTickets + 1,
+                            }
+                        );
+
+                    } else {
+
+                        await updateDoc(
+                            doc(
+                                db,
+                                "trips",
+                                trip.id
+                            ),
+                            {
+                                secondClassTickets:
+                                    trip.secondClassTickets + 1,
+                            }
+                        );
+
+                    }
+
+                }
+
+            }
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "bookings",
+                    id
+                )
+            );
+
+            alert("تم حذف الحجز");
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
     };
 
 
@@ -338,8 +523,7 @@ export default function Admin() {
                 <div className="mb-6">
                     <input
                         type="text"
-                        placeholder="ابحث باسم الراكب أو المقعد"
-                        value={search}
+                        placeholder="ابحث باسم الراكب أو نوع التذكرة" value={search}
                         onChange={(e) =>
                             setSearch(e.target.value)
                         }
@@ -360,7 +544,7 @@ export default function Admin() {
                                 </th>
 
                                 <th className="p-4">
-                                    المقعد
+                                    نوع التذكرة
                                 </th>
                                 <th className="p-4">
                                     الهاتف
@@ -372,6 +556,10 @@ export default function Admin() {
 
                                 <th className="p-4">
                                     الإيصال
+                                </th>
+
+                                <th className="p-4">
+                                    الجواز
                                 </th>
                                 <th className="p-4">
                                     الحالة
@@ -387,6 +575,8 @@ export default function Admin() {
 
 
 
+
+
                         <tbody>
                             {bookings
                                 .filter((booking) => {
@@ -396,7 +586,7 @@ export default function Admin() {
                                             .includes(
                                                 search.toLowerCase()
                                             ) ||
-                                        booking.seat
+                                        booking.ticketType
                                             ?.toLowerCase()
                                             .includes(
                                                 search.toLowerCase()
@@ -413,7 +603,7 @@ export default function Admin() {
                                         </td>
 
                                         <td className="p-4">
-                                            {booking.seat}
+                                            {booking.ticketType}
                                         </td>
 
                                         <td className="p-4">
@@ -424,20 +614,49 @@ export default function Admin() {
                                             {booking.passport}
                                         </td>
 
-                                        <td className="p-4 text-center">                                            {booking.paymentImage && (
-                                            <img
-                                                src={booking.paymentImage}
-                                                alt="Payment"
-                                                onClick={() =>
-                                                    booking.paymentImage &&
-                                                    window.open(
-                                                        booking.paymentImage,
-                                                        "_blank"
-                                                    )
-                                                }
-                                                className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
-                                            />
-                                        )}
+                                        <td className="p-4 text-center">
+                                            {booking.paymentImage && (
+                                                <img
+                                                    src={booking.paymentImage}
+                                                    alt="Payment"
+                                                    onClick={() =>
+                                                        setPreviewImage(
+                                                            booking.paymentImage
+                                                        )
+                                                    }
+                                                    className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
+                                                />
+                                            )}
+                                        </td>
+
+                                        <td className="p-4 text-center">
+
+                                            {booking.passportImage && (
+
+                                                <img
+                                                    src={
+                                                        booking.passportImage
+                                                    }
+                                                    alt="Passport"
+                                                    onClick={() =>
+                                                        setPreviewImage(
+                                                            booking.passportImage
+                                                        )
+                                                    }
+                                                    className="
+        w-20
+        h-20
+        object-cover
+        rounded-xl
+        cursor-pointer
+        mx-auto
+        hover:scale-105
+        transition
+      "
+                                                />
+
+                                            )}
+
                                         </td>
 
                                         <td className="p-4">
@@ -448,24 +667,30 @@ export default function Admin() {
 
                                         <td className="p-4">
                                             {booking.status !==
-                                                "confirmed" && (
-                                                    <button
-                                                        onClick={() =>
-                                                            confirmBooking(
-                                                                booking.id
-                                                            )
-                                                        }
-                                                        className="bg-green-600 px-4 py-2 rounded-xl"
-                                                    >
-                                                        تأكيد
-                                                    </button>
-                                                )}
+                                                "confirmed" ? (
+                                                <button
+                                                    onClick={() =>
+                                                        confirmBooking(
+                                                            booking.id
+                                                        )
+                                                    }
+                                                    className="bg-green-600 px-4 py-2 rounded-xl"
+                                                >
+                                                    تأكيد
+                                                </button>
+                                            ) : (
+                                                <span className="text-green-400 font-bold">
+                                                    تم التأكيد
+                                                </span>
+                                            )}
                                         </td>
 
                                         <td className="p-4">
                                             <button
                                                 onClick={() =>
-                                                    deleteBooking(booking.id)
+                                                    deleteBooking(
+                                                        booking.id
+                                                    )
                                                 }
                                                 className="bg-red-600 px-4 py-2 rounded-xl"
                                             >
@@ -475,6 +700,8 @@ export default function Admin() {
                                     </tr>
                                 ))}
                         </tbody>
+
+
                     </table>
 
                     <button
@@ -533,25 +760,79 @@ export default function Admin() {
                                         className="bg-slate-700 p-4 rounded-2xl outline-none"
                                     />
 
+
+                                    <input
+                                        type="number"
+                                        placeholder="عدد تذاكر الدرجة الثانية" value={secondClassTickets}
+                                        onChange={(e) =>
+                                            setSecondClassTickets(
+                                                e.target.value
+                                            )
+                                        }
+                                        className="
+    bg-slate-700
+    p-4
+    rounded-2xl
+    outline-none
+  "
+                                    />
+
+
+
+
                                     <input
                                         type="text"
-                                        placeholder="السعر"
-                                        value={price}
+                                        placeholder="سعر الدرجة الثانية" value={secondClassPrice}
                                         onChange={(e) =>
-                                            setPrice(e.target.value)
+                                            setSecondClassPrice(
+                                                e.target.value
+                                            )
                                         }
-                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                        className="
+    bg-slate-700
+    p-4
+    rounded-2xl
+    outline-none
+  "
                                     />
 
                                     <input
                                         type="number"
-                                        placeholder="عدد المقاعد"
-                                        value={seats}
+                                        placeholder="عدد تذاكر الكابن"
+                                        value={cabinTickets}
                                         onChange={(e) =>
-                                            setSeats(e.target.value)
+                                            setCabinTickets(
+                                                e.target.value
+                                            )
                                         }
-                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                        className="
+    bg-slate-700
+    p-4
+    rounded-2xl
+    outline-none
+  "
                                     />
+
+
+                                    <input
+                                        type="text"
+                                        placeholder="سعر الكابن"
+                                        value={cabinPrice}
+                                        onChange={(e) =>
+                                            setCabinPrice(
+                                                e.target.value
+                                            )
+                                        }
+                                        className="
+    bg-slate-700
+    p-4
+    rounded-2xl
+    outline-none
+  "
+                                    />
+
+
+
 
                                 </div>
 
@@ -572,9 +853,36 @@ export default function Admin() {
                                                     {trip.route}
                                                 </h3>
 
-                                                <p className="text-slate-400 text-sm">
-                                                    {trip.date} - {trip.time}
-                                                </p>
+                                                <div className="text-slate-400 text-sm">
+
+                                                    <p>
+                                                        {trip.date} - {trip.time}
+                                                    </p>
+
+                                                    <p className="text-sm text-green-400 mt-2">
+
+                                                        المتبقي كابينة:
+                                                        {trip.cabinTickets}
+
+                                                    </p>
+
+                                                    <p className="text-sm text-yellow-400">
+
+                                                        المتبقي درجة ثانية:
+                                                        {trip.secondClassTickets}
+
+                                                    </p>
+
+                                                    <p className="text-sm text-slate-300">
+                                                        كابينة:
+                                                        {trip.cabinPrice} ج.م
+                                                    </p>
+
+                                                    <p className="text-sm text-slate-300">
+                                                        الدرجة الثانية:
+                                                        {trip.secondClassPrice} ج.م
+                                                    </p>
+                                                </div>
                                             </div>
 
                                             <button
@@ -594,6 +902,39 @@ export default function Admin() {
                     )}
                 </div>
             </div>
+
+            {previewImage && (
+
+  <div
+    onClick={() =>
+      setPreviewImage("")
+    }
+    className="
+      fixed
+      inset-0
+      bg-black/80
+      flex
+      items-center
+      justify-center
+      z-50
+      p-6
+    "
+  >
+
+    <img
+      src={previewImage}
+      alt="Preview"
+      className="
+        max-w-full
+        max-h-full
+        rounded-3xl
+        shadow-2xl
+      "
+    />
+
+  </div>
+
+)}
         </div>
     );
 }

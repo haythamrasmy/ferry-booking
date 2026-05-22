@@ -10,6 +10,8 @@ import JsBarcode from "jsbarcode";
 import {
   collection,
   addDoc,
+  deleteDoc,
+  updateDoc,
   getDocs,
   onSnapshot,
   doc,
@@ -26,28 +28,16 @@ export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
 
 
-  const seats = [
-    "A1",
-    "A2",
-    "A3",
-    "A4",
-    "B1",
-    "B2",
-    "B3",
-    "B4",
-    "C1",
-    "C2",
-    "C3",
-    "C4",
-  ];
+
 
 
 
 
   // Fixed invalid variable names
-  const [bookedSeats, setBookedSeats] = useState([]);
-  const lockedSeats = ["C1"];
-  const [selectedSeat, setSelectedSeat] = useState("");
+  const [
+    selectedTicketType,
+    setSelectedTicketType,
+  ] = useState("");
   const [name, setName] = useState("");
   const [passport, setPassport] = useState("");
   const [phone, setPhone] = useState("");
@@ -59,49 +49,53 @@ export default function FerryBookingWebsite() {
     useState(null);
   const [trips, setTrips] =
     useState([]);
+  const [selectedTrip, setSelectedTrip] =
+    useState(null);
+
+  const [
+    passportImage,
+    setPassportImage
+  ] = useState("");
+
+
+
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [senderName, setSenderName] = useState("");
-  const [senderPhone, setSenderPhone] = useState("");
 
-  const [receiverName, setReceiverName] = useState("");
-  const [receiverPhone, setReceiverPhone] = useState("");
 
- 
-  const [destination, setDestination] = useState("");
-
-  const [notes, setNotes] = useState("");
 
   const [selectedCargo, setSelectedCargo] =
-  useState({});
+    useState({});
 
-  const [shipmentPaymentImage, setShipmentPaymentImage] =
-    useState("");
+
   const [trackingNumber, setTrackingNumber] =
     useState("");
 
   const [trackedShipment, setTrackedShipment] =
     useState(null);
 
-    const cargoItems = [
-  "ثلاجه 11 قدم",
-  "ثلاجه 14 قدم",
-  "غساله اتوماتيك",
-  "بوتاجاز 4 عين",
-  "بوتاجاز 5 عين",
-  "بوتاجاز 6 عين",
-  "التكييف الصحراوي",
-  "شاشه 32 بوصه",
-  "شاشه 43",
-  "غرفة نوم كامله",
-  "طقم مكتب 3 كرسي",
-  "طقم مكتب 6 كرسي",
-  "سرير 120 إلى 100",
-  "مرتبة سرير متر",
-  "التروسيكل / توك توك صندوق",
-  "شنطه شخصيه",
-];
+  const cargoItems = [
+    "ثلاجه 11 قدم",
+    "ثلاجه 14 قدم",
+    "غساله اتوماتيك",
+    "بوتاجاز 4 عين",
+    "بوتاجاز 5 عين",
+    "بوتاجاز 6 عين",
+    "التكييف الصحراوي",
+    "شاشه 32 بوصه",
+    "شاشه 43",
+    "غرفة نوم كامله",
+    "طقم مكتب 3 كرسي",
+    "طقم مكتب 6 كرسي",
+    "سرير 120 إلى 100",
+    "مرتبة سرير متر",
+    "التروسيكل / توك توك صندوق",
+    "شنطه شخصيه",
+  ];
+
+
+
 
 
   const trackShipment = async () => {
@@ -142,36 +136,36 @@ export default function FerryBookingWebsite() {
     }
   };
 
-const updateCargoQuantity = (
-  item,
-  amount
-) => {
+  const updateCargoQuantity = (
+    item,
+    amount
+  ) => {
 
-  setSelectedCargo((prev) => {
+    setSelectedCargo((prev) => {
 
-    const current =
-      prev[item] || 0;
+      const current =
+        prev[item] || 0;
 
-    const updated =
-      current + amount;
+      const updated =
+        current + amount;
 
-    if (updated <= 0) {
+      if (updated <= 0) {
 
-      const copy = { ...prev };
+        const copy = { ...prev };
 
-      delete copy[item];
+        delete copy[item];
 
-      return copy;
-    }
+        return copy;
+      }
 
-    return {
-      ...prev,
-      [item]: updated,
-    };
+      return {
+        ...prev,
+        [item]: updated,
+      };
 
-  });
+    });
 
-};
+  };
 
   const fetchBookings = async () => {
     try {
@@ -181,15 +175,6 @@ const updateCargoQuantity = (
 
       const currentTime = Date.now();
 
-      const activeSeats = querySnapshot.docs
-        .filter((doc) => {
-          const data = doc.data();
-
-          return !data.expiresAt || data.expiresAt > currentTime;
-        })
-        .map((doc) => doc.data().seat);
-
-      setBookedSeats(activeSeats);
 
       const bookingData = querySnapshot.docs.map(
         (doc) => ({
@@ -213,6 +198,86 @@ const updateCargoQuantity = (
           const currentTime =
             Date.now();
 
+          snapshot.docs.forEach(
+            async (docSnap) => {
+
+              const data =
+                docSnap.data();
+
+              if (
+                data.status !==
+                "confirmed" &&
+                data.expiresAt &&
+                data.expiresAt <
+                currentTime
+              ) {
+
+                try {
+
+                  const trip =
+                    trips.find(
+                      (trip) =>
+                        trip.route ===
+                        data.trip
+                    );
+
+                  if (trip) {
+
+                    if (
+                      data.ticketType ===
+                      "Cabin"
+                    ) {
+
+                      await updateDoc(
+                        doc(
+                          db,
+                          "trips",
+                          trip.id
+                        ),
+                        {
+                          cabinTickets:
+                            trip.cabinTickets + 1,
+                        }
+                      );
+
+                    } else {
+
+                      await updateDoc(
+                        doc(
+                          db,
+                          "trips",
+                          trip.id
+                        ),
+                        {
+                          secondClassTickets:
+                            trip.secondClassTickets +
+                            1,
+                        }
+                      );
+
+                    }
+
+                  }
+
+                  await deleteDoc(
+                    doc(
+                      db,
+                      "bookings",
+                      docSnap.id
+                    )
+                  );
+
+                } catch (error) {
+
+                  console.log(error);
+
+                }
+
+              }
+
+            }
+          );
+
           const bookingData =
             snapshot.docs.map((doc) => ({
               id: doc.id,
@@ -221,22 +286,9 @@ const updateCargoQuantity = (
 
           setBookings(bookingData);
 
-          const activeSeats =
-            bookingData
-              .filter(
-                (booking) =>
-                  !booking.expiresAt ||
-                  booking.expiresAt >
-                  currentTime
-              )
-              .map(
-                (booking) =>
-                  booking.seat
-              );
 
-          setBookedSeats(
-            activeSeats
-          );
+
+
         }
       );
     const unsubscribeTrips =
@@ -250,13 +302,25 @@ const updateCargoQuantity = (
               id: doc.id,
               ...doc.data(),
             }))
-            .filter(
-              (trip) =>
+            .filter((trip) => {
+
+              const tripStillValid =
                 !trip.tripTimestamp ||
                 currentTime <
                 trip.tripTimestamp +
-                86400000
-            );
+                86400000;
+
+              const hasTickets =
+                trip.cabinTickets > 0 ||
+                trip.secondClassTickets >
+                0;
+
+              return (
+                tripStillValid &&
+                hasTickets
+              );
+
+            });
 
           console.log(tripsData);
 
@@ -286,7 +350,47 @@ const updateCargoQuantity = (
   },
 
     []);
+  useEffect(() => {
 
+    const bookingId =
+      localStorage.getItem(
+        "bookingId"
+      );
+
+    if (!bookingId) return;
+
+    const unsubscribe =
+      onSnapshot(
+        doc(
+          db,
+          "bookings",
+          bookingId
+        ),
+        (docSnap) => {
+
+          if (
+            docSnap.exists()
+          ) {
+
+            setUserBooking({
+              id: docSnap.id,
+              ...docSnap.data(),
+            });
+
+          } else {
+
+            localStorage.removeItem(
+              "bookingId"
+            );
+
+          }
+
+        }
+      );
+
+    return () => unsubscribe();
+
+  }, []);
 
   useEffect(() => {
     if (!userBooking) return;
@@ -383,7 +487,7 @@ const updateCargoQuantity = (
     );
 
     doc.text(
-      `Seat: ${booking.seat}`,
+      `Ticket Type: ${booking.ticketType}`,
       20,
       120
     );
@@ -393,6 +497,19 @@ const updateCargoQuantity = (
       20,
       140
     );
+
+    doc.setFontSize(16);
+
+    doc.setTextColor(0, 51, 153);
+
+    doc.text(
+      `Tracking ID: ${booking.trackingId}`,
+      20,
+      155
+    );
+
+    doc.setTextColor(0);
+    doc.setFontSize(14);
 
     doc.text(
       `Issued: ${new Date().toLocaleDateString()}`,
@@ -412,8 +529,8 @@ const updateCargoQuantity = (
           passport:
             booking.passport,
 
-          seat:
-            booking.seat,
+          ticketType:
+            booking.ticketType,
 
           trip:
             booking.trip,
@@ -476,6 +593,129 @@ const updateCargoQuantity = (
       25
     );
 
+    const trackingCanvas =
+      document.createElement(
+        "canvas"
+      );
+
+    JsBarcode(
+      trackingCanvas,
+      booking.trackingId,
+      {
+        format: "CODE128",
+      }
+    );
+
+    const trackingBarcode =
+      trackingCanvas.toDataURL(
+        "image/png"
+      );
+
+    doc.setFontSize(14);
+
+    doc.text(
+      "Tracking Barcode:",
+      20,
+      205
+    );
+
+    doc.addImage(
+      trackingBarcode,
+      "PNG",
+      20,
+      210,
+      120,
+      20
+    );
+
+    // Cargo Section
+
+    let cargoY = 165;
+
+    doc.setFontSize(16);
+
+    doc.text(
+      "Cargo Items:",
+      20,
+      cargoY
+    );
+
+    cargoY += 15;
+
+    if (booking.cargo) {
+
+      Object.entries(
+        booking.cargo
+      ).forEach(
+        ([item, qty]) => {
+
+          doc.setFontSize(12);
+
+          doc.text(
+            `${item} x ${qty}`,
+            20,
+            cargoY
+          );
+
+          cargoY += 12;
+
+          for (
+            let i = 1;
+            i <= qty;
+            i++
+          ) {
+
+            const cargoCanvas =
+              document.createElement(
+                "canvas"
+              );
+
+            JsBarcode(
+              cargoCanvas,
+              `${booking.trackingId} | ${item} | ${i}/${qty}`,
+              {
+                format: "CODE128",
+              }
+            );
+
+            const cargoBarcode =
+              cargoCanvas.toDataURL(
+                "image/png"
+              );
+
+            doc.text(
+              `${item} (${i}/${qty})`,
+              20,
+              cargoY
+            );
+
+            cargoY += 8;
+
+            doc.addImage(
+              cargoBarcode,
+              "PNG",
+              20,
+              cargoY,
+              120,
+              18
+            );
+
+            cargoY += 25;
+
+            if (cargoY > 250) {
+
+              doc.addPage();
+
+              cargoY = 20;
+
+            }
+
+          }
+
+        }
+      );
+
+    }
     doc.save(
       `${booking.ticketId}.pdf`
     );
@@ -483,81 +723,246 @@ const updateCargoQuantity = (
 
 
   const saveBooking = async () => {
-    if (!selectedSeat) {
-      alert("اختر مقعد أولًا");
+    if (!selectedTicketType) {
+
+      alert("اختر نوع التذكرة");
+
+      return;
+    }
+
+    if (!passportImage) {
+
+      alert(
+        "ارفع صورة جواز السفر"
+      );
+
+      return;
+    }
+
+    if (!paymentImage) {
+
+      alert(
+        "ارفع صورة التحويل"
+      );
+
       return;
     }
     try {
-      const querySnapshot = await getDocs(
-        collection(db, "bookings")
-      );
 
-
-      const currentTime = Date.now();
-
-      const alreadyBooked =
-        querySnapshot.docs.some((doc) => {
-          const data = doc.data();
-
-          return (
-            data.seat === selectedSeat &&
-            (!data.expiresAt ||
-              data.expiresAt > currentTime)
-          );
-        });
-
-      if (alreadyBooked) {
-        alert("هذا المقعد تم حجزه بالفعل");
-
-        return;
-      }
       const ticketId =
-        "WND-" +
+        "TKT-" +
         Math.floor(
-          100000 + Math.random() * 900000
+          100000 +
+          Math.random() * 900000
+        );
+      const tripDate =
+        new Date(
+          selectedTrip?.date
+        ).getTime();
+
+      const now = Date.now();
+
+      const daysLeft =
+        (tripDate - now) /
+        (1000 * 60 * 60 * 24);
+
+      let expirationTime;
+
+      if (daysLeft > 30) {
+
+        expirationTime =
+          7 * 24 * 60 * 60 * 1000;
+
+      } else if (
+        daysLeft > 14
+      ) {
+
+        expirationTime =
+          5 * 24 * 60 * 60 * 1000;
+
+      } else if (
+        daysLeft > 7
+      ) {
+
+        expirationTime =
+          3 * 24 * 60 * 60 * 1000;
+
+      } else if (
+        daysLeft > 3
+      ) {
+
+        expirationTime =
+          24 * 60 * 60 * 1000;
+
+      } else {
+
+        expirationTime =
+          2 * 60 * 60 * 1000;
+
+      }
+      const trackingId =
+        "TRK-" +
+        Math.floor(
+          100000 +
+          Math.random() * 900000
+        );
+      const updatedTrip =
+        trips.find(
+          (trip) =>
+            trip.id ===
+            selectedTrip.id
         );
 
+      if (
+        selectedTicketType ===
+        "Cabin"
+      ) {
+
+        if (
+          updatedTrip.cabinTickets <=
+          0
+        ) {
+
+          alert(
+            "الكبائن نفدت"
+          );
+
+          return;
+        }
+
+      } else {
+
+        if (
+          updatedTrip.secondClassTickets <=
+          0
+        ) {
+
+          alert(
+            "الدرجة الثانية نفدت"
+          );
+
+          return;
+        }
+
+      }
 
       const bookingRef =
         await addDoc(
           collection(db, "bookings"), {
+          trackingId,
           ticketId,
           name,
           passport,
+          passportImage,
           phone,
           email,
           paymentImage,
-          seat: selectedSeat,
-          trip: trips[0]?.route,
+          cargo: selectedCargo,
+          ticketType:
+            selectedTicketType,
+          trip: selectedTrip?.route,
           status: "pending",
           createdAt: new Date(),
-          expiresAt: Date.now() + 10 * 60 * 1000,
+          expiresAt:
+            Date.now() +
+            expirationTime,
         });
+      await addDoc(
+        collection(db, "shipments"),
+        {
+
+
+
+          trackingId,
+
+          ticketId,
+
+          senderName:
+            name,
+
+          receiverName:
+            name,
+
+          cargo:
+            selectedCargo,
+
+          destination:
+            selectedTrip?.route,
+
+          status:
+            "قيد التجهيز",
+
+          createdAt:
+            new Date(),
+
+        }
+      );
+
+      if (
+        selectedTicketType ===
+        "Cabin"
+      ) {
+
+        await updateDoc(
+          doc(
+            db,
+            "trips",
+            selectedTrip.id
+          ),
+          {
+            cabinTickets:
+              selectedTrip.cabinTickets -
+              1,
+          }
+        );
+
+      } else {
+
+        await updateDoc(
+          doc(
+            db,
+            "trips",
+            selectedTrip.id
+          ),
+          {
+            secondClassTickets:
+              selectedTrip.secondClassTickets -
+              1,
+          }
+        );
+
+      }
 
       setUserBooking({
         id: bookingRef.id,
-
+        trackingId,
         ticketId,
 
         name,
         passport,
+        cargo: selectedCargo,
 
-        seat: selectedSeat,
 
-        trip:
-          trips[0]?.route,
+        ticketType:
+          selectedTicketType,
+        trip: selectedTrip?.route,
 
         status: "pending",
       });
+      localStorage.setItem(
+        "bookingId",
+        bookingRef.id
+      );
 
       alert("تم حفظ الحجز بنجاح");
 
 
-      setBookedSeats([...bookedSeats, selectedSeat]);
       setName("");
       setPassport("");
       setPhone("");
       setEmail("");
+      setSelectedCargo({});
+      setSelectedTicketType("");
     } catch (error) {
 
       console.log(error);
@@ -566,66 +971,7 @@ const updateCargoQuantity = (
   };
 
 
-const saveShipment = async () => {
 
-  try {
-
-    const trackingId =
-      "WND-CARGO-" +
-      Math.floor(
-        100000 + Math.random() * 900000
-      );
-
-    await addDoc(
-      collection(db, "shipments"),
-      {
-        trackingId,
-
-        senderName,
-        senderPhone,
-
-        receiverName,
-        receiverPhone,
-
-        cargo: selectedCargo,
-
-        destination,
-
-        notes,
-
-        paymentImage:
-          shipmentPaymentImage,
-
-        status: "pending",
-
-        createdAt:
-          serverTimestamp(),
-      }
-    );
-
-    alert("تم تسجيل الشحنة بنجاح");
-
-    setSenderName("");
-    setSenderPhone("");
-
-    setReceiverName("");
-    setReceiverPhone("");
-
-    setDestination("");
-
-    setNotes("");
-
-    setSelectedCargo({});
-
-  } catch (error) {
-
-    console.log(error);
-
-    alert(error.message);
-
-  }
-
-};
   const adminLogin = async () => {
     try {
       await signInWithEmailAndPassword(
@@ -657,13 +1003,55 @@ const saveShipment = async () => {
         dir="rtl"
         className="
     relative
+    min-h-screen
     overflow-hidden
-    bg-[#edf3f9]
+    flex
+    items-center
   "
       >
+        {/* Video Background */}
+
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="
+    absolute
+    inset-0
+    w-full
+    h-full
+    object-cover
+  "
+        >
+
+          <source
+            src="/hero-video.mp4"
+            type="video/mp4"
+          />
+
+        </video>
+
+        {/* Dark Overlay */}
+
+        <div
+          className="
+    absolute
+    inset-0
+    bg-black/45
+  "
+        />
 
         {/* Top Area */}
-        <div className="max-w-[1500px] mx-auto px-6 pt-4 relative z-20">
+        <div className="
+  max-w-[1500px]
+  mx-auto
+  px-6
+  pt-4
+  relative
+  z-20
+  w-full
+">
 
           {/* Navbar */}
           <div className="flex items-start justify-between">
@@ -675,7 +1063,7 @@ const saveShipment = async () => {
           md:flex
           items-center
           gap-14
-          text-blue-950
+text-white
           font-bold
           text-[22px]
           pt-2
@@ -734,14 +1122,13 @@ const saveShipment = async () => {
             {/* Small Top Banner */}
             <div
               className="
-         bg-white/55
-backdrop-blur-xl
+bg-white/10backdrop-blur-xl
 shadow-md
 rounded-[32px]
 px-5
 py-3
 border
-border-white/40
+border-white/20
           flex
           items-center
           gap-4
@@ -765,17 +1152,17 @@ w-10
 
               <div
                 className="
-            text-blue-950
+text-white
             font-black
             text-xl
             leading-tight
           "
               >
-                هيئة وادي النيل
+               3A   international
+
                 <br />
 
                 <span className="text-base font-bold">
-                  للملاحة النهرية
                 </span>
 
               </div>
@@ -787,8 +1174,9 @@ w-10
           {/* Main Hero */}
           <div
             className="
-        grid
-        md:grid-cols-[1fr_1.4fr]
+       flex
+items-center
+justify-center
         gap-16
         items-center
         pt-2
@@ -797,7 +1185,9 @@ w-10
           >
 
             {/* Right Content */}
-            <div className="text-center md:text-right">
+            <div className="text-center
+max-w-4xl
+mx-auto">
 
               {/* Big Logos */}
               <div
@@ -852,8 +1242,7 @@ w-10
 md:text-[58px]
             font-black
             leading-[1.05]
-            text-blue-950
-mb-4
+text-whitemb-4
 mt-2          "
               >
                 هيئة وادي النيل
@@ -866,8 +1255,7 @@ mt-2          "
                 className="
 text-[20px]
 mt-3          
-  text-blue-900/70
-mb-14
+text-white/80mb-14
           "
               >
                 ثمرة التكامل بين شطري وادي النيل        </p>
@@ -897,8 +1285,8 @@ mb-14
               {/* CTA */}
               <button
                 className="
-            bg-yellow-400
-            hover:bg-yellow-300
+           bg-white
+hover:bg-slate-200
             text-black
            px-12
 py-3
@@ -915,34 +1303,6 @@ text-[24px]
 
             </div>
 
-            {/* Ferry Image */}
-            <div>
-
-              <div
-                className="
-            rounded-[40px]
-            overflow-hidden
-            border-[6px]
-            border-white
-            shadow-2xl
-          "
-              >
-
-                <img
-                  src="/hero.jpg"
-                  alt="Ferry"
-                  className="
-              w-full
-              h-[520px]
-              object-cover
-              object-center
-              scale-[1.02]
-            "
-                />
-
-              </div>
-
-            </div>
 
           </div>
 
@@ -1004,119 +1364,213 @@ text-[24px]
         </div>
       </section>
 
-      {/* Trips */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold">الرحلات المتاحة</h2>
-          <span className="text-slate-500">الحالة المباشرة</span>
-        </div>
 
-        <div className="grid gap-6">
-          {trips.map((trip) => (
-            <div
-              key={trip.id}
-              className="bg-white rounded-3xl shadow-md p-6 grid md:grid-cols-5 gap-6 items-center"
-            >
-              <div>
-                <p className="text-slate-500 text-sm">الرحلة</p>
-                <h3 className="font-bold text-xl">{trip.route}</h3>
-              </div>
+      {isAdmin && (
 
-              <div>
-                <p className="text-slate-500 text-sm">التاريخ</p>
-                <h3 className="font-semibold">{trip.date}</h3>
-              </div>
+        <section className="max-w-5xl mx-auto px-6 py-16">
 
-              <div>
-                <p className="text-slate-500 text-sm">موعد التحرك</p>
-                <h3 className="font-semibold">{trip.time}</h3>
-              </div>
+        </section>
+      )}
 
-              <div>
-                <p className="text-slate-500 text-sm">المقاعد المتبقية</p>
-                <h3 className="font-semibold text-green-600">
-                  {
-                    trip.seats -
-                    bookings.filter(
-                      (booking) =>
-                        booking.trip ===
-                        trip.route
-                    ).length
-                  }                          </h3>
-              </div>
+      <section className="max-w-5xl mx-auto px-6 py-16">
 
-              <div className="flex items-center justify-between md:justify-end gap-4">
-                <div>
-                  <p className="text-slate-500 text-sm">السعر</p>
-                  <h3 className="font-bold text-lg">{trip.price}</h3>
+        <div className="bg-white rounded-3xl shadow-xl p-8">
+
+          <h2 className="text-3xl font-bold mb-8">
+            الرحلات المتاحة
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-6">
+
+            {trips.map((trip) => (
+
+              <div
+                key={trip.id}
+                className={`
+            border
+            rounded-3xl
+            p-6
+            transition
+            cursor-pointer
+            ${selectedTrip?.id ===
+                    trip.id
+                    ? "border-blue-700 bg-blue-50"
+                    : "bg-slate-50"
+                  }
+          `}
+                onClick={() =>
+                  setSelectedTrip(trip)
+                }
+              >
+
+                <h3 className="text-2xl font-bold mb-4">
+                  {trip.route}
+                </h3>
+                <p className="text-slate-500">
+                  التاريخ:
+                  {trip.date}
+                </p>
+
+                <p className="text-slate-500">
+                  الوقت:
+                  {trip.time}
+                </p>
+                <div className="space-y-3 text-lg">
+
+                  <p>
+                    عدد تذاكر الدرجة الثانية:
+                    {" "}
+                    {trip.secondClassTickets || 0}
+                  </p>
+
+                  <p>
+                    عدد الكبائن:
+                    {" "}
+                    {trip.cabinTickets || 0}
+                  </p>
+
+                  <p
+                    className={
+                      trip.cabinTickets <= 3
+                        ? "text-red-600 font-bold"
+                        : "text-green-700"
+                    }
+                  >
+                    المتبقي كابينة:
+                    {trip.cabinTickets}
+                  </p>
+
+                  <p
+                    className={
+                      trip.secondClassTickets <= 5
+                        ? "text-red-600 font-bold"
+                        : "text-green-700"
+                    }
+                  >
+                    المتبقي درجة ثانية:
+                    {trip.secondClassTickets}
+                  </p>
+                  <p>
+                    كابينة:
+                    {trip.cabinPrice} ج.م
+                  </p>
+
+                  <p>
+                    الدرجة الثانية:
+                    {trip.secondClassPrice} ج.م
+                  </p>
                 </div>
 
-
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
 
-      {/* Seat Selection */}
-      <section className="bg-white py-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold">اختر مقعدك</h2>
-            <p className="text-red-600 font-bold mt-3 text-sm">
-              ⚠️ بعد اختيار المقعد وإتمام الحجز سيتم حجزه لمدة 10 دقائق فقط،
-              وإذا لم يتم تأكيد الدفع سيصبح متاحًا مرة أخرى.
-            </p>
-            <p className="text-blue-700 font-bold mt-2">
-              المقعد المختار: {selectedSeat || "لا يوجد"}
-            </p>
-            <div className="flex gap-4 text-sm flex-wrap">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-500 rounded"></div>
-                <span>متاح</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-yellow-400 rounded"></div>
-                <span>مقفول مؤقتًا</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-red-500 rounded"></div>
-                <span>محجوز</span>
-              </div>
-            </div>
           </div>
 
-          <div className="bg-slate-100 rounded-3xl p-8 shadow-inner">
-            <div className="grid grid-cols-4 gap-4">
-              {seats.map((seat) => {
-                const isBooked = bookedSeats.includes(seat);
-                const isLocked = lockedSeats.includes(seat);
+        </div>
 
-                return (
-                  <button
-                    key={seat}
-                    onClick={() => setSelectedSeat(seat)}
-                    disabled={isBooked || isLocked}
-                    className={`rounded-2xl py-5 font-bold transition ${isBooked
-                      ? "bg-red-500 text-white cursor-not-allowed"
-                      : isLocked
-                        ? "bg-yellow-400 text-black cursor-not-allowed"
-                        : selectedSeat === seat
-                          ? "bg-blue-700 text-white scale-105"
-                          : "bg-green-500 hover:scale-105 text-white"
-                      }`}
-                  >
-                    {seat}
-                  </button>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-16">
+
+        <div className="grid md:grid-cols-2 gap-6">
+
+          {/* Cabin */}
+
+          <div
+            onClick={() => {
+
+              if (
+                selectedTrip?.cabinTickets <=
+                0
+              ) {
+                alert(
+                  "الكبائن غير متاحة"
                 );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
+                return;
+              }
 
+              setSelectedTicketType(
+                "Cabin"
+              );
+
+            }}
+            className={`
+        rounded-3xl
+        p-8
+        cursor-pointer
+        transition
+        shadow-xl
+        ${selectedTicketType ===
+                "Cabin"
+                ? "bg-blue-700 text-white"
+                : "bg-white"
+              }
+      `}
+          >
+
+            <h2 className="text-3xl font-bold mb-4">
+              كابينة            </h2>
+
+            <p className="text-2xl font-bold">
+
+              {
+                selectedTrip?.cabinPrice
+              } ج.م
+
+            </p>
+
+          </div>
+
+          {/* Second Class */}
+
+          <div
+            onClick={() => {
+
+              if (
+                selectedTrip?.secondClassTickets <=
+                0
+              ) {
+                alert(
+                  "الدرجة الثانية غير متاحة"
+                );
+                return;
+              }
+
+              setSelectedTicketType(
+                "Second Class"
+              );
+
+            }}
+            className={`
+        rounded-3xl
+        p-8
+        cursor-pointer
+        transition
+        shadow-xl
+        ${selectedTicketType ===
+                "Second Class"
+                ? "bg-blue-700 text-white"
+                : "bg-white"
+              }
+      `}
+          >
+
+            <h2 className="text-3xl font-bold mb-4">
+              الدرجة الثانية            </h2>
+
+            <p className="text-2xl font-bold">
+
+              {
+                selectedTrip?.secondClassPrice
+              } ج.م
+
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
       {/* Booking Form */}
       <section className="max-w-5xl mx-auto px-6 py-16">
         <div className="bg-white rounded-3xl shadow-xl p-8">
@@ -1155,6 +1609,129 @@ text-[24px]
             />
           </div>
 
+          <div className="mt-10">
+
+            <h2 className="text-3xl font-bold mb-8">
+              البضائع المصاحبة
+            </h2>
+
+            <div className="grid md:grid-cols-2 gap-4">
+
+              {cargoItems.map((item) => (
+
+                <div
+                  key={item}
+                  className="
+          border
+          rounded-2xl
+          p-4
+          flex
+          items-center
+          justify-between
+        "
+                >
+
+                  <span className="font-semibold">
+                    {item}
+                  </span>
+
+                  <div className="flex items-center gap-3">
+
+                    <button
+                      onClick={() =>
+                        updateCargoQuantity(
+                          item,
+                          -1
+                        )
+                      }
+                      className="
+              bg-red-500
+              text-white
+              w-8
+              h-8
+              rounded-full
+            "
+                    >
+                      -
+                    </button>
+
+                    <span className="font-bold text-lg">
+                      {selectedCargo[item] || 0}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        updateCargoQuantity(
+                          item,
+                          1
+                        )
+                      }
+                      className="
+              bg-green-600
+              text-white
+              w-8
+              h-8
+              rounded-full
+            "
+                    >
+                      +
+                    </button>
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+          <div className="mt-8">
+
+            <label className="block mb-3 font-semibold">
+              ارفع صورة جواز السفر
+            </label>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+
+                const file =
+                  e.target.files[0];
+
+                const reader =
+                  new FileReader();
+
+                reader.onloadend =
+                  () => {
+
+                    setPassportImage(
+                      reader.result
+                    );
+
+                  };
+
+                if (file) {
+
+                  reader.readAsDataURL(
+                    file
+                  );
+
+                }
+
+              }}
+              className="
+      border
+      rounded-2xl
+      p-4
+      w-full
+    "
+            />
+
+          </div>
+
           <div className="mt-8">
             <label className="block mb-3 font-semibold">
               ارفع صورة التحويل أو الدفع
@@ -1180,18 +1757,95 @@ text-[24px]
             />
           </div>
 
+
+
           <div className="mt-10 flex items-center justify-between flex-wrap gap-6">
             <div>
               <p className="text-slate-500">طريقة الدفع</p>
-              <h3 className="font-bold text-xl">InstaPay / Paymob</h3>
-            </div>
+              <div className="flex items-center gap-4">
+
+                <img
+                  src="/instapay.png"
+                  alt="InstaPay"
+                  className="w-16"
+                />
+
+                <div>
+
+                  <h3 className="font-bold text-xl">
+                    InstaPay
+                  </h3>
+
+                  <p className="text-slate-500">
+                    الدفع عبر إنستاباي فقط
+                  </p>
+
+                </div>
+
+              </div>            </div>
             <button
               onClick={saveBooking}
-              className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg transition"
-            >
+              disabled={
+                !selectedTrip ||
+                !selectedTicketType ||
+                !name ||
+                !passport ||
+                !phone
+              }
+              className={`
+  px-8
+  py-4
+  rounded-2xl
+  font-semibold
+  text-lg
+  shadow-lg
+  transition
+  ${!selectedTrip ||
+                  !selectedTicketType ||
+                  !name ||
+                  !passport ||
+                  !phone
+                  ? "bg-slate-400 cursor-not-allowed"
+                  : "bg-blue-700 hover:bg-blue-800 text-white"
+                }
+`}            >
               تأكيد الحجز
             </button>
+            {userBooking &&
+              userBooking.status !==
+              "confirmed" &&
+              userBooking.expiresAt && (
 
+                <div
+                  className="
+      bg-yellow-100
+      border
+      border-yellow-400
+      text-yellow-900
+      p-4
+      rounded-2xl
+      mt-6
+      font-bold
+    "
+                >
+
+                  ينتهي الحجز خلال:
+                  {" "}
+
+                  {Math.max(
+                    0,
+                    Math.floor(
+                      (
+                        userBooking.expiresAt -
+                        Date.now()
+                      ) /
+                      (1000 * 60 * 60)
+                    )
+                  )} ساعة
+
+                </div>
+
+              )}
             {userBooking?.status ===
               "confirmed" && (
                 <button
@@ -1210,181 +1864,7 @@ text-[24px]
         </div>
 
       </section>
-      {/* Cargo Booking */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
-        <div className="bg-white rounded-3xl shadow-xl p-8">
 
-          <h2 className="text-3xl font-bold mb-8">
-            حجز شحنة
-          </h2>
-
-          <div className="grid md:grid-cols-2 gap-6">
-
-            <input
-              type="text"
-              placeholder="اسم المرسل"
-              value={senderName}
-              onChange={(e) =>
-                setSenderName(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
-
-            <input
-              type="text"
-              placeholder="رقم المرسل"
-              value={senderPhone}
-              onChange={(e) =>
-                setSenderPhone(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
-
-            <input
-              type="text"
-              placeholder="اسم المستلم"
-              value={receiverName}
-              onChange={(e) =>
-                setReceiverName(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
-
-            <input
-              type="text"
-              placeholder="رقم المستلم"
-              value={receiverPhone}
-              onChange={(e) =>
-                setReceiverPhone(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
-
-           
-
-           <div className="md:col-span-2 mt-6">
-
-  <h3 className="text-2xl font-bold mb-6 text-blue-900">
-    البضائع المشحونة
-  </h3>
-
-  <div className="space-y-4">
-
-    {cargoItems.map((item) => (
-
-      <div
-        key={item}
-        className="
-          flex
-          items-center
-          justify-between
-          bg-slate-50
-          rounded-2xl
-          p-4
-          border
-        "
-      >
-
-        <span className="font-bold text-lg">
-          {item}
-        </span>
-
-        <div className="flex items-center gap-4">
-
-          <button
-            type="button"
-            onClick={() =>
-              updateCargoQuantity(item, -1)
-            }
-            className="
-              w-10
-              h-10
-              rounded-full
-              bg-red-500
-              text-white
-              text-xl
-              font-bold
-            "
-          >
-            -
-          </button>
-
-          <span className="text-xl font-bold w-8 text-center">
-            {selectedCargo[item] || 0}
-          </span>
-
-          <button
-            type="button"
-            onClick={() =>
-              updateCargoQuantity(item, 1)
-            }
-            className="
-              w-10
-              h-10
-              rounded-full
-              bg-green-600
-              text-white
-              text-xl
-              font-bold
-            "
-          >
-            +
-          </button>
-
-        </div>
-
-      </div>
-
-    ))}
-
-  </div>
-
-</div>
-
-            
-            <input
-              type="text"
-              placeholder="الوجهة"
-              value={destination}
-              onChange={(e) =>
-                setDestination(e.target.value)
-              }
-              className="border rounded-2xl p-4 outline-none"
-            />
-
-          </div>
-
-          <textarea
-            placeholder="ملاحظات إضافية"
-            value={notes}
-            onChange={(e) =>
-              setNotes(e.target.value)
-            }
-            className="border rounded-2xl p-4 outline-none w-full mt-6 min-h-[120px]"
-          />
-
-
-          <button
-            onClick={saveShipment}
-            className="
-    bg-blue-700
-    hover:bg-blue-800
-    text-white
-    px-8
-    py-4
-    rounded-2xl
-    font-semibold
-    text-lg
-    shadow-lg
-    transition
-    mt-6
-  "
-          >
-            تسجيل الشحنة
-          </button>
-
-        </div>
-      </section>
 
       {/* Shipment Tracking */}
       <section className="max-w-4xl mx-auto px-6 py-16">
@@ -1460,18 +1940,18 @@ text-[24px]
 
                 <div className="md:col-span-2">
 
-  <strong>البضائع:</strong>
+                  <strong>البضائع:</strong>
 
-  <div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-2">
 
-    {trackedShipment.cargo &&
-      Object.entries(
-        trackedShipment.cargo
-      ).map(([item, qty]) => (
+                    {trackedShipment.cargo &&
+                      Object.entries(
+                        trackedShipment.cargo
+                      ).map(([item, qty]) => (
 
-        <div
-          key={item}
-          className="
+                        <div
+                          key={item}
+                          className="
             flex
             justify-between
             bg-white
@@ -1479,21 +1959,21 @@ text-[24px]
             rounded-xl
             p-3
           "
-        >
+                        >
 
-          <span>{item}</span>
+                          <span>{item}</span>
 
-          <span>
-            {qty} قطعة
-          </span>
+                          <span>
+                            {qty} قطعة
+                          </span>
 
-        </div>
+                        </div>
 
-      ))}
+                      ))}
 
-  </div>
+                  </div>
 
-</div>
+                </div>
 
                 <p>
                   <strong>الوجهة:</strong>
