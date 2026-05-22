@@ -700,7 +700,7 @@ export default function FerryBookingWebsite() {
 
             JsBarcode(
               cargoCanvas,
-              `${booking.trackingId}_${i}-${qty}`,
+             `${booking.trackingId}-${i}`,
               {
                 format: "CODE128",
               }
@@ -1125,35 +1125,35 @@ border-white
 
               <a
                 href="#"
-                className="hover:text-blue-500 transition"
+                className="hover:text-black-500 transition"
               >
                 حجز رحلة
               </a>
 
               <a
                 href="#"
-                className="hover:text-blue-500 transition"
+                className="hover:text-black-500 transition"
               >
                 حجوزاتي
               </a>
 
               <a
                 href="#"
-                className="hover:text-blue-500 transition"
+                className="hover:text-black-500 transition"
               >
                 الشحن
               </a>
 
               <a
                 href="#"
-                className="hover:text-blue-500 transition"
+                className="hover:text-black-500 transition"
               >
                 تتبع شحنتك
               </a>
 
               <a
                 href="#"
-                className="hover:text-blue-500 transition"
+                className="hover:text-black-500 transition"
               >
                 تواصل معنا
               </a>
@@ -1333,7 +1333,7 @@ text-white/80 mb-14          "
 
                 <div className="h-[2px] w-32 bg-blue-600" />
 
-                <div className="text-5xl text-blue-700">
+                <div className="text-5xl text-black-700">
                   ⚓
                 </div>
 
@@ -1461,8 +1461,8 @@ mt-6 md:-mt-24
           rounded-2xl
           p-4
           outline-none
-          text-blue
-placeholder:text-blue/50        "
+          text-black
+placeholder:text-black/50        "
             />
 
 

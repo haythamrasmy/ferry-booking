@@ -130,48 +130,9 @@ export default function Admin() {
         };
     }, []);
 
-   useEffect(() => {
-
-  const scanner =
-    new Html5QrcodeScanner(
-      "reader",
-      {
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-        fps: 5,
-      },
-      false
-    );
-
-  scanner.render(
-
-    (decodedText) => {
-
-      setScannedCode(
-        decodedText
-      );
-
-    },
-
-    (error) => {
-      console.log(error);
-    }
-
-  );
-
-  return () => {
-    scanner.clear();
-  };
-
-}, []);
 
 
-    };
-
-
-    const fetchBookings = () => {
+const fetchBookings = () => {
 
     return onSnapshot(
         collection(db, "bookings"),
@@ -212,6 +173,53 @@ export default function Admin() {
     );
 
 };
+
+
+ useEffect(() => {
+
+  if (!isAdmin) return;
+
+  const readerElement =
+    document.getElementById(
+      "reader"
+    );
+
+  if (!readerElement) return;
+
+  const scanner =
+    new Html5QrcodeScanner(
+      "reader",
+      {
+        qrbox: {
+          width: 250,
+          height: 250,
+        },
+        fps: 5,
+      },
+      false
+    );
+
+  scanner.render(
+
+    (decodedText) => {
+
+      setScannedCode(
+        decodedText
+      );
+
+    },
+
+    (error) => {
+      console.log(error);
+    }
+
+  );
+
+  return () => {
+    scanner.clear();
+  };
+
+}, [isAdmin]);
 
     const confirmBooking = async (id) => {
 
@@ -1040,4 +1048,6 @@ export default function Admin() {
 </div>
 
         </div>
+
     );
+};
