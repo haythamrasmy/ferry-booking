@@ -29,7 +29,7 @@ import {
 import ArabicReshaper
   from "arabic-reshaper";
 
- 
+
 
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
@@ -64,10 +64,10 @@ export default function FerryBookingWebsite() {
     setPassportImage
   ] = useState("");
 
-const [
-  scannedCode,
-  setScannedCode
-] = useState("");
+  const [
+    scannedCode,
+    setScannedCode
+  ] = useState("");
 
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -1344,6 +1344,18 @@ text-white/80 mb-14          "
               {/* CTA */}
               <motion.button
 
+                onClick={() => {
+
+                  document
+                    .getElementById(
+                      "booking-section"
+                    )
+                    ?.scrollIntoView({
+                      behavior: "smooth",
+                    });
+
+                }}
+
                 whileHover={{
                   scale: 1.06,
                 }}
@@ -1416,7 +1428,7 @@ text-white/80 mb-14          "
     max-w-7xl
     mx-auto
     px-6
-    -mt-24
+mt-6 md:-mt-24
   "
       >
 
@@ -1449,33 +1461,29 @@ text-white/80 mb-14          "
           rounded-2xl
           p-4
           outline-none
-          text-white
-          placeholder:text-white/60
-        "
+          text-blue
+placeholder:text-blue/50        "
             />
+
 
             <select
               className="
-          bg-white/10
-          border
-          border-white/20
-          rounded-2xl
-          p-4
-          outline-none
-          text-white
-        "
+    bg-white
+    border
+    border-white/20
+    rounded-2xl
+    p-4
+    outline-none
+    text-black
+  "
             >
 
-              <option className="text-black">
-                راكب واحد
+              <option>
+                السد العالي - حلفا
               </option>
 
-              <option className="text-black">
-                راكبين
-              </option>
-
-              <option className="text-black">
-                3 ركاب
+              <option>
+                حلفا - السد العالي
               </option>
 
             </select>
@@ -1730,7 +1738,7 @@ text-white/80 mb-14          "
 
       </section>
       {/* Booking Form */}
-      <section className="max-w-5xl mx-auto px-6 py-16">
+      <section id="booking-section" className="max-w-5xl mx-auto px-6 py-16">
         <div className="bg-white rounded-3xl shadow-xl p-8">
           <h2 className="text-3xl font-bold mb-8">بيانات الراكب</h2>
 
