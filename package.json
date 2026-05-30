@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.2.4",
     "arabic-persian-reshaper": "^1.0.1",
     "arabic-reshaper": "^1.1.0",
+    "bidi-js": "^1.0.3",
     "firebase": "^12.13.0",
     "framer-motion": "^12.40.0",
     "html5-qrcode": "^2.3.8",

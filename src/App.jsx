@@ -1,11 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { db, auth } from "./firebase";
-import jsPDF from "jspdf";
 
-import QRCode from "qrcode";
-
-import JsBarcode from "jsbarcode";
 
 import { motion } from "framer-motion";
 import cairoFont from "../public/fonts/Cairo-Regular.ttf";
@@ -26,10 +22,12 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 
-import ArabicReshaper
-  from "arabic-reshaper";
 
-import logo from "./assets/logo.png";
+
+import {
+  generateTicketPDF
+} from "./utils/generateTicketPDF";
+
 
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
@@ -307,12 +305,20 @@ export default function FerryBookingWebsite() {
         (snapshot) => {
           const currentTime = Date.now();
 
+
           const tripsData = snapshot.docs
             .map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }))
-           
+            .filter((trip) => {
+              const tripDateTime = new Date(
+                `${trip.date}T${trip.time || "00:00"}`
+              ).getTime();
+
+              return tripDateTime > currentTime;
+            });
+
 
           console.log(tripsData);
 
@@ -410,340 +416,50 @@ export default function FerryBookingWebsite() {
     return () => unsubscribe();
   }, [userBooking]);
 
-  const generateTicketPDF = async (
-    booking
-  ) => {
-    const doc = new jsPDF();
 
-    doc.addFont(
-      cairoFont,
-      "Cairo",
-      "normal"
-    );
+  const sendTelegramNotification = async (bookingData) => {
 
-    doc.setFont(
-      "Cairo"
-    );
+    const BOT_TOKEN = "8744549066:AAGT0Z3eszoSGPOReK9SrpuKRJBs5lg9nn8";
 
-    doc.setDrawColor(0, 51, 102);
+    const CHAT_ID = "-5205180446";
 
-    doc.rect(10, 10, 190, 277);
+    const message = `
+🔔 حجز جديد
 
-    doc.setFontSize(28);
+👤 الاسم: ${bookingData.name}
 
-    doc.setTextColor(0, 51, 102);
+📞 الهاتف: ${bookingData.phone}
 
-    doc.setFontSize(22);
+🛂 الجواز: ${bookingData.passport}
 
-    const logo = "/logo.png";
+🚢 الرحلة: ${bookingData.trip}
 
-    doc.addImage(
-  logo,
-  "PNG",
-  15,
-  10,
-  40,
-  40
-);
+🎫 نوع التذكرة: ${bookingData.ticketType}
+`;
 
-    doc.text(
-      "Wadi El Nile Ferry Ticket",
-      20,
-      20
-    );
+    try {
 
-    doc.setFontSize(14);
-
-    doc.setTextColor(120);
-
-    doc.setFontSize(60);
-
-    doc.text(
-      "WNF",
-      70,
-      160,
-      {
-        angle: 45,
-      }
-    );
-
-    doc.setTextColor(0);
-    doc.setFontSize(14);
-
-    doc.text(
-      `Ticket ID: ${booking.ticketId}`,
-      20,
-      60
-    );
-
-    doc.text(
-      `Passenger: ${booking.name}`,
-      20,
-      80
-    );
-
-    doc.text(
-      `Passport: ${booking.passport}`,
-      20,
-      100
-    );
-
-    doc.text(
-      `Ticket Type: ${booking.ticketType}`,
-      20,
-      120
-    );
-
-    doc.text(
-      `Trip: ${booking.trip}`,
-      20,
-      140
-    );
-
-    doc.setFontSize(16);
-
-    doc.setTextColor(0, 51, 153);
-
-    doc.text(
-      `Tracking ID: ${booking.trackingId}`,
-      20,
-      155
-    );
-
-    doc.setTextColor(0);
-    doc.setFontSize(14);
-
-    doc.text(
-      `Issued: ${new Date().toLocaleDateString()}`,
-      20,
-      160
-    );
-
-    const qrData =
-      await QRCode.toDataURL(
-        JSON.stringify({
-          ticketId:
-            booking.ticketId,
-
-          name:
-            booking.name,
-
-          passport:
-            booking.passport,
-
-          ticketType:
-            booking.ticketType,
-
-          trip:
-            booking.trip,
-
-          status:
-            booking.status,
-        }));
-
-    doc.addImage(
-      qrData,
-      "PNG",
-      140,
-      30,
-      50,
-      50
-    );
-    localStorage.removeItem(
-      "pendingBooking"
-    );
-    const canvas =
-      document.createElement("canvas");
-
-    JsBarcode(
-      canvas,
-      booking.ticketId,
-      {
-        format: "CODE128",
-      }
-    );
-
-    const barcode =
-      canvas.toDataURL("image/png");
-
-    doc.line(20, 170, 190, 170);
-
-    doc.setFontSize(11);
-
-    doc.text(
-      "Please arrive 2 hours before departure.",
-      20,
-      185
-    );
-
-    doc.text(
-      "Keep this ticket during the whole trip.",
-      20,
-      195
-    );
-
-    doc.text(
-      "Wadi El Nile River Transport Authority",
-      20,
-      260
-    );
-
-    doc.addImage(
-      barcode,
-      "PNG",
-      20,
-      120,
-      150,
-      25
-    );
-
-    const trackingCanvas =
-      document.createElement(
-        "canvas"
-      );
-
-    JsBarcode(
-      trackingCanvas,
-      booking.trackingId,
-      {
-        format: "CODE128",
-      }
-    );
-
-    const trackingBarcode =
-      trackingCanvas.toDataURL(
-        "image/png"
-      );
-
-    doc.setFontSize(14);
-
-    doc.text(
-      "Tracking Barcode:",
-      20,
-      205
-    );
-
-    doc.addImage(
-      trackingBarcode,
-      "PNG",
-      20,
-      210,
-      120,
-      20
-    );
-
-    // Cargo Section
-
-    let cargoY = 165;
-
-    doc.setFontSize(16);
-
-    doc.text(
-      "Cargo Items:",
-      20,
-      cargoY
-    );
-
-    cargoY += 15;
-
-    if (booking.cargo) {
-
-      Object.entries(
-        booking.cargo
-      ).forEach(
-        ([item, qty]) => {
-
-          doc.setFontSize(12);
-
-          const safeText =
-            String(item || "");
-
-          const safeY =
-            typeof cargoY === "number"
-              ? cargoY
-              : 20;
-
-          doc.text(
-            safeText
-            ,
-            20,
-            safeY
-          );
-          cargoY += 12;
-
-          for (
-            let i = 1;
-            i <= qty;
-            i++
-          ) {
-
-            const cargoCanvas =
-              document.createElement(
-                "canvas"
-              );
-
-            JsBarcode(
-              cargoCanvas,
-              `${booking.trackingId}-${i}`,
-              {
-                format: "CODE128",
-              }
-            );
-
-            const cargoBarcode =
-              cargoCanvas.toDataURL(
-                "image/png"
-              );
-
-            doc.text(
-              ArabicReshaper.convertArabic(
-                `${item} (${i}/${qty})`
-              ),
-              20,
-              cargoY
-            );
-            cargoY += 8;
-
-            doc.addImage(
-              cargoBarcode,
-              "PNG",
-              20,
-              cargoY,
-              120,
-              18
-            );
-
-            cargoY += 24;
-
-            doc.text(
-              ArabicReshaper.convertArabic(
-                item
-              ),
-              20,
-              cargoY
-            );
-
-            cargoY += 12;
-
-            if (cargoY > 250) {
-
-              doc.addPage();
-
-              cargoY = 20;
-
-            }
-
-          }
-
+      await fetch(
+        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: CHAT_ID,
+            text: message,
+          }),
         }
       );
 
-    }
-    doc.save(
-      `${booking.ticketId}.pdf`
-    );
-  };
+    } catch (error) {
 
+      console.log(error);
+
+    }
+
+  };
 
   const saveBooking = async () => {
     if (!selectedTicketType) {
@@ -883,8 +599,8 @@ export default function FerryBookingWebsite() {
           cargo: selectedCargo,
           ticketType:
             selectedTicketType,
-trip: selectedTrip?.route,
-tripId: selectedTrip?.id,
+          trip: selectedTrip?.route,
+          tripId: selectedTrip?.id,
           status: "pending",
           createdAt: new Date(),
           expiresAt:
@@ -922,7 +638,7 @@ tripId: selectedTrip?.id,
         }
       );
 
-    
+
 
       setUserBooking({
         id: bookingRef.id,
@@ -936,8 +652,8 @@ tripId: selectedTrip?.id,
 
         ticketType:
           selectedTicketType,
-trip: selectedTrip?.route,
-tripId: selectedTrip?.id,
+        trip: selectedTrip?.route,
+        tripId: selectedTrip?.id,
         status: "pending",
       });
       localStorage.setItem(
@@ -945,6 +661,14 @@ tripId: selectedTrip?.id,
         bookingRef.id
       );
 
+
+      await sendTelegramNotification({
+        name,
+        phone,
+        passport,
+        trip: selectedTrip?.route,
+        ticketType: selectedTicketType,
+      });
       alert("تم حفظ الحجز بنجاح");
 
 
@@ -962,6 +686,26 @@ tripId: selectedTrip?.id,
   };
 
 
+
+  const downloadTicket = async () => {
+    try {
+
+      // Generate and download the PDF
+      generateTicketPDF(userBooking);
+
+      // Mark the ticket as downloaded
+      await updateDoc(
+        doc(db, "bookings", userBooking.id),
+        {
+          ticketDownloaded: true,
+        }
+      );
+
+    } catch (error) {
+      console.log(error);
+      alert("حدث خطأ أثناء تحميل التذكرة");
+    }
+  };
 
   const adminLogin = async () => {
     try {
@@ -1564,40 +1308,40 @@ placeholder:text-black/50        "
 
                   <p
                     className={
-(
-  trip.remainingCabinTickets ??
-  trip.cabinTickets ??
-  0
-) <= 3
+                      (
+                        trip.remainingCabinTickets ??
+                        trip.cabinTickets ??
+                        0
+                      ) <= 3
                         ? "text-red-600 font-bold"
                         : "text-green-700"
                     }
                   >
                     المتبقي كابينة:
-{
-  trip.remainingCabinTickets ??
-  trip.cabinTickets ??
-  0
-}
+                    {
+                      trip.remainingCabinTickets ??
+                      trip.cabinTickets ??
+                      0
+                    }
                   </p>
 
                   <p
                     className={
                       (
-  trip.remainingSecondClassTickets ??
-  trip.secondClassTickets ??
-  0
-) <= 5
+                        trip.remainingSecondClassTickets ??
+                        trip.secondClassTickets ??
+                        0
+                      ) <= 5
                         ? "text-red-600 font-bold"
                         : "text-green-700"
                     }
                   >
                     المتبقي درجة ثانية:
-{
-  trip.remainingSecondClassTickets ??
-  trip.secondClassTickets ??
-  0
-}                  </p>
+                    {
+                      trip.remainingSecondClassTickets ??
+                      trip.secondClassTickets ??
+                      0
+                    }                  </p>
                   <p>
                     كابينة:
                     {trip.cabinPrice} ج.م
@@ -1628,11 +1372,11 @@ placeholder:text-black/50        "
             onClick={() => {
 
               if (
-              (
-  selectedTrip?.remainingCabinTickets ??
-  selectedTrip?.cabinTickets ??
-  0
-) <= 0
+                (
+                  selectedTrip?.remainingCabinTickets ??
+                  selectedTrip?.cabinTickets ??
+                  0
+                ) <= 0
               ) {
                 alert(
                   "الكبائن غير متاحة"
@@ -1678,11 +1422,11 @@ placeholder:text-black/50        "
             onClick={() => {
 
               if (
-            (
-  selectedTrip?.remainingSecondClassTickets ??
-  selectedTrip?.secondClassTickets ??
-  0
-) <= 0
+                (
+                  selectedTrip?.remainingSecondClassTickets ??
+                  selectedTrip?.secondClassTickets ??
+                  0
+                ) <= 0
               ) {
                 alert(
                   "الدرجة الثانية غير متاحة"
@@ -2000,15 +1744,17 @@ placeholder:text-black/50        "
                 </div>
 
               )}
-            {userBooking?.status ===
-              "confirmed" && (
+            {userBooking?.status === "confirmed" &&
+              !userBooking?.ticketDownloaded && (
                 <button
-                  onClick={() =>
-                    generateTicketPDF(
-                      userBooking
-                    )
-                  }
-                  className="bg-green-600 text-white px-8 py-4 rounded-2xl"
+                  onClick={downloadTicket}
+                  className="
+        bg-green-600
+        text-white
+        px-8
+        py-4
+        rounded-2xl
+      "
                 >
                   تحميل التذكرة
                 </button>

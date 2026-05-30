@@ -20,6 +20,11 @@ import {
 import { Html5QrcodeScanner }
     from "html5-qrcode";
 
+import {
+    generateTicketPDF
+} from "./utils/generateTicketPDF";
+
+
 export default function Admin() {
     const [bookings, setBookings] =
         useState([]);
@@ -241,8 +246,8 @@ export default function Admin() {
             const trip =
                 trips.find(
                     (t) =>
-t.id === booking.tripId
-                                );
+                        t.id === booking.tripId
+                );
 
             if (!trip) {
 
@@ -311,6 +316,7 @@ t.id === booking.tripId
                 {
                     status: "confirmed",
                     expiresAt: null,
+                    ticketDownloaded: false,
                 }
             );
 
@@ -333,7 +339,7 @@ t.id === booking.tripId
                     date,
                     time,
                     tripTimestamp:
-    new Date(date).getTime(),
+                        new Date(date).getTime(),
                     cabinPrice,
 
                     secondClassPrice,
@@ -385,12 +391,22 @@ t.id === booking.tripId
         id
     ) => {
 
+
+
         try {
 
             const booking =
                 bookings.find(
                     (b) => b.id === id
                 );
+
+            if (
+                !window.confirm(
+                    `هل تريد حذف حجز ${booking?.name} ؟`
+                )
+            ) {
+                return;
+            }
 
             if (!booking) return;
 
@@ -435,7 +451,7 @@ t.id === booking.tripId
                             ),
                             {
                                 remainingSecondClassTickets:
-    trip.remainingSecondClassTickets + 1,
+                                    trip.remainingSecondClassTickets + 1,
                             }
                         );
 
@@ -599,10 +615,10 @@ t.id === booking.tripId
                     </div>
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-6 sticky top-0 z-20 bg-slate-900 py-2">
                     <input
                         type="text"
-                        placeholder="ابحث باسم الراكب أو نوع التذكرة" value={search}
+                        placeholder="ابحث بالاسم أو رقم الهاتف أو رقم الجواز أو نوع التذكرة" value={search}
                         onChange={(e) =>
                             setSearch(e.target.value)
                         }
@@ -615,8 +631,8 @@ t.id === booking.tripId
 
 
 
-                    <table className="min-w-[1100px] w-full text-right">
-                        <thead className="bg-slate-700">
+                    <table className="min-w-[1300px] w-full text-right">
+                        <thead className="bg-slate-700 sticky top-0 z-10">
                             <tr>
                                 <th className="p-4">
                                     الراكب
@@ -630,7 +646,11 @@ t.id === booking.tripId
                                 </th>
 
                                 <th className="p-4">
-                                    الجواز
+                                    تاريخ الحجز
+                                </th>
+
+                                <th className="p-4">
+                                    رقم الجواز
                                 </th>
 
                                 <th className="p-4">
@@ -638,8 +658,9 @@ t.id === booking.tripId
                                 </th>
 
                                 <th className="p-4">
-                                    الجواز
+                                    صورة الجواز
                                 </th>
+
                                 <th className="p-4">
                                     الحالة
                                 </th>
@@ -659,18 +680,36 @@ t.id === booking.tripId
                         <tbody>
                             {bookings
                                 .filter((booking) => {
+
+                                    const searchValue =
+                                        search.toLowerCase();
+
                                     return (
+
                                         booking.name
                                             ?.toLowerCase()
-                                            .includes(
-                                                search.toLowerCase()
-                                            ) ||
+                                            .includes(searchValue)
+
+                                        ||
+
                                         booking.ticketType
                                             ?.toLowerCase()
-                                            .includes(
-                                                search.toLowerCase()
-                                            )
+                                            .includes(searchValue)
+
+                                        ||
+
+                                        booking.phone
+                                            ?.toString()
+                                            .includes(search)
+
+                                        ||
+
+                                        booking.passport
+                                            ?.toString()
+                                            .includes(search)
+
                                     );
+
                                 })
                                 .map((booking) => (
                                     <tr
@@ -687,6 +726,14 @@ t.id === booking.tripId
 
                                         <td className="p-4">
                                             {booking.phone}
+                                        </td>
+
+                                        <td className="p-4 whitespace-nowrap">
+                                            {booking.createdAt
+                                                ? booking.createdAt
+                                                    .toDate()
+                                                    .toLocaleString("ar-EG")
+                                                : "-"}
                                         </td>
 
                                         <td className="p-4">
@@ -739,9 +786,41 @@ t.id === booking.tripId
                                         </td>
 
                                         <td className="p-4">
-                                            {booking.status === "confirmed"
-                                                ? "مؤكد"
-                                                : "قيد المراجعة"}
+
+                                            {booking.status === "confirmed" ? (
+
+                                                <span
+                                                    className="
+                bg-green-600
+                text-white
+                px-3
+                py-1
+                rounded-full
+                text-sm
+                font-semibold
+            "
+                                                >
+                                                    مؤكد
+                                                </span>
+
+                                            ) : (
+
+                                                <span
+                                                    className="
+                bg-yellow-500
+                text-black
+                px-3
+                py-1
+                rounded-full
+                text-sm
+                font-semibold
+            "
+                                                >
+                                                    قيد المراجعة
+                                                </span>
+
+                                            )}
+
                                         </td>
 
                                         <td className="p-4">
@@ -764,17 +843,45 @@ t.id === booking.tripId
                                             )}
                                         </td>
 
-                                        <td className="p-4">
+                                        <td className="p-4 flex gap-2">
+
+                                            {booking.status ===
+                                                "confirmed" && (
+
+                                                    <button
+                                                        onClick={() =>
+                                                            generateTicketPDF(
+                                                                booking
+                                                            )
+                                                        }
+                                                        className="
+    bg-blue-600
+    px-4
+    py-2
+    rounded-xl
+  "
+                                                    >
+                                                        إعادة إصدار
+                                                    </button>
+
+                                                )}
+
                                             <button
                                                 onClick={() =>
                                                     deleteBooking(
                                                         booking.id
                                                     )
                                                 }
-                                                className="bg-red-600 px-4 py-2 rounded-xl"
+                                                className="
+      bg-red-600
+      px-4
+      py-2
+      rounded-xl
+    "
                                             >
                                                 حذف
                                             </button>
+
                                         </td>
                                     </tr>
                                 ))}
@@ -794,8 +901,8 @@ t.id === booking.tripId
                         إضافة رحلة
                     </button>
                     {showTripForm && (
-<div
-  className="
+                        <div
+                            className="
     fixed
     inset-0
     bg-black/60
@@ -803,9 +910,9 @@ t.id === booking.tripId
     overflow-y-auto
     p-6
   "
->
-<div
-  className="
+                        >
+                            <div
+                                className="
     bg-blue-950
     rounded-3xl
     p-6
@@ -816,8 +923,8 @@ t.id === booking.tripId
     my-10
     mx-auto
   "
->
-                                    <h2 className="text-2xl font-bold mb-6 pr-12 text-right">
+                            >
+                                <h2 className="text-2xl font-bold mb-6 pr-12 text-right">
                                     إضافة رحلة
                                 </h2>
                                 <button
@@ -1001,36 +1108,49 @@ t.id === booking.tripId
             </div>
 
             {previewImage && (
-
                 <div
-                    onClick={() =>
-                        setPreviewImage("")
-                    }
+                    onClick={() => setPreviewImage("")}
                     className="
-      relative
-w-full
-      bg-black/80
+      fixed
+      inset-0
+      bg-black/90
       flex
       items-center
       justify-center
-      z-50
+      z-[9999]
       p-6
     "
                 >
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewImage("");
+                        }}
+                        className="
+        absolute
+        top-6
+        right-6
+        text-white
+        text-5xl
+        font-bold
+      "
+                    >
+                        ×
+                    </button>
 
                     <img
                         src={previewImage}
                         alt="Preview"
+                        onClick={(e) => e.stopPropagation()}
                         className="
-        max-w-full
-        max-h-full
+        max-w-[90vw]
+        max-h-[90vh]
+        object-contain
         rounded-3xl
         shadow-2xl
       "
                     />
-
                 </div>
-
             )}
             <div
                 className="
