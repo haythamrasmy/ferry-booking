@@ -9,6 +9,7 @@ import {
     updateDoc,
     deleteDoc,
     doc,
+    getDocs,
 } from "firebase/firestore";
 
 import {
@@ -23,6 +24,14 @@ import { Html5QrcodeScanner }
 import {
     generateTicketPDF
 } from "./utils/generateTicketPDF";
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+import {
+
+    setDoc
+} from "firebase/firestore";
 
 
 export default function Admin() {
@@ -93,6 +102,31 @@ export default function Admin() {
         setScannedCode
     ] = useState("");
 
+
+    const [agents, setAgents] = useState([]);
+
+    const [selectedAgent, setSelectedAgent] =
+        useState(null);
+
+    const [expandedTrip, setExpandedTrip] =
+        useState(null);
+
+    const [archives, setArchives] =
+        useState([]);
+
+    const [
+        showArchives,
+        setShowArchives
+    ] = useState(false);
+
+
+    const [
+        showAgents,
+        setShowAgents
+    ] = useState(false);
+
+
+
     useEffect(() => {
         let unsubscribeBookings = null;
 
@@ -111,6 +145,45 @@ export default function Admin() {
             );
 
 
+        const unsubscribeAgents =
+            onSnapshot(
+                collection(db, "agents"),
+                (snapshot) => {
+
+                    const agentsData =
+                        snapshot.docs.map((doc) => ({
+                            id: doc.id,
+                            ...doc.data(),
+                        }));
+
+                    setAgents(agentsData);
+
+                }
+            );
+
+        const unsubscribeArchives =
+            onSnapshot(
+                collection(
+                    db,
+                    "tripArchives"
+                ),
+                (snapshot) => {
+
+                    const archivesData =
+                        snapshot.docs.map(
+                            (doc) => ({
+                                id: doc.id,
+                                ...doc.data(),
+                            })
+                        );
+
+                    setArchives(
+                        archivesData
+                    );
+
+                }
+            );
+
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -127,6 +200,8 @@ export default function Admin() {
 
         return () => {
             unsubscribe();
+
+            unsubscribeAgents();
 
             if (unsubscribeBookings) {
                 unsubscribeBookings();
@@ -338,11 +413,37 @@ export default function Admin() {
                     route,
                     date,
                     time,
+
                     tripTimestamp:
                         new Date(date).getTime(),
-                    cabinPrice,
 
-                    secondClassPrice,
+                    cabinPrice: Number(
+                        cabinPrice
+                            .replace(/٠/g, "0")
+                            .replace(/١/g, "1")
+                            .replace(/٢/g, "2")
+                            .replace(/٣/g, "3")
+                            .replace(/٤/g, "4")
+                            .replace(/٥/g, "5")
+                            .replace(/٦/g, "6")
+                            .replace(/٧/g, "7")
+                            .replace(/٨/g, "8")
+                            .replace(/٩/g, "9")
+                    ),
+
+                    secondClassPrice: Number(
+                        secondClassPrice
+                            .replace(/٠/g, "0")
+                            .replace(/١/g, "1")
+                            .replace(/٢/g, "2")
+                            .replace(/٣/g, "3")
+                            .replace(/٤/g, "4")
+                            .replace(/٥/g, "5")
+                            .replace(/٦/g, "6")
+                            .replace(/٧/g, "7")
+                            .replace(/٨/g, "8")
+                            .replace(/٩/g, "9")
+                    ),
 
                     totalCabinTickets:
                         Number(cabinTickets),
@@ -567,6 +668,282 @@ export default function Admin() {
                 booking.status !==
                 "confirmed"
         );
+
+
+    const exportTripExcel = (
+        trip
+    ) => {
+
+        const tripBookings =
+            bookings.filter(
+                (booking) =>
+                    booking.tripId === trip.id
+            );
+
+        const excelData =
+            tripBookings.map(
+                (booking) => ({
+
+                    الاسم:
+                        booking.name,
+
+                    الهاتف:
+                        booking.phone,
+
+                    الجواز:
+                        booking.passport,
+
+                    "نوع التذكرة":
+                        booking.ticketType,
+
+                    الوكيل:
+                        booking.agentName ||
+                        "حجز مباشر",
+
+                    الحالة:
+                        booking.status,
+
+                })
+            );
+
+        const worksheet =
+            XLSX.utils.json_to_sheet(
+                excelData
+            );
+
+        const workbook =
+            XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Passengers"
+        );
+
+        const excelBuffer =
+            XLSX.write(
+                workbook,
+                {
+                    bookType: "xlsx",
+                    type: "array",
+                }
+            );
+
+        const file =
+            new Blob(
+                [excelBuffer],
+                {
+                    type:
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+                }
+            );
+
+        saveAs(
+            file,
+            `${trip.route}.xlsx`
+        );
+
+    };
+
+
+
+    const exportAgentExcel = (
+        agent
+    ) => {
+
+        const agentBookings =
+            bookings.filter(
+                (booking) =>
+                    booking.agentId ===
+                    agent.id
+            );
+
+        const excelData =
+            agentBookings.map(
+                (booking) => ({
+
+                    الراكب:
+                        booking.name,
+
+                    الهاتف:
+                        booking.phone,
+
+                    الجواز:
+                        booking.passport,
+
+                    الرحلة:
+                        booking.trip,
+
+                    "نوع التذكرة":
+                        booking.ticketType,
+
+                    السعر:
+                        booking.ticketPrice,
+
+                    الحالة:
+                        booking.status,
+
+                })
+            );
+
+        const worksheet =
+            XLSX.utils.json_to_sheet(
+                excelData
+            );
+
+        const workbook =
+            XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            "Bookings"
+        );
+
+        const excelBuffer =
+            XLSX.write(
+                workbook,
+                {
+                    bookType: "xlsx",
+                    type: "array",
+                }
+            );
+
+        const file =
+            new Blob(
+                [excelBuffer],
+                {
+                    type:
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+                }
+            );
+
+        saveAs(
+            file,
+            `${agent.fullName}.xlsx`
+        );
+
+    };
+
+    const archiveTrip = async (
+        trip
+    ) => {
+
+        try {
+
+            const tripBookings =
+                bookings.filter(
+                    (booking) =>
+                        booking.tripId ===
+                        trip.id
+                );
+
+            await addDoc(
+                collection(db, "tripArchives"),
+                {
+                    originalTripId: trip.id,
+
+                    tripData: trip,
+
+                    passengers:
+                        tripBookings,
+
+                    archivedAt:
+                        new Date(),
+
+                    passengerCount:
+                        tripBookings.length,
+
+                }
+            );
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "trips",
+                    trip.id
+                )
+            );
+
+            alert(
+                "تمت أرشفة الرحلة بنجاح"
+            );
+
+        } catch (error) {
+
+            console.log(error);
+
+            alert(
+                "حدث خطأ أثناء الأرشفة"
+            );
+
+        }
+
+    };
+
+    const restoreTrip = async (
+        archive
+    ) => {
+
+        try {
+
+            const originalId =
+                archive.originalTripId;
+
+            const tripData = {
+                ...archive.tripData,
+            };
+
+            delete tripData.id;
+
+            await setDoc(
+                doc(
+                    db,
+                    "trips",
+                    originalId
+                ),
+                tripData
+            );
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "tripArchives",
+                    archive.id
+                )
+            );
+
+            alert(
+                "تم استرجاع الرحلة"
+            );
+
+        } catch (error) {
+
+            console.log(error);
+
+            alert(
+                "حدث خطأ أثناء الاسترجاع"
+            );
+
+        }
+
+    };
+
+    const groupedTrips =
+        trips.map((trip) => ({
+            ...trip,
+
+            passengers:
+                bookings.filter(
+                    (booking) =>
+                        booking.tripId ===
+                        trip.id
+                ),
+        }));
+
+
+
+
     return (
         <div className="min-h-screen bg-slate-900 text-white p-10">
             <div className="max-w-6xl mx-auto">
@@ -583,7 +960,176 @@ export default function Admin() {
                     </button>
                 </div>
 
+
+
                 <div className="grid md:grid-cols-3 gap-6 mb-10">
+
+
+                    <div
+                        className="
+    bg-fuchsia-950
+    border
+    border-fuchsia-700
+    rounded-3xl
+    p-6
+    mt-8
+    shadow-2xl
+  "
+                    >
+                        <div className="flex items-center gap-3 mb-6">
+
+                            <div className="w-3 h-8 rounded-full bg-cyan-400"></div>
+
+                            <button
+  onClick={() =>
+    setShowAgents(
+      !showAgents
+    )
+  }
+  className="
+    w-full
+    flex
+    justify-between
+    items-center
+    mb-6
+  "
+>
+
+  <div className="flex items-center gap-3">
+
+    <div className="w-3 h-8 rounded-full bg-fuchsia-400"></div>
+
+    <h2 className="text-2xl font-bold">
+      الوكلاء
+    </h2>
+
+    <span
+      className="
+        bg-fuchsia-500/20
+        text-fuchsia-300
+        px-3
+        py-1
+        rounded-xl
+        text-sm
+      "
+    >
+      {agents.length}
+    </span>
+
+  </div>
+
+  <span className="text-2xl">
+    {showAgents ? "▲" : "▼"}
+  </span>
+
+</button>
+
+                            <span
+                                className="
+      bg-cyan-500/20
+      text-cyan-300
+      px-3
+      py-1
+      rounded-xl
+      text-sm
+    "
+                            >
+                                {agents.length}
+                            </span>
+
+                        </div>
+
+{showAgents && (
+
+  <div className="space-y-4">
+    
+                            {agents.map((agent) => {
+
+                                const agentBookings =
+                                    bookings.filter(
+                                        (booking) =>
+                                            booking.agentId ===
+                                            agent.id
+                                    );
+
+                                const sales =
+                                    agentBookings.reduce(
+                                        (sum, booking) =>
+                                            sum +
+                                            Number(
+                                                booking.ticketPrice || 0
+                                            ),
+                                        0
+                                    );
+
+                                const commission =
+                                    sales * (
+                                        Number(
+                                            agent.commissionRate
+                                        ) / 100
+                                    );
+
+                                return (
+
+                                    <div
+                                        key={agent.id}
+                                        onClick={() =>
+                                            setSelectedAgent(agent)
+                                        }
+                                        className="
+  bg-cyan-950
+  border
+  border-cyan-700
+  rounded-3xl
+  p-6
+  mt-8
+  shadow-2xl
+"
+                                    >
+                                       
+
+<div className="flex items-center gap-3">
+
+  <div
+    className="
+      w-12
+      h-12
+      rounded-full
+      bg-fuchsia-500/20
+      flex
+      items-center
+      justify-center
+      text-xl
+    "
+  >
+    👤
+  </div>
+
+  <h3 className="font-bold text-lg">
+    {agent.fullName}
+  </h3>
+
+</div>
+
+<div
+  className="
+    text-2xl
+    text-fuchsia-300
+  "
+>
+  ›
+</div>
+
+                                    </div>
+
+                                );
+
+                            })}
+
+                        </div>
+                        )}
+
+                    </div>
                     <div className="bg-slate-800 rounded-3xl p-6">
                         <p className="text-slate-400">
                             إجمالي الحجوزات
@@ -626,150 +1172,159 @@ export default function Admin() {
                     />
                 </div>
 
-                <div className="bg-slate-800 rounded-3xl overflow-x-auto">
+                <div className="bg-slate-800 rounded-3xl overflow-hidden">
+
+
+
+                    <div className="overflow-x-auto">
+                        <table className="min-w-[1300px] w-full text-right">
+
+
+                            <thead className="bg-slate-700 sticky top-0 z-10">
+                                <tr>
+                                    <th className="p-4">
+                                        الراكب
+                                    </th>
+
+                                    <th className="p-4">
+                                        الوكيل
+                                    </th>
+                                    <th className="p-4">
+                                        نوع التذكرة
+                                    </th>
+                                    <th className="p-4">
+                                        الهاتف
+                                    </th>
+
+                                    <th className="p-4">
+                                        تاريخ الحجز
+                                    </th>
+
+                                    <th className="p-4">
+                                        رقم الجواز
+                                    </th>
+
+                                    <th className="p-4">
+                                        الإيصال
+                                    </th>
+
+                                    <th className="p-4">
+                                        صورة الجواز
+                                    </th>
+
+                                    <th className="p-4">
+                                        الحالة
+                                    </th>
+
+                                    <th className="p-4">
+                                        الإجراء
+                                    </th>
+                                    <th className="p-4"></th>
+
+                                </tr>
+                            </thead>
 
 
 
 
-                    <table className="min-w-[1300px] w-full text-right">
-                        <thead className="bg-slate-700 sticky top-0 z-10">
-                            <tr>
-                                <th className="p-4">
-                                    الراكب
-                                </th>
 
-                                <th className="p-4">
-                                    نوع التذكرة
-                                </th>
-                                <th className="p-4">
-                                    الهاتف
-                                </th>
+                            <tbody>
+                                {bookings
+                                    .filter((booking) => {
 
-                                <th className="p-4">
-                                    تاريخ الحجز
-                                </th>
+                                        const searchValue =
+                                            search.toLowerCase();
 
-                                <th className="p-4">
-                                    رقم الجواز
-                                </th>
+                                        return (
 
-                                <th className="p-4">
-                                    الإيصال
-                                </th>
+                                            booking.name
+                                                ?.toLowerCase()
+                                                .includes(searchValue)
 
-                                <th className="p-4">
-                                    صورة الجواز
-                                </th>
+                                            ||
 
-                                <th className="p-4">
-                                    الحالة
-                                </th>
+                                            booking.ticketType
+                                                ?.toLowerCase()
+                                                .includes(searchValue)
 
-                                <th className="p-4">
-                                    الإجراء
-                                </th>
-                                <th className="p-4"></th>
+                                            ||
 
-                            </tr>
-                        </thead>
+                                            booking.phone
+                                                ?.toString()
+                                                .includes(search)
 
+                                            ||
 
+                                            booking.passport
+                                                ?.toString()
+                                                .includes(search)
 
+                                        );
 
+                                    })
+                                    .map((booking) => (
+                                        <tr
+                                            key={booking.id}
+                                            className="border-t border-slate-700"
+                                        >
+                                            <td className="p-4">
+                                                {booking.name}
+                                            </td>
 
-                        <tbody>
-                            {bookings
-                                .filter((booking) => {
+                                            <td className="p-4">
+                                                {booking.agentName || "حجز مباشر"}
+                                            </td>
 
-                                    const searchValue =
-                                        search.toLowerCase();
+                                            <td className="p-4">
+                                                {booking.ticketType}
+                                            </td>
 
-                                    return (
+                                            <td className="p-4">
+                                                {booking.phone}
+                                            </td>
 
-                                        booking.name
-                                            ?.toLowerCase()
-                                            .includes(searchValue)
+                                            <td className="p-4 whitespace-nowrap">
+                                                {booking.createdAt
+                                                    ? booking.createdAt
+                                                        .toDate()
+                                                        .toLocaleString("ar-EG")
+                                                    : "-"}
+                                            </td>
 
-                                        ||
+                                            <td className="p-4">
+                                                {booking.passport}
+                                            </td>
 
-                                        booking.ticketType
-                                            ?.toLowerCase()
-                                            .includes(searchValue)
+                                            <td className="p-4 text-center">
+                                                {booking.paymentImage && (
+                                                    <img
+                                                        src={booking.paymentImage}
+                                                        alt="Payment"
+                                                        onClick={() =>
+                                                            setPreviewImage(
+                                                                booking.paymentImage
+                                                            )
+                                                        }
+                                                        className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
+                                                    />
+                                                )}
+                                            </td>
 
-                                        ||
+                                            <td className="p-4 text-center">
 
-                                        booking.phone
-                                            ?.toString()
-                                            .includes(search)
+                                                {booking.passportImage && (
 
-                                        ||
-
-                                        booking.passport
-                                            ?.toString()
-                                            .includes(search)
-
-                                    );
-
-                                })
-                                .map((booking) => (
-                                    <tr
-                                        key={booking.id}
-                                        className="border-t border-slate-700"
-                                    >
-                                        <td className="p-4">
-                                            {booking.name}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {booking.ticketType}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {booking.phone}
-                                        </td>
-
-                                        <td className="p-4 whitespace-nowrap">
-                                            {booking.createdAt
-                                                ? booking.createdAt
-                                                    .toDate()
-                                                    .toLocaleString("ar-EG")
-                                                : "-"}
-                                        </td>
-
-                                        <td className="p-4">
-                                            {booking.passport}
-                                        </td>
-
-                                        <td className="p-4 text-center">
-                                            {booking.paymentImage && (
-                                                <img
-                                                    src={booking.paymentImage}
-                                                    alt="Payment"
-                                                    onClick={() =>
-                                                        setPreviewImage(
-                                                            booking.paymentImage
-                                                        )
-                                                    }
-                                                    className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
-                                                />
-                                            )}
-                                        </td>
-
-                                        <td className="p-4 text-center">
-
-                                            {booking.passportImage && (
-
-                                                <img
-                                                    src={
-                                                        booking.passportImage
-                                                    }
-                                                    alt="Passport"
-                                                    onClick={() =>
-                                                        setPreviewImage(
+                                                    <img
+                                                        src={
                                                             booking.passportImage
-                                                        )
-                                                    }
-                                                    className="
+                                                        }
+                                                        alt="Passport"
+                                                        onClick={() =>
+                                                            setPreviewImage(
+                                                                booking.passportImage
+                                                            )
+                                                        }
+                                                        className="
         w-20
         h-20
         object-cover
@@ -779,18 +1334,18 @@ export default function Admin() {
         hover:scale-105
         transition
       "
-                                                />
+                                                    />
 
-                                            )}
+                                                )}
 
-                                        </td>
+                                            </td>
 
-                                        <td className="p-4">
+                                            <td className="p-4">
 
-                                            {booking.status === "confirmed" ? (
+                                                {booking.status === "confirmed" ? (
 
-                                                <span
-                                                    className="
+                                                    <span
+                                                        className="
                 bg-green-600
                 text-white
                 px-3
@@ -799,14 +1354,14 @@ export default function Admin() {
                 text-sm
                 font-semibold
             "
-                                                >
-                                                    مؤكد
-                                                </span>
+                                                    >
+                                                        مؤكد
+                                                    </span>
 
-                                            ) : (
+                                                ) : (
 
-                                                <span
-                                                    className="
+                                                    <span
+                                                        className="
                 bg-yellow-500
                 text-black
                 px-3
@@ -815,80 +1370,431 @@ export default function Admin() {
                 text-sm
                 font-semibold
             "
-                                                >
-                                                    قيد المراجعة
-                                                </span>
+                                                    >
+                                                        قيد المراجعة
+                                                    </span>
 
-                                            )}
+                                                )}
 
-                                        </td>
+                                            </td>
 
-                                        <td className="p-4">
-                                            {booking.status !==
-                                                "confirmed" ? (
-                                                <button
-                                                    onClick={() =>
-                                                        confirmBooking(
-                                                            booking.id
-                                                        )
-                                                    }
-                                                    className="bg-green-600 px-4 py-2 rounded-xl"
-                                                >
-                                                    تأكيد
-                                                </button>
-                                            ) : (
-                                                <span className="text-green-400 font-bold">
-                                                    تم التأكيد
-                                                </span>
-                                            )}
-                                        </td>
-
-                                        <td className="p-4 flex gap-2">
-
-                                            {booking.status ===
-                                                "confirmed" && (
-
+                                            <td className="p-4">
+                                                {booking.status !==
+                                                    "confirmed" ? (
                                                     <button
                                                         onClick={() =>
-                                                            generateTicketPDF(
-                                                                booking
+                                                            confirmBooking(
+                                                                booking.id
                                                             )
                                                         }
-                                                        className="
+                                                        className="bg-green-600 px-4 py-2 rounded-xl"
+                                                    >
+                                                        تأكيد
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-green-400 font-bold">
+                                                        تم التأكيد
+                                                    </span>
+                                                )}
+                                            </td>
+
+                                            <td className="p-4 flex gap-2">
+
+                                                {booking.status ===
+                                                    "confirmed" && (
+
+                                                        <button
+                                                            onClick={() =>
+                                                                generateTicketPDF(
+                                                                    booking
+                                                                )
+                                                            }
+                                                            className="
     bg-blue-600
     px-4
     py-2
     rounded-xl
   "
-                                                    >
-                                                        إعادة إصدار
-                                                    </button>
+                                                        >
+                                                            إعادة إصدار
+                                                        </button>
 
-                                                )}
+                                                    )}
 
-                                            <button
-                                                onClick={() =>
-                                                    deleteBooking(
-                                                        booking.id
-                                                    )
-                                                }
-                                                className="
+                                                <button
+                                                    onClick={() =>
+                                                        deleteBooking(
+                                                            booking.id
+                                                        )
+                                                    }
+                                                    className="
       bg-red-600
       px-4
       py-2
       rounded-xl
     "
+                                                >
+                                                    حذف
+                                                </button>
+
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+
+
+                        </table>
+
+                    </div>
+
+                    <div
+                        className="
+mt-16
+  bg-emerald-950
+  border
+  border-emerald-700
+  rounded-3xl
+  p-6
+  shadow-2xl
+"
+                    >
+
+
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-3 h-8 rounded-full bg-emerald-400"></div>
+
+                            <h2 className="text-3xl font-bold">
+                                الرحلات والركاب
+                            </h2>
+                        </div>
+
+                        <div className="space-y-6">
+
+                            {groupedTrips.map((trip) => (
+
+                                <div
+                                    key={trip.id}
+
+                                    className="
+          bg-slate-800
+          rounded-3xl
+          p-6
+        "
+                                >
+
+                                    <div
+                                        className="
+    flex
+    flex-col
+    md:flex-row
+    gap-4
+    md:justify-between
+    md:items-center
+"
+                                    >
+
+                                        <div>
+
+                                            <h3 className="text-2xl font-bold">
+                                                {trip.route}
+                                            </h3>
+
+                                            <p className="text-slate-400">
+                                                {trip.date} - {trip.time}
+                                            </p>
+
+                                            <p className="text-slate-400">
+                                                عدد الركاب:
+                                                {" "}
+                                                {trip.passengers.length}
+                                            </p>
+
+                                        </div>
+
+                                        <div className="flex gap-2">
+
+                                            <button
+                                                onClick={() =>
+                                                    exportTripExcel(trip)
+                                                }
+                                                className="
+      bg-green-600
+      px-4
+      py-2
+      rounded-xl
+    "
                                             >
-                                                حذف
+                                                Export Excel
                                             </button>
 
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
+                                            <button
+                                                onClick={() =>
+                                                    archiveTrip(trip)
+                                                }
+                                                className="
+      bg-yellow-600
+      px-4
+      py-2
+      rounded-xl
+    "
+                                            >
+                                                Archive
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    setExpandedTrip(
+                                                        expandedTrip === trip.id
+                                                            ? null
+                                                            : trip.id
+                                                    )
+                                                }
+                                                className="
+      bg-blue-600
+      px-4
+      py-2
+      rounded-xl
+    "
+                                            >
+                                                عرض الركاب
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                    {expandedTrip === trip.id && (
+
+                                        <div className="mt-6 overflow-x-auto">
+
+                                            <div className="overflow-x-auto">
+
+                                                <table className="min-w-[700px] w-full">
+                                                    <thead>
+
+                                                        <tr>
+
+                                                            <th className="p-3">
+                                                                الاسم
+                                                            </th>
+
+                                                            <th className="p-3">
+                                                                الهاتف
+                                                            </th>
+
+                                                            <th className="p-3">
+                                                                الجواز
+                                                            </th>
+
+                                                            <th className="p-3">
+                                                                نوع التذكرة
+                                                            </th>
+
+                                                            <th className="p-3">
+                                                                الوكيل
+                                                            </th>
+
+                                                        </tr>
+
+                                                    </thead>
+
+                                                    <tbody>
+
+                                                        {trip.passengers.map(
+                                                            (passenger) => (
+
+                                                                <tr
+                                                                    key={passenger.id}
+                                                                    className="
+                        border-t
+                        border-slate-700
+                      "
+                                                                >
+
+                                                                    <td className="p-3">
+                                                                        {passenger.name}
+                                                                    </td>
+
+                                                                    <td className="p-3">
+                                                                        {passenger.phone}
+                                                                    </td>
+
+                                                                    <td className="p-3">
+                                                                        {passenger.passport}
+                                                                    </td>
+
+                                                                    <td className="p-3">
+                                                                        {passenger.ticketType}
+                                                                    </td>
+
+                                                                    <td className="p-3">
+                                                                        {passenger.agentName ||
+                                                                            "حجز مباشر"}
+                                                                    </td>
+
+                                                                </tr>
+
+                                                            )
+                                                        )}
+
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+                            ))}
+
+                        </div>
+
+                    </div>
 
 
-                    </table>
+
+                    <div
+                        className="
+mt-16
+    bg-amber-950
+    border
+    border-amber-700
+    rounded-3xl
+    p-6
+    shadow-2xl
+  "
+                    >
+                        <button
+                            onClick={() =>
+                                setShowArchives(
+                                    !showArchives
+                                )
+                            }
+                            className="
+    w-full
+    flex
+    items-center
+    justify-between
+    mb-6
+    text-right
+  "
+                        >
+
+                            <div className="flex items-center gap-3">
+
+                                <div className="w-3 h-8 rounded-full bg-amber-400"></div>
+
+                                <h2 className="text-3xl font-bold">
+                                    الرحلات المؤرشفة
+                                </h2>
+
+                            </div>
+
+                            <span className="text-2xl">
+
+                                {showArchives
+                                    ? "▲"
+                                    : "▼"}
+
+                            </span>
+
+                        </button>
+
+                        {showArchives && (
+
+                            <div className="space-y-4 overflow-x-auto">
+                                {archives.map(
+                                    (archive) => (
+
+                                        <div
+                                            key={archive.id}
+                                            className="
+  bg-slate-900/60
+  border
+  border-amber-700/40
+  rounded-3xl
+  p-6
+  flex
+  flex-col
+  md:flex-row
+  gap-4
+  md:justify-between
+  md:items-center
+"
+                                        >
+
+                                            <div>
+
+                                                <h3 className="text-2xl font-bold">
+                                                    {
+                                                        archive.tripData
+                                                            ?.route
+                                                    }
+                                                </h3>
+
+                                                <p>
+                                                    عدد الركاب:
+                                                    {" "}
+                                                    {
+                                                        archive.passengerCount
+                                                    }
+                                                </p>
+
+                                            </div>
+
+                                            <div
+                                                className="
+    flex
+    flex-wrap
+    gap-2
+    w-full
+    md:w-auto
+  "
+                                            >
+
+
+
+                                                <button
+                                                    onClick={() =>
+                                                        restoreTrip(
+                                                            archive
+                                                        )
+                                                    }
+                                                    className="
+    bg-green-600
+    px-4
+    py-2
+    rounded-xl
+  "
+                                                >
+                                                    Restore
+                                                </button>
+
+                                                <button
+                                                    className="
+      bg-yellow-600
+      px-4
+      py-2
+      rounded-xl
+    "
+                                                >
+                                                    Excel
+                                                </button>
+
+                                            </div>
+                                        </div>
+
+                                    )
+                                )}
+
+                            </div>
+                        )}
+                    </div>
+
+
 
                     <button
                         onClick={() =>
@@ -987,7 +1893,7 @@ export default function Admin() {
 
 
                                     <input
-                                        type="text"
+                                        type="number"
                                         placeholder="سعر الدرجة الثانية" value={secondClassPrice}
                                         onChange={(e) =>
                                             setSecondClassPrice(
@@ -1021,7 +1927,7 @@ export default function Admin() {
 
 
                                     <input
-                                        type="text"
+                                        type="number"
                                         placeholder="سعر الكابن"
                                         value={cabinPrice}
                                         onChange={(e) =>
@@ -1089,14 +1995,37 @@ export default function Admin() {
                                                 </div>
                                             </div>
 
-                                            <button
-                                                onClick={() =>
-                                                    deleteTrip(trip.id)
-                                                }
-                                                className="bg-red-600 px-4 py-2 rounded-xl"
-                                            >
-                                                حذف
-                                            </button>
+                                            <div className="flex gap-2">
+
+                                                <button
+                                                    onClick={() =>
+                                                        exportTripExcel(trip)
+                                                    }
+                                                    className="
+      bg-green-600
+      px-4
+      py-2
+      rounded-xl
+    "
+                                                >
+                                                    Excel
+                                                </button>
+
+                                                <button
+                                                    onClick={() =>
+                                                        archiveTrip(trip)
+                                                    }
+                                                    className="
+      bg-yellow-600
+      px-4
+      py-2
+      rounded-xl
+    "
+                                                >
+                                                    Archive
+                                                </button>
+
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -1106,6 +2035,286 @@ export default function Admin() {
                     )}
                 </div>
             </div>
+
+            {selectedAgent && (
+
+                <div
+                    className="
+      fixed
+      inset-0
+      bg-black/70
+      z-[9999]
+      p-6
+      overflow-y-auto
+    "
+                >
+
+                    <div
+                       className="
+  max-w-7xl
+  mx-auto
+  bg-fuchsia-950
+  border
+  border-fuchsia-700
+  rounded-3xl
+  p-6
+  shadow-2xl
+"
+                    >
+
+                      <div
+  className="
+    flex
+    flex-col
+    md:flex-row
+    gap-4
+    md:items-center
+    md:justify-between
+    mb-8
+  "
+>
+
+  <div className="flex items-center gap-4">
+
+    <div
+      className="
+        w-16
+        h-16
+        rounded-full
+        bg-fuchsia-500/20
+        flex
+        items-center
+        justify-center
+        text-3xl
+      "
+    >
+      👤
+    </div>
+
+    <div>
+
+      <h2 className="text-3xl font-bold">
+        {selectedAgent.fullName}
+      </h2>
+
+      <p className="text-slate-400">
+        وكيل معتمد
+      </p>
+
+    </div>
+
+  </div>
+
+  <div className="flex gap-3">
+
+    <button
+      onClick={() =>
+        exportAgentExcel(
+          selectedAgent
+        )
+      }
+      className="
+        bg-green-600
+        px-4
+        py-2
+        rounded-xl
+      "
+    >
+      Export Excel
+    </button>
+
+    <button
+      onClick={() =>
+        setSelectedAgent(null)
+      }
+      className="
+        bg-red-600
+        px-4
+        py-2
+        rounded-xl
+      "
+    >
+      إغلاق
+    </button>
+
+  </div>
+
+</div>
+
+
+                        <div className="grid md:grid-cols-3 gap-4 mb-8">
+
+  <div className="bg-slate-900/40 rounded-2xl p-4">
+
+    <p className="text-slate-400">
+      الحجوزات
+    </p>
+
+    <h3 className="text-3xl font-bold">
+      {
+        bookings.filter(
+          booking =>
+            booking.agentId ===
+            selectedAgent.id
+        ).length
+      }
+    </h3>
+
+  </div>
+
+  <div className="bg-green-900/30 rounded-2xl p-4">
+
+    <p className="text-green-300">
+      المبيعات
+    </p>
+
+    <h3 className="text-3xl font-bold">
+      {
+        bookings
+          .filter(
+            booking =>
+              booking.agentId ===
+              selectedAgent.id
+          )
+          .reduce(
+            (sum, booking) =>
+              sum +
+              Number(
+                booking.ticketPrice || 0
+              ),
+            0
+          )
+      }
+      ج.م
+    </h3>
+
+  </div>
+
+  <div className="bg-blue-900/30 rounded-2xl p-4">
+
+    <p className="text-blue-300">
+      العمولة
+    </p>
+
+    <h3 className="text-3xl font-bold">
+
+      {(
+        bookings
+          .filter(
+            booking =>
+              booking.agentId ===
+              selectedAgent.id
+          )
+          .reduce(
+            (sum, booking) =>
+              sum +
+              Number(
+                booking.ticketPrice || 0
+              ),
+            0
+          ) *
+        (
+          Number(
+            selectedAgent.commissionRate
+          ) / 100
+        )
+      ).toFixed(2)}
+
+      ج.م
+
+    </h3>
+
+  </div>
+
+</div>
+
+<div className="overflow-x-auto">
+
+  <table
+    className="
+      min-w-[700px]
+      w-full
+    "
+  >                            
+
+                            <thead>
+
+                                <tr className="
+  border-b
+  border-slate-700
+  bg-fuchsia-900/20
+">
+
+                                    <th className="p-3">
+                                        الراكب
+                                    </th>
+
+                                    <th className="p-3">
+                                        الرحلة
+                                    </th>
+
+                                    <th className="p-3">
+                                        نوع التذكرة
+                                    </th>
+
+                                    <th className="p-3">
+                                        السعر
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                {bookings
+                                    .filter(
+                                        (booking) =>
+                                            booking.agentId ===
+                                            selectedAgent.id
+                                    )
+                                    .map((booking) => (
+
+                                        <tr
+                                            key={booking.id}
+                                           className="
+  border-b
+  border-slate-800
+  hover:bg-fuchsia-900/20
+  transition
+"
+                                        >
+
+                                            <td className="p-3">
+                                                {booking.name}
+                                            </td>
+
+                                            <td className="p-3">
+                                                {booking.trip}
+                                            </td>
+
+                                            <td className="p-3">
+                                                {booking.ticketType}
+                                            </td>
+
+                                            <td className="p-3">
+                                                {booking.ticketPrice}
+                                            </td>
+
+                                        </tr>
+
+                                    ))}
+
+                            </tbody>
+
+                        </table>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            )}
 
             {previewImage && (
                 <div

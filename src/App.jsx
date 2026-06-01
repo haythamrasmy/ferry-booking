@@ -29,6 +29,10 @@ import {
 } from "./utils/generateTicketPDF";
 
 
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+
 export default function FerryBookingWebsite() {
   const companyName = "هيئة وادي النيل للملاحة النهرية";
 
@@ -82,6 +86,18 @@ export default function FerryBookingWebsite() {
 
   const [trackedShipment, setTrackedShipment] =
     useState(null);
+
+  const [agentEmail, setAgentEmail] = useState("");
+  const [agentPassword, setAgentPassword] = useState("");
+  const [agentUser, setAgentUser] = useState(null);
+
+  const [agentStats, setAgentStats] = useState({
+    bookings: 0,
+    sales: 0,
+    commission: 0,
+  });
+
+  const [agentSearch, setAgentSearch] = useState("");
 
   const cargoItems = [
     "ثلاجه 11 قدم",
@@ -348,6 +364,57 @@ export default function FerryBookingWebsite() {
   },
 
     []);
+
+  useEffect(() => {
+
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        async (user) => {
+
+          if (!user) {
+
+            setAgentUser(null);
+
+            return;
+          }
+
+          try {
+
+            const querySnapshot =
+              await getDocs(
+                collection(db, "agents")
+              );
+
+            const agentDoc =
+              querySnapshot.docs.find(
+                (doc) =>
+                  doc.data().email ===
+                  user.email
+              );
+
+            if (agentDoc) {
+
+              setAgentUser({
+                id: agentDoc.id,
+                ...agentDoc.data(),
+              });
+
+            }
+
+          } catch (error) {
+
+            console.log(error);
+
+          }
+
+        }
+      );
+
+    return () => unsubscribe();
+
+  }, []);
+
   useEffect(() => {
 
     const bookingId =
@@ -415,6 +482,59 @@ export default function FerryBookingWebsite() {
 
     return () => unsubscribe();
   }, [userBooking]);
+
+
+
+  useEffect(() => {
+
+    if (!agentUser) return;
+
+    const unsubscribe =
+      onSnapshot(
+        collection(db, "bookings"),
+        (snapshot) => {
+
+          const myBookings =
+            snapshot.docs
+              .map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }))
+              .filter(
+                (booking) =>
+                  booking.agentId ===
+                  agentUser.id
+              );
+
+          const sales =
+            myBookings.reduce(
+              (sum, booking) =>
+                sum +
+                Number(
+                  booking.ticketPrice || 0
+                ),
+              0
+            );
+
+          const commission =
+            sales * 0.07;
+
+          setAgentStats({
+            bookings:
+              myBookings.length,
+
+            sales,
+
+            commission,
+          });
+
+        }
+      );
+
+    return () => unsubscribe();
+
+  }, [agentUser]);
+
 
 
   const sendTelegramNotification = async (bookingData) => {
@@ -585,11 +705,20 @@ export default function FerryBookingWebsite() {
 
       }
 
+
+      const ticketPrice =
+        selectedTicketType === "Cabin"
+          ? Number(selectedTrip.cabinPrice)
+          : Number(selectedTrip.secondClassPrice);
+
       const bookingRef =
         await addDoc(
           collection(db, "bookings"), {
           trackingId,
           ticketId,
+          agentId: agentUser?.id || null,
+          agentName: agentUser?.fullName || null,
+          ticketPrice,
           name,
           passport,
           passportImage,
@@ -669,6 +798,9 @@ export default function FerryBookingWebsite() {
         trip: selectedTrip?.route,
         ticketType: selectedTicketType,
       });
+
+
+
       alert("تم حفظ الحجز بنجاح");
 
 
@@ -731,9 +863,157 @@ export default function FerryBookingWebsite() {
     setIsAdmin(false);
   };
 
+
+
+
+
+  const agentLogin = async () => {
+    try {
+
+      const credential =
+        await signInWithEmailAndPassword(
+          auth,
+          agentEmail,
+          agentPassword
+        );
+
+      const querySnapshot = await getDocs(
+        collection(db, "agents")
+      );
+
+      const agentDoc =
+        querySnapshot.docs.find(
+          (doc) =>
+            doc.data().email ===
+            credential.user.email
+        );
+
+      console.log("Logged Email:", credential.user.email);
+
+      console.log(
+        "Agents Count:",
+        querySnapshot.docs.length
+      );
+
+      querySnapshot.docs.forEach((d) => {
+        console.log(
+          "Agent Email:",
+          d.data().email
+        );
+      });
+
+      console.log("agentDoc =", agentDoc);
+
+      if (!agentDoc) {
+
+        console.log(
+          "Email From Auth =",
+          credential.user.email
+        );
+
+        alert("هذا الحساب ليس وكيلاً");
+
+        return;
+      }
+
+      setAgentUser({
+        id: agentDoc.id,
+        ...agentDoc.data(),
+      });
+
+      alert("تم تسجيل دخول الوكيل");
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("بيانات الدخول غير صحيحة");
+    }
+  };
+
+  const exportMyBookings = () => {
+
+  if (!agentUser) return;
+
+  const myBookings = bookings.filter(
+    (booking) =>
+      booking.agentId === agentUser.id
+  );
+
+  const excelData = myBookings.map(
+    (booking) => ({
+      الراكب: booking.name,
+      الهاتف: booking.phone,
+      الجواز: booking.passport,
+      الرحلة: booking.trip,
+      "نوع التذكرة": booking.ticketType,
+      السعر: booking.ticketPrice,
+      الحالة: booking.status,
+    })
+  );
+
+  const worksheet =
+    XLSX.utils.json_to_sheet(
+      excelData
+    );
+
+  const workbook =
+    XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "Bookings"
+  );
+
+  const excelBuffer =
+    XLSX.write(
+      workbook,
+      {
+        bookType: "xlsx",
+        type: "array",
+      }
+    );
+
+  const file =
+    new Blob(
+      [excelBuffer],
+      {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+      }
+    );
+
+  saveAs(
+    file,
+    `${agentUser.fullName}-bookings.xlsx`
+  );
+};
+
+  const agentLogout = async () => {
+
+    try {
+
+      await signOut(auth);
+
+      setAgentUser(null);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+
   return (
 
     <div dir="rtl" className="min-h-screen bg-slate-100 text-slate-900">
+
+
+
+
       {/* Hero Section */}
       <section
         dir="rtl"
@@ -1251,8 +1531,22 @@ placeholder:text-black/50        "
       <section id="available-trips" className="max-w-5xl mx-auto px-6 py-16">
 
 
-        <div className="bg-white rounded-3xl shadow-xl p-8">
-
+<div
+  className="
+    relative
+    overflow-hidden
+    bg-gradient-to-br
+    from-slate-900
+    via-fuchsia-950
+    to-slate-900
+    text-white
+    rounded-[32px]
+    shadow-2xl
+    p-8
+    border
+    border-fuchsia-700/40
+  "
+>
           <h2 className="text-3xl font-bold mb-8">
             الرحلات المتاحة
           </h2>
@@ -1263,37 +1557,95 @@ placeholder:text-black/50        "
 
               <div
                 key={trip.id}
+
                 className={`
-            border
-            rounded-3xl
-            p-6
-            transition
-            cursor-pointer
-            ${selectedTrip?.id ===
-                    trip.id
-                    ? "border-blue-700 bg-blue-50"
-                    : "bg-slate-50"
-                  }
-          `}
+    rounded-[28px]
+    p-6
+    transition-all
+    duration-300
+    cursor-pointer
+    border-2
+    shadow-lg
+    hover:shadow-2xl
+    hover:-translate-y-1
+    ${
+      selectedTrip?.id === trip.id
+        ? `
+          border-blue-600
+          bg-gradient-to-br
+          from-fuchsia-900/60
+to-purple-900/60
+
+        `
+        : `
+         border-white/10
+bg-white/5
+backdrop-blur-xl
+hover:border-fuchsia-400
+        `
+    }
+`}
                 onClick={() =>
                   setSelectedTrip(trip)
                 }
               >
 
-                <h3 className="text-2xl font-bold mb-4">
-                  {trip.route}
-                </h3>
-                <p className="text-slate-500">
-                  التاريخ:
-                  {trip.date}
-                </p>
+               <div className="flex items-center justify-between mb-4">
 
-                <p className="text-slate-500">
-                  الوقت:
-                  {trip.time}
-                </p>
-                <div className="space-y-3 text-lg">
+  <h3 className="text-2xl font-bold">
+    🚢 {trip.route}
+  </h3>
 
+  {selectedTrip?.id === trip.id && (
+
+    <span
+      className="
+        bg-blue-600
+        text-white
+        px-3
+        py-1
+        rounded-xl
+        text-sm
+        font-bold
+      "
+    >
+      مختارة
+    </span>
+
+  )}
+
+</div>
+               <div className="flex flex-wrap gap-3 mb-5">
+
+  <span
+    className="
+bg-white/10
+text-white
+      px-3
+      py-2
+      rounded-xl
+      text-sm
+      font-medium
+    "
+  >
+    📅 {trip.date}
+  </span>
+
+  <span
+    className="
+bg-white/10
+text-white
+      px-3
+      py-2
+      rounded-xl
+      text-sm
+      font-medium
+    "
+  >
+    🕒 {trip.time}
+  </span>
+
+</div>
                   <p>
                     عدد تذاكر الدرجة الثانية:
                     {" "}
@@ -1306,55 +1658,66 @@ placeholder:text-black/50        "
                     {trip.totalCabinTickets || 0}
                   </p>
 
-                  <p
-                    className={
-                      (
-                        trip.remainingCabinTickets ??
-                        trip.cabinTickets ??
-                        0
-                      ) <= 3
-                        ? "text-red-600 font-bold"
-                        : "text-green-700"
-                    }
-                  >
-                    المتبقي كابينة:
-                    {
-                      trip.remainingCabinTickets ??
-                      trip.cabinTickets ??
-                      0
-                    }
-                  </p>
+                 <div className="flex flex-wrap gap-3 mt-4">
 
-                  <p
-                    className={
-                      (
-                        trip.remainingSecondClassTickets ??
-                        trip.secondClassTickets ??
-                        0
-                      ) <= 5
-                        ? "text-red-600 font-bold"
-                        : "text-green-700"
-                    }
-                  >
-                    المتبقي درجة ثانية:
-                    {
-                      trip.remainingSecondClassTickets ??
-                      trip.secondClassTickets ??
-                      0
-                    }                  </p>
-                  <p>
-                    كابينة:
-                    {trip.cabinPrice} ج.م
-                  </p>
+  <span
+    className={`
+      px-4
+      py-2
+      rounded-xl
+      font-bold
+      ${
+        (
+          trip.remainingCabinTickets ??
+          trip.cabinTickets ??
+          0
+        ) <= 3
+          ? "bg-red-100 text-red-700"
+          : "bg-green-100 text-green-700"
+      }
+    `}
+  >
+    🛏️ {
+      trip.remainingCabinTickets ??
+      trip.cabinTickets ??
+      0
+    } كابينة
+  </span>
 
-                  <p>
-                    الدرجة الثانية:
-                    {trip.secondClassPrice} ج.م
-                  </p>
-                </div>
+  <span
+    className={`
+      px-4
+      py-2
+      rounded-xl
+      font-bold
+      ${
+        (
+          trip.remainingSecondClassTickets ??
+          trip.secondClassTickets ??
+          0
+        ) <= 5
+          ? "bg-red-100 text-red-700"
+          : "bg-blue-100 text-blue-700"
+      }
+    `}
+  >
+    🎫 {
+      trip.remainingSecondClassTickets ??
+      trip.secondClassTickets ??
+      0
+    } درجة ثانية
+  </span>
 
-              </div>
-            ))}
+</div>
+                 <p>
+  الدرجة الثانية:
+  {trip.secondClassPrice} ج.م
+</p>
+
+</div>
+
+))}
+           
 
           </div>
 
@@ -1888,6 +2251,472 @@ placeholder:text-black/50        "
 
         </div>
 
+      </section>
+
+      <section className="max-w-5xl mx-auto px-6 py-16">
+
+<div
+  className="
+    bg-gradient-to-br
+    from-fuchsia-950
+    via-purple-950
+    to-slate-950
+    text-white
+    rounded-3xl
+    shadow-2xl
+    p-8
+    border
+    border-fuchsia-700/50
+  "
+>
+         <div className="flex items-center gap-4 mb-8">
+
+  <div
+    className="
+      w-14
+      h-14
+      rounded-full
+      bg-fuchsia-500/20
+      flex
+      items-center
+      justify-center
+      text-2xl
+    "
+  >
+    👥
+  </div>
+
+  <div>
+
+    <h2 className="text-3xl font-bold">
+      بوابة الوكلاء
+    </h2>
+
+    <p className="text-slate-300">
+      إدارة الحجوزات والمبيعات
+    </p>
+
+  </div>
+
+</div>
+
+<div
+  className="
+    absolute
+    top-0
+    left-0
+    w-full
+    h-full
+    bg-gradient-to-br
+    from-fuchsia-600/10
+    via-purple-600/10
+    to-transparent
+    pointer-events-none
+  "
+/>
+
+          {!agentUser ? (
+
+            <div className="space-y-4">
+
+              <input
+                type="email"
+                placeholder="البريد الإلكتروني"
+                value={agentEmail}
+                onChange={(e) =>
+                  setAgentEmail(e.target.value)
+                }
+className="
+  bg-white/10
+  border
+  border-white/20
+  rounded-2xl
+  p-4
+  w-full
+  text-white
+  placeholder:text-slate-400
+"              />
+
+              <input
+                type="password"
+                placeholder="كلمة المرور"
+                value={agentPassword}
+                onChange={(e) =>
+                  setAgentPassword(e.target.value)
+                }
+                className="border rounded-2xl p-4 w-full"
+              />
+
+              <button
+                onClick={agentLogin}
+                className="
+bg-fuchsia-600
+hover:bg-fuchsia-700
+            text-white
+            px-8
+            py-4
+            rounded-2xl
+          "
+              >
+                دخول الوكيل
+              </button>
+
+            </div>
+
+          ) : (
+
+            <div>
+
+             <div className="flex items-center gap-4 mb-6">
+
+  <div
+    className="
+      w-16
+      h-16
+      rounded-full
+      bg-fuchsia-500/20
+      flex
+      items-center
+      justify-center
+      text-3xl
+    "
+  >
+    👤
+  </div>
+
+  <div>
+
+    <h3 className="text-2xl font-bold">
+      {agentUser.fullName}
+    </h3>
+
+    <p className="text-slate-300">
+      بوابة الوكيل
+    </p>
+
+    <p>         وكيل معتمد
+</p>
+
+  </div>
+
+</div>
+
+<div
+  className="
+    flex
+    flex-wrap
+    gap-3
+    mb-6
+  "
+>
+
+  <div
+    className="
+      bg-emerald-500/15
+      border
+      border-emerald-500/20
+      px-4
+      py-2
+      rounded-xl
+      text-emerald-300
+      text-sm
+    "
+  >
+    🟢 متصل الآن
+  </div>
+
+  <div
+    className="
+      bg-white/10
+      border
+      border-white/10
+      px-4
+      py-2
+      rounded-xl
+      text-slate-300
+      text-sm
+    "
+  >
+    {agentStats.bookings} حجز
+  </div>
+
+</div>
+
+            <div className="flex flex-wrap gap-3 mb-6">
+
+  <button
+    onClick={exportMyBookings}
+    className="
+      bg-green-600
+      text-white
+      px-6
+      py-3
+      rounded-2xl
+    "
+  >
+    Export Excel ({agentStats.bookings})
+  </button>
+
+  <button
+    onClick={agentLogout}
+    className="
+      bg-red-600
+      text-white
+      px-6
+      py-3
+      rounded-2xl
+    "
+  >
+    تسجيل خروج الوكيل
+  </button>
+
+</div>
+
+             <div className="grid md:grid-cols-3 gap-4 mt-6">
+
+<div
+  className="
+    bg-white/10
+    backdrop-blur-xl
+    border
+    border-white/10
+    rounded-3xl
+    p-5
+  "
+>    <p className="text-slate-300">
+      عدد الحجوزات
+    </p>
+
+    <h3 className="text-3xl font-bold">
+      {agentStats.bookings}
+    </h3>
+  </div>
+
+<div
+  className="
+    bg-emerald-500/10
+    backdrop-blur-xl
+    border
+    border-emerald-500/20
+    rounded-3xl
+    p-5
+  "
+><p className="text-emerald-300">
+        إجمالي المبيعات
+    </p>
+
+    <h3 className="text-3xl font-bold text-green-700">
+      {agentStats.sales}
+    </h3>
+  </div>
+
+<div
+  className="
+    bg-fuchsia-500/10
+    backdrop-blur-xl
+    border
+    border-fuchsia-500/20
+    rounded-3xl
+    p-5
+  "
+>    <p className="text-fuchsia-300">
+      العمولة
+    </p>
+
+    <h3 className="text-3xl font-bold text-blue-700">
+      {agentStats.commission.toFixed(2)}
+    </h3>
+  </div>
+
+</div>
+
+            </div>
+
+          )}
+
+        </div>
+
+{agentUser && (
+
+<div className="mt-8">
+ <div className="flex justify-between items-center mb-4">
+
+  <h3 className="text-2xl font-bold">
+    آخر الحجوزات
+  </h3>
+
+  <span
+    className="
+      bg-blue-100
+      text-blue-700
+      px-4
+      py-2
+      rounded-xl
+      font-bold
+    "
+  >
+    {bookings.filter(
+      booking =>
+        booking.agentId === agentUser.id
+    ).length}
+    {" "}راكب
+  </span>
+
+</div>
+
+<input
+  type="text"
+  placeholder="ابحث بالاسم أو الجواز أو الهاتف"
+  value={agentSearch}
+  onChange={(e) =>
+    setAgentSearch(e.target.value)
+  }
+
+ className="
+  w-full
+  bg-white/10
+  border
+  border-white/10
+  rounded-2xl
+  p-4
+  mb-4
+  outline-none
+  text-white
+  placeholder:text-slate-400
+"
+/>
+
+  <div className="overflow-x-auto">
+
+<table
+  className="
+    w-full
+    overflow-hidden
+    rounded-3xl
+  "
+>
+      <thead>
+
+<tr
+  className="
+    bg-white/10
+    border-b
+    border-white/10
+  "
+>
+          <th className="p-3 text-right">
+            الراكب
+          </th>
+
+          <th className="p-3 text-right">
+            الرحلة
+          </th>
+
+          <th className="p-3 text-right">
+            التذكرة
+          </th>
+
+          <th className="p-3 text-right">
+            السعر
+          </th>
+
+          <th className="p-3 text-right">
+            الحالة
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+       {bookings
+  .filter((booking) => {
+
+    if (
+      booking.agentId !==
+      agentUser.id
+    ) {
+      return false;
+    }
+
+    const searchValue =
+      agentSearch.toLowerCase();
+
+    return (
+
+      booking.name
+        ?.toLowerCase()
+        .includes(searchValue)
+
+      ||
+
+      booking.passport
+        ?.toString()
+        .includes(agentSearch)
+
+      ||
+
+      booking.phone
+        ?.toString()
+        .includes(agentSearch)
+
+    );
+
+  })
+          .slice()
+          .reverse()
+          .map((booking) => (
+
+            <tr
+              key={booking.id}
+              className="border-b"
+            >
+
+              <td className="p-3">
+                {booking.name}
+              </td>
+
+              <td className="p-3">
+                {booking.trip}
+              </td>
+
+              <td className="p-3">
+                {booking.ticketType}
+              </td>
+
+              <td className="p-3">
+                {booking.ticketPrice}
+              </td>
+
+              <td className="p-3">
+
+                {booking.status === "confirmed"
+                  ? (
+                    <span className="text-green-600 font-bold">
+                      مؤكد
+                    </span>
+                  )
+                  : (
+                    <span className="text-yellow-600 font-bold">
+                      قيد المراجعة
+                    </span>
+                  )}
+
+              </td>
+
+            </tr>
+
+          ))}
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+)}
       </section>
 
       {/* Footer */}
