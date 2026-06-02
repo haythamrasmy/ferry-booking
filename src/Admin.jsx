@@ -125,6 +125,18 @@ export default function Admin() {
         setShowAgents
     ] = useState(false);
 
+    const [
+        showTripsSection,
+        setShowTripsSection
+    ] = useState(false);
+
+
+
+   const [
+  showBookingsSection,
+  setShowBookingsSection
+] = useState(false);
+
 
 
     useEffect(() => {
@@ -415,7 +427,9 @@ export default function Admin() {
                     time,
 
                     tripTimestamp:
-                        new Date(date).getTime(),
+                        new Date(
+                            `${date}T${time}`
+                        ).getTime(),
 
                     cabinPrice: Number(
                         cabinPrice
@@ -945,13 +959,29 @@ export default function Admin() {
 
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white p-10">
+        <div
+            className="
+    min-h-screen
+    text-white
+    p-10
+    bg-[#020817]
+  "
+        >
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-10">
-                    <h1 className="text-4xl font-bold">
-                        لوحة التحكم
-                    </h1>
 
+
+                    <div className="flex-1 text-center">
+
+  <h1 className="text-5xl font-black">
+    لوحة التحكم
+  </h1>
+
+  <p className="text-slate-400 mt-2">
+    إدارة الرحلات والحجوزات والوكلاء
+  </p>
+
+</div>
                     <button
                         onClick={adminLogout}
                         className="bg-red-600 px-5 py-3 rounded-2xl"
@@ -962,49 +992,501 @@ export default function Admin() {
 
 
 
-                <div className="grid md:grid-cols-3 gap-6 mb-10">
-
+                <div className="grid grid-cols-3 gap-2 mb-8">
 
                     <div
                         className="
-    bg-fuchsia-950
-    border
-    border-fuchsia-700
+bg-slate-800/50
+backdrop-blur-xl
+border
+border-blue-500/40
+rounded-3xl
+flex-1
+h-24
+flex
+flex-col
+justify-center
+items-center
+text-center
+shadow-[0_0_35px_rgba(59,130,246,0.35)]
+"
+                    >
+                        <p className="text-[14px] text-slate-400">
+                            إجمالي الحجوزات
+                        </p>
+
+                        <h3 className="text-2xl font-bold mt-1">                            {bookings.length}
+                        </h3>
+                    </div>
+
+                    <div
+
+                        className="
+bg-slate-800/50
+backdrop-blur-xl
+border
+border-blue-500/40
+rounded-3xl
+flex-1
+h-24
+flex
+flex-col
+justify-center
+items-center
+text-center
+shadow-[0_0_35px_rgba(59,130,246,0.35)]
+"
+
+                    >
+                        <p className="text-[15px] text-slate-400">
+                            الحجوزات المؤكدة
+                        </p>
+
+                        <h3 className="text-2xl font-bold mt-1 text-green-400">
+                            {confirmedBookings.length}
+                        </h3>
+
+
+                    </div>
+
+                    <div
+
+                        className="
+bg-slate-800/50
+backdrop-blur-xl
+border
+border-blue-500/40
+rounded-3xl
+flex-1
+h-24
+flex
+flex-col
+justify-center
+items-center
+text-center
+shadow-[0_0_35px_rgba(59,130,246,0.35)]
+"
+
+                    >
+
+
+                        <p className="text-[15px] text-slate-400">
+                            قيد المراجعة
+                        </p>
+
+                        <h3 className="text-2xl font-bold mt-1 text-yellow-400">
+                            {pendingBookings.length}
+                        </h3>
+                    </div>
+                </div>
+
+                <div className="mb-6 sticky top-0 z-20 bg-slate-900 py-2">
+                    <input
+                        type="text"
+                        placeholder="ابحث بالاسم أو رقم الهاتف أو رقم الجواز أو نوع التذكرة" value={search}
+                        onChange={(e) =>
+                            setSearch(e.target.value)
+                        }
+                        className="w-full bg-slate-700 text-white p-4 rounded-2xl outline-none"
+                    />
+                </div>
+
+                <div
+                    className="
+    mt-10
+bbg-[#071427]
+border
+border-[#12315f]
+rounded-[28px]
+py-8
+px-10
+shadow-[0_0_30px_rgba(37,99,235,0.12)]
+    mb-4
+  "
+                >
+
+
+                    <button
+                        onClick={() =>
+                            setShowBookingsSection(
+                                !showBookingsSection
+                            )
+                        }
+                        className="
+relative
+w-full
+flex
+justify-center
+items-center
+"
+                    >
+
+
+
+                        <div className="flex items-center gap-3">
+
+                            <div className="w-3 h-8 rounded-full bg-blue-400"></div>
+
+                            <h2 className="text-3xl font-bold">
+                                الحجوزات
+                            </h2>
+
+                            <span
+                                className="
+          bg-blue-500/20
+          text-blue-300
+          px-3
+          py-1
+          rounded-xl
+          text-sm
+        "
+                            >
+                                {bookings.length}
+                            </span>
+
+                        </div>
+
+
+
+                        <span className="text-2xl">
+                            {showBookingsSection ? "▲" : "▼"}
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+
+                {showBookingsSection && (
+
+                    <div className="bg-slate-800 rounded-3xl overflow-hidden">
+
+
+                        <div className="overflow-x-auto">
+                            <table className="min-w-[1300px] w-full text-right">
+
+
+                                <thead className="bg-slate-700 sticky top-0 z-10">
+                                    <tr>
+                                        <th className="p-4">
+                                            الراكب
+                                        </th>
+
+                                        <th className="p-4">
+                                            الوكيل
+                                        </th>
+                                        <th className="p-4">
+                                            نوع التذكرة
+                                        </th>
+                                        <th className="p-4">
+                                            الهاتف
+                                        </th>
+
+                                        <th className="p-4">
+                                            تاريخ الحجز
+                                        </th>
+
+                                        <th className="p-4">
+                                            رقم الجواز
+                                        </th>
+
+                                        <th className="p-4">
+                                            الإيصال
+                                        </th>
+
+                                        <th className="p-4">
+                                            صورة الجواز
+                                        </th>
+
+                                        <th className="p-4">
+                                            الحالة
+                                        </th>
+
+                                        <th className="p-4">
+                                            الإجراء
+                                        </th>
+                                        <th className="p-4"></th>
+
+                                    </tr>
+                                </thead>
+
+
+
+
+
+                                <tbody>
+                                    {bookings
+                                        .filter((booking) => {
+
+                                            const trip = trips.find(
+                                                (t) => t.id === booking.tripId
+                                            );
+
+                                            if (
+                                                trip &&
+                                                trip.tripTimestamp &&
+                                                trip.tripTimestamp < Date.now()
+                                            ) {
+                                                return false;
+                                            }
+
+                                            const searchValue =
+                                                search.toLowerCase();
+
+                                            return (
+
+                                                booking.name
+                                                    ?.toLowerCase()
+                                                    .includes(searchValue)
+
+                                                ||
+
+                                                booking.ticketType
+                                                    ?.toLowerCase()
+                                                    .includes(searchValue)
+
+                                                ||
+
+                                                booking.phone
+                                                    ?.toString()
+                                                    .includes(search)
+
+                                                ||
+
+                                                booking.passport
+                                                    ?.toString()
+                                                    .includes(search)
+
+                                            );
+
+                                        })
+                                        .map((booking) => (
+                                            <tr
+                                                key={booking.id}
+                                                className="border-t border-slate-700"
+                                            >
+                                                <td className="p-4">
+                                                    {booking.name}
+                                                </td>
+
+                                                <td className="p-4">
+                                                    {booking.agentName || "حجز مباشر"}
+                                                </td>
+
+                                                <td className="p-4">
+                                                    {booking.ticketType}
+                                                </td>
+
+                                                <td className="p-4">
+                                                    {booking.phone}
+                                                </td>
+
+                                                <td className="p-4 whitespace-nowrap">
+                                                    {booking.createdAt
+                                                        ? booking.createdAt
+                                                            .toDate()
+                                                            .toLocaleString("ar-EG")
+                                                        : "-"}
+                                                </td>
+
+                                                <td className="p-4">
+                                                    {booking.passport}
+                                                </td>
+
+                                                <td className="p-4 text-center">
+                                                    {booking.paymentImage && (
+                                                        <img
+                                                            src={booking.paymentImage}
+                                                            alt="Payment"
+                                                            onClick={() =>
+                                                                setPreviewImage(
+                                                                    booking.paymentImage
+                                                                )
+                                                            }
+                                                            className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
+                                                        />
+                                                    )}
+                                                </td>
+
+                                                <td className="p-4 text-center">
+
+                                                    {booking.passportImage && (
+
+                                                        <img
+                                                            src={
+                                                                booking.passportImage
+                                                            }
+                                                            alt="Passport"
+                                                            onClick={() =>
+                                                                setPreviewImage(
+                                                                    booking.passportImage
+                                                                )
+                                                            }
+                                                            className="
+        w-20
+        h-20
+        object-cover
+        rounded-xl
+        cursor-pointer
+        mx-auto
+        hover:scale-105
+        transition
+      "
+                                                        />
+
+                                                    )}
+
+                                                </td>
+
+                                                <td className="p-4">
+
+                                                    {booking.status === "confirmed" ? (
+
+                                                        <span
+                                                            className="
+                bg-green-600
+                text-white
+                px-3
+                py-1
+                rounded-full
+                text-sm
+                font-semibold
+            "
+                                                        >
+                                                            مؤكد
+                                                        </span>
+
+                                                    ) : (
+
+                                                        <span
+                                                            className="
+                bg-yellow-500
+                text-black
+                px-3
+                py-1
+                rounded-full
+                text-sm
+                font-semibold
+            "
+                                                        >
+                                                            قيد المراجعة
+                                                        </span>
+
+                                                    )}
+
+                                                </td>
+
+                                                <td className="p-4">
+                                                    {booking.status !==
+                                                        "confirmed" ? (
+                                                        <button
+                                                            onClick={() =>
+                                                                confirmBooking(
+                                                                    booking.id
+                                                                )
+                                                            }
+                                                            className="bg-green-600 px-4 py-2 rounded-xl"
+                                                        >
+                                                            تأكيد
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-green-400 font-bold">
+                                                            تم التأكيد
+                                                        </span>
+                                                    )}
+                                                </td>
+
+                                                <td className="p-4 flex gap-2">
+
+                                                    {booking.status ===
+                                                        "confirmed" && (
+
+                                                            <button
+                                                                onClick={() =>
+                                                                    generateTicketPDF(
+                                                                        booking
+                                                                    )
+                                                                }
+                                                                className="
+    bg-blue-600
+    px-4
+    py-2
+    rounded-xl
+  "
+                                                            >
+                                                                إعادة إصدار
+                                                            </button>
+
+                                                        )}
+
+                                                    <button
+                                                        onClick={() =>
+                                                            deleteBooking(
+                                                                booking.id
+                                                            )
+                                                        }
+                                                        className="
+      bg-red-600
+      px-4
+      py-2
+      rounded-xl
+    "
+                                                    >
+                                                        حذف
+                                                    </button>
+
+                                                </td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                )}
+
+                <div
+                    className="
+    bg-[#071427]
+border-[#12315f]
     rounded-3xl
     p-6
     mt-8
     shadow-2xl
   "
-                    >
-                        <div className="flex items-center gap-3 mb-6">
+                >
+                    <div className="flex items-center gap-3 mb-6">
 
-                            <div className="w-3 h-8 rounded-full bg-cyan-400"></div>
 
-                            <button
-  onClick={() =>
-    setShowAgents(
-      !showAgents
-    )
-  }
-  className="
-    w-full
-    flex
-    justify-between
-    items-center
-    mb-6
-  "
->
+                        <button
+                            onClick={() =>
+                                setShowAgents(
+                                    !showAgents
+                                )
+                            }
+                            className="
+relative
+w-full
+flex
+justify-center
+items-center
+"
+                        >
 
-  <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
 
-    <div className="w-3 h-8 rounded-full bg-fuchsia-400"></div>
+                                <div className="w-3 h-8 rounded-full bg-fuchsia-400"></div>
 
-    <h2 className="text-2xl font-bold">
-      الوكلاء
-    </h2>
+                                <h2 className="text-2xl font-bold">
+                                    الوكلاء
+                                </h2>
 
-    <span
-      className="
+                                <span
+                                    className="
         bg-fuchsia-500/20
         text-fuchsia-300
         px-3
@@ -1012,37 +1494,26 @@ export default function Admin() {
         rounded-xl
         text-sm
       "
-    >
-      {agents.length}
-    </span>
+                                >
+                                    {agents.length}
+                                </span>
 
-  </div>
+                            </div>
 
-  <span className="text-2xl">
-    {showAgents ? "▲" : "▼"}
-  </span>
-
-</button>
-
-                            <span
-                                className="
-      bg-cyan-500/20
-      text-cyan-300
-      px-3
-      py-1
-      rounded-xl
-      text-sm
-    "
-                            >
-                                {agents.length}
+                            <span className="text-2xl">
+                                {showAgents ? "▲" : "▼"}
                             </span>
 
-                        </div>
+                        </button>
 
-{showAgents && (
 
-  <div className="space-y-4">
-    
+
+                    </div>
+
+                    {showAgents && (
+
+                        <div className="space-y-4">
+
                             {agents.map((agent) => {
 
                                 const agentBookings =
@@ -1086,12 +1557,12 @@ export default function Admin() {
   shadow-2xl
 "
                                     >
-                                       
 
-<div className="flex items-center gap-3">
 
-  <div
-    className="
+                                        <div className="flex items-center gap-3">
+
+                                            <div
+                                                className="
       w-12
       h-12
       rounded-full
@@ -1101,24 +1572,24 @@ export default function Admin() {
       justify-center
       text-xl
     "
-  >
-    👤
-  </div>
+                                            >
+                                                👤
+                                            </div>
 
-  <h3 className="font-bold text-lg">
-    {agent.fullName}
-  </h3>
+                                            <h3 className="font-bold text-lg">
+                                                {agent.fullName}
+                                            </h3>
 
-</div>
+                                        </div>
 
-<div
-  className="
+                                        <div
+                                            className="
     text-2xl
     text-fuchsia-300
   "
->
-  ›
-</div>
+                                        >
+                                            ›
+                                        </div>
 
                                     </div>
 
@@ -1127,346 +1598,57 @@ export default function Admin() {
                             })}
 
                         </div>
-                        )}
+                    )}
 
-                    </div>
-                    <div className="bg-slate-800 rounded-3xl p-6">
-                        <p className="text-slate-400">
-                            إجمالي الحجوزات
-                        </p>
-
-                        <h3 className="text-4xl font-bold mt-3">
-                            {bookings.length}
-                        </h3>
-                    </div>
-
-                    <div className="bg-slate-800 rounded-3xl p-6">
-                        <p className="text-slate-400">
-                            الحجوزات المؤكدة
-                        </p>
-
-                        <h3 className="text-4xl font-bold mt-3 text-green-400">
-                            {confirmedBookings.length}
-                        </h3>
-                    </div>
-
-                    <div className="bg-slate-800 rounded-3xl p-6">
-                        <p className="text-slate-400">
-                            قيد المراجعة
-                        </p>
-
-                        <h3 className="text-4xl font-bold mt-3 text-yellow-400">
-                            {pendingBookings.length}
-                        </h3>
-                    </div>
                 </div>
 
-                <div className="mb-6 sticky top-0 z-20 bg-slate-900 py-2">
-                    <input
-                        type="text"
-                        placeholder="ابحث بالاسم أو رقم الهاتف أو رقم الجواز أو نوع التذكرة" value={search}
-                        onChange={(e) =>
-                            setSearch(e.target.value)
-                        }
-                        className="w-full bg-slate-700 text-white p-4 rounded-2xl outline-none"
-                    />
-                </div>
-
-                <div className="bg-slate-800 rounded-3xl overflow-hidden">
-
-
-
-                    <div className="overflow-x-auto">
-                        <table className="min-w-[1300px] w-full text-right">
-
-
-                            <thead className="bg-slate-700 sticky top-0 z-10">
-                                <tr>
-                                    <th className="p-4">
-                                        الراكب
-                                    </th>
-
-                                    <th className="p-4">
-                                        الوكيل
-                                    </th>
-                                    <th className="p-4">
-                                        نوع التذكرة
-                                    </th>
-                                    <th className="p-4">
-                                        الهاتف
-                                    </th>
-
-                                    <th className="p-4">
-                                        تاريخ الحجز
-                                    </th>
-
-                                    <th className="p-4">
-                                        رقم الجواز
-                                    </th>
-
-                                    <th className="p-4">
-                                        الإيصال
-                                    </th>
-
-                                    <th className="p-4">
-                                        صورة الجواز
-                                    </th>
-
-                                    <th className="p-4">
-                                        الحالة
-                                    </th>
-
-                                    <th className="p-4">
-                                        الإجراء
-                                    </th>
-                                    <th className="p-4"></th>
-
-                                </tr>
-                            </thead>
-
-
-
-
-
-                            <tbody>
-                                {bookings
-                                    .filter((booking) => {
-
-                                        const searchValue =
-                                            search.toLowerCase();
-
-                                        return (
-
-                                            booking.name
-                                                ?.toLowerCase()
-                                                .includes(searchValue)
-
-                                            ||
-
-                                            booking.ticketType
-                                                ?.toLowerCase()
-                                                .includes(searchValue)
-
-                                            ||
-
-                                            booking.phone
-                                                ?.toString()
-                                                .includes(search)
-
-                                            ||
-
-                                            booking.passport
-                                                ?.toString()
-                                                .includes(search)
-
-                                        );
-
-                                    })
-                                    .map((booking) => (
-                                        <tr
-                                            key={booking.id}
-                                            className="border-t border-slate-700"
-                                        >
-                                            <td className="p-4">
-                                                {booking.name}
-                                            </td>
-
-                                            <td className="p-4">
-                                                {booking.agentName || "حجز مباشر"}
-                                            </td>
-
-                                            <td className="p-4">
-                                                {booking.ticketType}
-                                            </td>
-
-                                            <td className="p-4">
-                                                {booking.phone}
-                                            </td>
-
-                                            <td className="p-4 whitespace-nowrap">
-                                                {booking.createdAt
-                                                    ? booking.createdAt
-                                                        .toDate()
-                                                        .toLocaleString("ar-EG")
-                                                    : "-"}
-                                            </td>
-
-                                            <td className="p-4">
-                                                {booking.passport}
-                                            </td>
-
-                                            <td className="p-4 text-center">
-                                                {booking.paymentImage && (
-                                                    <img
-                                                        src={booking.paymentImage}
-                                                        alt="Payment"
-                                                        onClick={() =>
-                                                            setPreviewImage(
-                                                                booking.paymentImage
-                                                            )
-                                                        }
-                                                        className="w-20 h-20 object-cover rounded-xl cursor-pointer mx-auto hover:scale-105 transition"
-                                                    />
-                                                )}
-                                            </td>
-
-                                            <td className="p-4 text-center">
-
-                                                {booking.passportImage && (
-
-                                                    <img
-                                                        src={
-                                                            booking.passportImage
-                                                        }
-                                                        alt="Passport"
-                                                        onClick={() =>
-                                                            setPreviewImage(
-                                                                booking.passportImage
-                                                            )
-                                                        }
-                                                        className="
-        w-20
-        h-20
-        object-cover
-        rounded-xl
-        cursor-pointer
-        mx-auto
-        hover:scale-105
-        transition
-      "
-                                                    />
-
-                                                )}
-
-                                            </td>
-
-                                            <td className="p-4">
-
-                                                {booking.status === "confirmed" ? (
-
-                                                    <span
-                                                        className="
-                bg-green-600
-                text-white
-                px-3
-                py-1
-                rounded-full
-                text-sm
-                font-semibold
-            "
-                                                    >
-                                                        مؤكد
-                                                    </span>
-
-                                                ) : (
-
-                                                    <span
-                                                        className="
-                bg-yellow-500
-                text-black
-                px-3
-                py-1
-                rounded-full
-                text-sm
-                font-semibold
-            "
-                                                    >
-                                                        قيد المراجعة
-                                                    </span>
-
-                                                )}
-
-                                            </td>
-
-                                            <td className="p-4">
-                                                {booking.status !==
-                                                    "confirmed" ? (
-                                                    <button
-                                                        onClick={() =>
-                                                            confirmBooking(
-                                                                booking.id
-                                                            )
-                                                        }
-                                                        className="bg-green-600 px-4 py-2 rounded-xl"
-                                                    >
-                                                        تأكيد
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-green-400 font-bold">
-                                                        تم التأكيد
-                                                    </span>
-                                                )}
-                                            </td>
-
-                                            <td className="p-4 flex gap-2">
-
-                                                {booking.status ===
-                                                    "confirmed" && (
-
-                                                        <button
-                                                            onClick={() =>
-                                                                generateTicketPDF(
-                                                                    booking
-                                                                )
-                                                            }
-                                                            className="
-    bg-blue-600
-    px-4
-    py-2
-    rounded-xl
-  "
-                                                        >
-                                                            إعادة إصدار
-                                                        </button>
-
-                                                    )}
-
-                                                <button
-                                                    onClick={() =>
-                                                        deleteBooking(
-                                                            booking.id
-                                                        )
-                                                    }
-                                                    className="
-      bg-red-600
-      px-4
-      py-2
-      rounded-xl
-    "
-                                                >
-                                                    حذف
-                                                </button>
-
-                                            </td>
-                                        </tr>
-                                    ))}
-                            </tbody>
-
-
-                        </table>
-
-                    </div>
-
-                    <div
-                        className="
+                <div
+                    className="
 mt-16
-  bg-emerald-950
+bg-[#071427]
   border
-  border-emerald-700
+border-[#112b52]
   rounded-3xl
   p-6
   shadow-2xl
 "
+                >
+
+
+                    <button
+                        onClick={() =>
+                            setShowTripsSection(
+                                !showTripsSection
+                            )
+                        }
+                        className="
+relative
+w-full
+flex
+justify-center
+items-center
+"
                     >
 
 
-                        <div className="flex items-center gap-3 mb-6">
+
+                        <div className="flex items-center gap-3">
+
                             <div className="w-3 h-8 rounded-full bg-emerald-400"></div>
 
                             <h2 className="text-3xl font-bold">
                                 الرحلات والركاب
                             </h2>
+
                         </div>
+
+                        <span className="text-2xl">
+                            {showTripsSection ? "▲" : "▼"}
+                        </span>
+
+                    </button>
+
+                    {showTripsSection && (
 
                         <div className="space-y-6">
 
@@ -1484,12 +1666,11 @@ mt-16
 
                                     <div
                                         className="
-    flex
-    flex-col
-    md:flex-row
-    gap-4
-    md:justify-between
-    md:items-center
+relative
+w-full
+flex
+justify-center
+items-center
 "
                                     >
 
@@ -1651,13 +1832,13 @@ mt-16
                             ))}
 
                         </div>
+                    )}
+                </div>
 
-                    </div>
 
 
-
-                    <div
-                        className="
+                <div
+                    className="
 mt-16
     bg-amber-950
     border
@@ -1666,52 +1847,51 @@ mt-16
     p-6
     shadow-2xl
   "
+                >
+                    <button
+                        onClick={() =>
+                            setShowArchives(
+                                !showArchives
+                            )
+                        }
+                        className="
+relative
+w-full
+flex
+justify-center
+items-center
+"
                     >
-                        <button
-                            onClick={() =>
-                                setShowArchives(
-                                    !showArchives
-                                )
-                            }
-                            className="
-    w-full
-    flex
-    items-center
-    justify-between
-    mb-6
-    text-right
-  "
-                        >
 
-                            <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3">
 
-                                <div className="w-3 h-8 rounded-full bg-amber-400"></div>
+                            <div className="w-3 h-8 rounded-full bg-amber-400"></div>
 
-                                <h2 className="text-3xl font-bold">
-                                    الرحلات المؤرشفة
-                                </h2>
+                            <h2 className="text-3xl font-bold">
+                                الرحلات المؤرشفة
+                            </h2>
 
-                            </div>
+                        </div>
 
-                            <span className="text-2xl">
+                        <span className="text-2xl">
 
-                                {showArchives
-                                    ? "▲"
-                                    : "▼"}
+                            {showArchives
+                                ? "▲"
+                                : "▼"}
 
-                            </span>
+                        </span>
 
-                        </button>
+                    </button>
 
-                        {showArchives && (
+                    {showArchives && (
 
-                            <div className="space-y-4 overflow-x-auto">
-                                {archives.map(
-                                    (archive) => (
+                        <div className="space-y-4 overflow-x-auto">
+                            {archives.map(
+                                (archive) => (
 
-                                        <div
-                                            key={archive.id}
-                                            className="
+                                    <div
+                                        key={archive.id}
+                                        className="
   bg-slate-900/60
   border
   border-amber-700/40
@@ -1724,91 +1904,129 @@ mt-16
   md:justify-between
   md:items-center
 "
-                                        >
+                                    >
 
-                                            <div>
+                                        <div>
 
-                                                <h3 className="text-2xl font-bold">
-                                                    {
-                                                        archive.tripData
-                                                            ?.route
-                                                    }
-                                                </h3>
+                                            <h3 className="text-2xl font-bold">
+                                                {
+                                                    archive.tripData
+                                                        ?.route
+                                                }
+                                            </h3>
 
-                                                <p>
-                                                    عدد الركاب:
-                                                    {" "}
-                                                    {
-                                                        archive.passengerCount
-                                                    }
-                                                </p>
+                                            <p>
+                                                عدد الركاب:
+                                                {" "}
+                                                {
+                                                    archive.passengerCount
+                                                }
+                                            </p>
 
-                                            </div>
+                                        </div>
 
-                                            <div
-                                                className="
+                                        <div
+                                            className="
     flex
     flex-wrap
     gap-2
     w-full
     md:w-auto
   "
-                                            >
+                                        >
 
 
 
-                                                <button
-                                                    onClick={() =>
-                                                        restoreTrip(
-                                                            archive
-                                                        )
-                                                    }
-                                                    className="
+                                            <button
+                                                onClick={() =>
+                                                    restoreTrip(
+                                                        archive
+                                                    )
+                                                }
+                                                className="
     bg-green-600
     px-4
     py-2
     rounded-xl
   "
-                                                >
-                                                    Restore
-                                                </button>
+                                            >
+                                                Restore
+                                            </button>
 
-                                                <button
-                                                    className="
+                                            <button
+                                                className="
       bg-yellow-600
       px-4
       py-2
       rounded-xl
     "
-                                                >
-                                                    Excel
-                                                </button>
+                                            >
+                                                Excel
+                                            </button>
 
-                                            </div>
                                         </div>
+                                    </div>
 
-                                    )
-                                )}
+                                )
+                            )}
 
-                            </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
+                </div>
 
 
 
-                    <button
-                        onClick={() =>
-                            setShowTripForm(
-                                !showTripForm
-                            )
-                        }
-                        className="fixed bottom-6 left-6 z-50 bg-blue-600 text-white px-6 py-4 rounded-full shadow-2xl"
-                    >
+
+
+                <button
+                    onClick={() =>
+                        setShowTripForm(!showTripForm)
+                    }
+                    className="
+    fixed
+    bottom-8
+    left-8
+    z-50
+
+    w-[88px]
+    h-[88px]
+
+    rounded-full
+
+    flex
+    flex-col
+    items-center
+    justify-center
+
+    bg-gradient-to-br
+    from-fuchsia-600
+    via-indigo-600
+    to-cyan-500
+
+    border-4
+    border-white/20
+
+    shadow-[0_0_40px_rgba(168,85,247,0.7)]
+
+    text-white
+
+    hover:scale-105
+    transition-all
+    duration-300
+  "
+                >
+                    <span className="text-4xl leading-none">
+                        +
+                    </span>
+
+                    <span className="text-[10px] font-bold leading-none">
                         إضافة رحلة
-                    </button>
-                    {showTripForm && (
-                        <div
-                            className="
+                    </span>
+                </button>
+
+                {showTripForm && (
+                    <div
+                        className="
     fixed
     inset-0
     bg-black/60
@@ -1816,10 +2034,10 @@ mt-16
     overflow-y-auto
     p-6
   "
-                        >
-                            <div
-                                className="
-    bg-blue-950
+                    >
+                        <div
+                            className="
+bg-[#071427]
     rounded-3xl
     p-6
     w-full
@@ -1829,133 +2047,140 @@ mt-16
     my-10
     mx-auto
   "
+                        >
+                            <h2 className="text-2xl font-bold mb-6 pr-12 text-right">
+                                إضافة رحلة
+                            </h2>
+                            <button
+                                onClick={() =>
+                                    setShowTripForm(false)
+                                }
+                                className="absolute top-4 left-4 bg-white/20 hover:bg-white/30 backdrop-blur-md w-10 h-10 rounded-full transition"
                             >
-                                <h2 className="text-2xl font-bold mb-6 pr-12 text-right">
-                                    إضافة رحلة
-                                </h2>
-                                <button
-                                    onClick={() =>
-                                        setShowTripForm(false)
+                                ✕
+                            </button>
+                            <div className="grid md:grid-cols-5 gap-4">
+
+                                <input
+                                    type="text"
+                                    placeholder="خط الرحلة"
+                                    value={route}
+                                    onChange={(e) =>
+                                        setRoute(e.target.value)
                                     }
-                                    className="absolute top-4 left-4 bg-white/20 hover:bg-white/30 backdrop-blur-md w-10 h-10 rounded-full transition"
-                                >
-                                    ✕
-                                </button>
-                                <div className="grid md:grid-cols-5 gap-4">
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
 
-                                    <input
-                                        type="text"
-                                        placeholder="خط الرحلة"
-                                        value={route}
-                                        onChange={(e) =>
-                                            setRoute(e.target.value)
-                                        }
-                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                    />
+                                <input
+                                    type="date" placeholder="التاريخ"
+                                    value={date}
+                                    onChange={(e) =>
+                                        setDate(e.target.value)
+                                    }
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
 
-                                    <input
-                                        type="date" placeholder="التاريخ"
-                                        value={date}
-                                        onChange={(e) =>
-                                            setDate(e.target.value)
-                                        }
-                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                    />
-
-                                    <input
-                                        type="time"
-                                        placeholder="الوقت"
-                                        value={time}
-                                        onChange={(e) =>
-                                            setTime(e.target.value)
-                                        }
-                                        className="bg-slate-700 p-4 rounded-2xl outline-none"
-                                    />
+                                <input
+                                    type="time"
+                                    placeholder="الوقت"
+                                    value={time}
+                                    onChange={(e) =>
+                                        setTime(e.target.value)
+                                    }
+                                    className="bg-slate-700 p-4 rounded-2xl outline-none"
+                                />
 
 
-                                    <input
-                                        type="number"
-                                        placeholder="عدد تذاكر الدرجة الثانية" value={secondClassTickets}
-                                        onChange={(e) =>
-                                            setSecondClassTickets(
-                                                e.target.value
-                                            )
-                                        }
-                                        className="
+                                <input
+                                    type="number"
+                                    placeholder="عدد تذاكر الدرجة الثانية" value={secondClassTickets}
+                                    onChange={(e) =>
+                                        setSecondClassTickets(
+                                            e.target.value
+                                        )
+                                    }
+                                    className="
     bg-slate-700
     p-4
     rounded-2xl
     outline-none
   "
-                                    />
+                                />
 
 
 
 
-                                    <input
-                                        type="number"
-                                        placeholder="سعر الدرجة الثانية" value={secondClassPrice}
-                                        onChange={(e) =>
-                                            setSecondClassPrice(
-                                                e.target.value
-                                            )
-                                        }
-                                        className="
+                                <input
+                                    type="number"
+                                    placeholder="سعر الدرجة الثانية" value={secondClassPrice}
+                                    onChange={(e) =>
+                                        setSecondClassPrice(
+                                            e.target.value
+                                        )
+                                    }
+                                    className="
     bg-slate-700
     p-4
     rounded-2xl
     outline-none
   "
-                                    />
+                                />
 
-                                    <input
-                                        type="number"
-                                        placeholder="عدد تذاكر الكابن"
-                                        value={cabinTickets}
-                                        onChange={(e) =>
-                                            setCabinTickets(
-                                                e.target.value
-                                            )
-                                        }
-                                        className="
+                                <input
+                                    type="number"
+                                    placeholder="عدد تذاكر الكابن"
+                                    value={cabinTickets}
+                                    onChange={(e) =>
+                                        setCabinTickets(
+                                            e.target.value
+                                        )
+                                    }
+                                    className="
     bg-slate-700
     p-4
     rounded-2xl
     outline-none
   "
-                                    />
+                                />
 
 
-                                    <input
-                                        type="number"
-                                        placeholder="سعر الكابن"
-                                        value={cabinPrice}
-                                        onChange={(e) =>
-                                            setCabinPrice(
-                                                e.target.value
-                                            )
-                                        }
-                                        className="
+                                <input
+                                    type="number"
+                                    placeholder="سعر الكابن"
+                                    value={cabinPrice}
+                                    onChange={(e) =>
+                                        setCabinPrice(
+                                            e.target.value
+                                        )
+                                    }
+                                    className="
     bg-slate-700
     p-4
     rounded-2xl
     outline-none
   "
-                                    />
+                                />
 
 
 
 
-                                </div>
+                            </div>
 
-                                <button
-                                    onClick={addTrip}
-                                    className="bg-blue-600 mt-6 px-6 py-3 rounded-2xl"
-                                >
-                                    إضافة الرحلة
-                                </button>
-                                <div className="mt-8 grid gap-4">
-                                    {trips.map((trip) => (
+                            <button
+                                onClick={addTrip}
+                                className="bg-blue-600 mt-6 px-6 py-3 rounded-2xl"
+                            >
+                                إضافة الرحلة
+                            </button>
+
+                            <div className="mt-8 grid gap-4">
+                                {trips
+                                    .filter(
+                                        (trip) =>
+                                            !trip.tripTimestamp ||
+                                            trip.tripTimestamp > Date.now()
+                                    )
+                                    .map((trip) => (
                                         <div
                                             key={trip.id}
                                             className="bg-slate-800 rounded-2xl p-4 flex items-center justify-between"
@@ -2028,12 +2253,12 @@ mt-16
                                             </div>
                                         </div>
                                     ))}
-                                </div>
-
                             </div>
+
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
+
             </div>
 
             {selectedAgent && (
@@ -2050,34 +2275,31 @@ mt-16
                 >
 
                     <div
-                       className="
+                        className="
   max-w-7xl
   mx-auto
-  bg-fuchsia-950
-  border
-  border-fuchsia-700
+  bg-[#071427]
+border-[#12315f]
   rounded-3xl
   p-6
   shadow-2xl
 "
                     >
 
-                      <div
-  className="
-    flex
-    flex-col
-    md:flex-row
-    gap-4
-    md:items-center
-    md:justify-between
-    mb-8
-  "
->
+                        <div
+                            className="
+relative
+w-full
+flex
+justify-center
+items-center
+"
+                        >
 
-  <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4">
 
-    <div
-      className="
+                                <div
+                                    className="
         w-16
         h-16
         rounded-full
@@ -2087,227 +2309,227 @@ mt-16
         justify-center
         text-3xl
       "
-    >
-      👤
-    </div>
+                                >
+                                    👤
+                                </div>
 
-    <div>
+                                <div>
 
-      <h2 className="text-3xl font-bold">
-        {selectedAgent.fullName}
-      </h2>
+                                    <h2 className="text-3xl font-bold">
+                                        {selectedAgent.fullName}
+                                    </h2>
 
-      <p className="text-slate-400">
-        وكيل معتمد
-      </p>
+                                    <p className="text-slate-400">
+                                        وكيل معتمد
+                                    </p>
 
-    </div>
+                                </div>
 
-  </div>
+                            </div>
 
-  <div className="flex gap-3">
+                            <div className="flex gap-3">
 
-    <button
-      onClick={() =>
-        exportAgentExcel(
-          selectedAgent
-        )
-      }
-      className="
+                                <button
+                                    onClick={() =>
+                                        exportAgentExcel(
+                                            selectedAgent
+                                        )
+                                    }
+                                    className="
         bg-green-600
         px-4
         py-2
         rounded-xl
       "
-    >
-      Export Excel
-    </button>
+                                >
+                                    Export Excel
+                                </button>
 
-    <button
-      onClick={() =>
-        setSelectedAgent(null)
-      }
-      className="
+                                <button
+                                    onClick={() =>
+                                        setSelectedAgent(null)
+                                    }
+                                    className="
         bg-red-600
         px-4
         py-2
         rounded-xl
       "
-    >
-      إغلاق
-    </button>
+                                >
+                                    إغلاق
+                                </button>
 
-  </div>
+                            </div>
 
-</div>
+                        </div>
 
 
                         <div className="grid md:grid-cols-3 gap-4 mb-8">
 
-  <div className="bg-slate-900/40 rounded-2xl p-4">
+                            <div className="bg-slate-900/40 rounded-2xl p-4">
 
-    <p className="text-slate-400">
-      الحجوزات
-    </p>
+                                <p className="text-slate-400">
+                                    الحجوزات
+                                </p>
 
-    <h3 className="text-3xl font-bold">
-      {
-        bookings.filter(
-          booking =>
-            booking.agentId ===
-            selectedAgent.id
-        ).length
-      }
-    </h3>
+                                <h3 className="text-3xl font-bold">
+                                    {
+                                        bookings.filter(
+                                            booking =>
+                                                booking.agentId ===
+                                                selectedAgent.id
+                                        ).length
+                                    }
+                                </h3>
 
-  </div>
+                            </div>
 
-  <div className="bg-green-900/30 rounded-2xl p-4">
+                            <div className="bg-green-900/30 rounded-2xl p-4">
 
-    <p className="text-green-300">
-      المبيعات
-    </p>
+                                <p className="text-green-300">
+                                    المبيعات
+                                </p>
 
-    <h3 className="text-3xl font-bold">
-      {
-        bookings
-          .filter(
-            booking =>
-              booking.agentId ===
-              selectedAgent.id
-          )
-          .reduce(
-            (sum, booking) =>
-              sum +
-              Number(
-                booking.ticketPrice || 0
-              ),
-            0
-          )
-      }
-      ج.م
-    </h3>
+                                <h3 className="text-3xl font-bold">
+                                    {
+                                        bookings
+                                            .filter(
+                                                booking =>
+                                                    booking.agentId ===
+                                                    selectedAgent.id
+                                            )
+                                            .reduce(
+                                                (sum, booking) =>
+                                                    sum +
+                                                    Number(
+                                                        booking.ticketPrice || 0
+                                                    ),
+                                                0
+                                            )
+                                    }
+                                    ج.م
+                                </h3>
 
-  </div>
+                            </div>
 
-  <div className="bg-blue-900/30 rounded-2xl p-4">
+                            <div className="bg-blue-900/30 rounded-2xl p-4">
 
-    <p className="text-blue-300">
-      العمولة
-    </p>
+                                <p className="text-blue-300">
+                                    العمولة
+                                </p>
 
-    <h3 className="text-3xl font-bold">
+                                <h3 className="text-3xl font-bold">
 
-      {(
-        bookings
-          .filter(
-            booking =>
-              booking.agentId ===
-              selectedAgent.id
-          )
-          .reduce(
-            (sum, booking) =>
-              sum +
-              Number(
-                booking.ticketPrice || 0
-              ),
-            0
-          ) *
-        (
-          Number(
-            selectedAgent.commissionRate
-          ) / 100
-        )
-      ).toFixed(2)}
+                                    {(
+                                        bookings
+                                            .filter(
+                                                booking =>
+                                                    booking.agentId ===
+                                                    selectedAgent.id
+                                            )
+                                            .reduce(
+                                                (sum, booking) =>
+                                                    sum +
+                                                    Number(
+                                                        booking.ticketPrice || 0
+                                                    ),
+                                                0
+                                            ) *
+                                        (
+                                            Number(
+                                                selectedAgent.commissionRate
+                                            ) / 100
+                                        )
+                                    ).toFixed(2)}
 
-      ج.م
+                                    ج.م
 
-    </h3>
+                                </h3>
 
-  </div>
+                            </div>
 
-</div>
+                        </div>
 
-<div className="overflow-x-auto">
+                        <div className="overflow-x-auto">
 
-  <table
-    className="
+                            <table
+                                className="
       min-w-[700px]
       w-full
     "
-  >                            
+                            >
 
-                            <thead>
+                                <thead>
 
-                                <tr className="
+                                    <tr className="
   border-b
   border-slate-700
   bg-fuchsia-900/20
 ">
 
-                                    <th className="p-3">
-                                        الراكب
-                                    </th>
+                                        <th className="p-3">
+                                            الراكب
+                                        </th>
 
-                                    <th className="p-3">
-                                        الرحلة
-                                    </th>
+                                        <th className="p-3">
+                                            الرحلة
+                                        </th>
 
-                                    <th className="p-3">
-                                        نوع التذكرة
-                                    </th>
+                                        <th className="p-3">
+                                            نوع التذكرة
+                                        </th>
 
-                                    <th className="p-3">
-                                        السعر
-                                    </th>
+                                        <th className="p-3">
+                                            السعر
+                                        </th>
 
-                                </tr>
+                                    </tr>
 
-                            </thead>
+                                </thead>
 
-                            <tbody>
+                                <tbody>
 
-                                {bookings
-                                    .filter(
-                                        (booking) =>
-                                            booking.agentId ===
-                                            selectedAgent.id
-                                    )
-                                    .map((booking) => (
+                                    {bookings
+                                        .filter(
+                                            (booking) =>
+                                                booking.agentId ===
+                                                selectedAgent.id
+                                        )
+                                        .map((booking) => (
 
-                                        <tr
-                                            key={booking.id}
-                                           className="
+                                            <tr
+                                                key={booking.id}
+                                                className="
   border-b
   border-slate-800
   hover:bg-fuchsia-900/20
   transition
 "
-                                        >
+                                            >
 
-                                            <td className="p-3">
-                                                {booking.name}
-                                            </td>
+                                                <td className="p-3">
+                                                    {booking.name}
+                                                </td>
 
-                                            <td className="p-3">
-                                                {booking.trip}
-                                            </td>
+                                                <td className="p-3">
+                                                    {booking.trip}
+                                                </td>
 
-                                            <td className="p-3">
-                                                {booking.ticketType}
-                                            </td>
+                                                <td className="p-3">
+                                                    {booking.ticketType}
+                                                </td>
 
-                                            <td className="p-3">
-                                                {booking.ticketPrice}
-                                            </td>
+                                                <td className="p-3">
+                                                    {booking.ticketPrice}
+                                                </td>
 
-                                        </tr>
+                                            </tr>
 
-                                    ))}
+                                        ))}
 
-                            </tbody>
+                                </tbody>
 
-                        </table>
+                            </table>
                         </div>
 
                     </div>

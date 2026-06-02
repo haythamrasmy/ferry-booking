@@ -75,7 +75,7 @@ export default function FerryBookingWebsite() {
   const [adminPassword, setAdminPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
 
-
+const [showCargo, setShowCargo] = useState(false);
 
   const [selectedCargo, setSelectedCargo] =
     useState({});
@@ -1069,123 +1069,39 @@ bg-black/55  "
   w-full
 "
         >
+<div className="flex justify-end">
+  <div
+    className="
+      bg-white/10
+      backdrop-blur-xl
+      rounded-[32px]
+      px-5
+      py-3
+      border
+      border-white/20
+      flex
+      items-center
+      gap-4
+    "
+  >
+    <img
+      src="/logo.png"
+      alt="Logo"
+      className="w-10 opacity-85"
+    />
 
-          {/* Navbar */}
-          <div className="flex items-start justify-between">
+    <img
+      src="/3a-logo.png"
+      alt="3A"
+      className="w-10 opacity-85"
+    />
 
-            {/* Nav Links */}
-            <div
-              className="
-          hidden
-          md:flex
-          items-center
-          gap-14
-text-white
-          font-bold
-          text-[22px]
-          pt-2
-        "
-            >
-
-              <a
-                href="#"
-                className="
-text-white
-            border-b-4
-border-white
-            pb-2
-          "
-              >
-                الرئيسية
-              </a>
-
-              <a
-                href="#"
-                className="hover:text-black-500 transition"
-              >
-                حجز رحلة
-              </a>
-
-              <a
-                href="#"
-                className="hover:text-black-500 transition"
-              >
-                حجوزاتي
-              </a>
-
-              <a
-                href="#"
-                className="hover:text-black-500 transition"
-              >
-                الشحن
-              </a>
-
-              <a
-                href="#"
-                className="hover:text-black-500 transition"
-              >
-                تتبع شحنتك
-              </a>
-
-              <a
-                href="#"
-                className="hover:text-black-500 transition"
-              >
-                تواصل معنا
-              </a>
-
-            </div>
-
-            {/* Small Top Banner */}
-            <div
-              className="
-bg-white/10 backdrop-blur-xlshadow-md
-rounded-[32px]
-px-5
-py-3
-border
-border-white/20
-          flex
-          items-center
-          gap-4
-        "
-            >
-
-              <img
-                src="/logo.png"
-                alt="Logo"
-                className="
-w-10  opacity-85
-"        />
-
-              <img
-                src="/3a-logo.png"
-                alt="3A"
-                className="
-w-10
-  opacity-85
-"        />
-
-              <div
-                className="
-text-white
-            font-black
-            text-xl
-            leading-tight
-          "
-              >
-                3A   international
-
-                <br />
-
-                <span className="text-base font-bold">
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
+    <div className="text-white font-black text-xl">
+      3A International
+    </div>
+  </div>
+</div>
+        
 
           {/* Main Hero */}
           <div
@@ -1393,6 +1309,63 @@ text-white/80 mb-14          "
 
         </div>
 
+      <button
+  onClick={() => {
+    document
+      .getElementById("agent-portal")
+      ?.scrollIntoView({
+        behavior: "smooth",
+      });
+  }}
+  className="
+    absolute
+    left-0
+    top-[35%]
+    z-40
+
+    bg-white/10
+    backdrop-blur-xl
+
+    border
+    border-white/20
+
+    text-white
+
+    px-4
+    py-5
+
+    rounded-r-3xl
+
+    shadow-2xl
+
+    hover:bg-white/15
+    hover:translate-x-2
+
+    transition-all
+    duration-300
+
+    font-bold
+    text-sm
+
+    flex
+    flex-col
+    items-center
+    justify-center
+    gap-2
+
+    w-[95px]
+  "
+>
+  <span className="text-2xl">
+    👤
+  </span>
+
+  <div className="text-center leading-tight">
+    <div>بوابة</div>
+    <div>الوكيل</div>
+  </div>
+</button>
+
       </section>
 
       {/* Floating Search Card */}
@@ -1521,12 +1494,7 @@ placeholder:text-black/50        "
       </section>
 
 
-      {isAdmin && (
-
-        <section className="max-w-5xl mx-auto px-6 py-16">
-
-        </section>
-      )}
+     
 
       <section id="available-trips" className="max-w-5xl mx-auto px-6 py-16">
 
@@ -1547,9 +1515,17 @@ placeholder:text-black/50        "
     border-fuchsia-700/40
   "
 >
-          <h2 className="text-3xl font-bold mb-8">
-            الرحلات المتاحة
-          </h2>
+          <div className="mb-8">
+
+  <h2 className="text-4xl font-black">
+    الرحلات المتاحة
+  </h2>
+
+  <p className="text-slate-300 mt-2">
+    اختر الرحلة المناسبة ثم نوع التذكرة
+  </p>
+
+</div>
 
           <div className="grid md:grid-cols-2 gap-6">
 
@@ -1595,6 +1571,8 @@ hover:border-fuchsia-400
   <h3 className="text-2xl font-bold">
     🚢 {trip.route}
   </h3>
+
+ 
 
   {selectedTrip?.id === trip.id && (
 
@@ -1709,10 +1687,85 @@ text-white
   </span>
 
 </div>
-                 <p>
-  الدرجة الثانية:
-  {trip.secondClassPrice} ج.م
-</p>
+                 <div className="grid grid-cols-2 gap-3 mt-4">
+
+  <div
+  onClick={(e) => {
+    e.stopPropagation();
+
+    if (
+      (trip.remainingCabinTickets ??
+        trip.cabinTickets ??
+        0) <= 0
+    ) {
+      alert("الكبائن غير متاحة");
+      return;
+    }
+
+    setSelectedTrip(trip);
+    setSelectedTicketType("Cabin");
+  }}
+  className={`
+    rounded-2xl
+    p-3
+    cursor-pointer
+    transition
+    ${
+      selectedTrip?.id === trip.id &&
+      selectedTicketType === "Cabin"
+        ? "bg-blue-600 text-white"
+        : "bg-white/10 hover:bg-white/20"
+    }
+  `}
+>
+  <p className="text-sm text-slate-300">
+    كابينة
+  </p>
+
+  <p className="font-bold text-lg">
+    {trip.cabinPrice} ج.م
+  </p>
+</div>
+
+<div
+  onClick={(e) => {
+    e.stopPropagation();
+
+    if (
+      (trip.remainingSecondClassTickets ??
+        trip.secondClassTickets ??
+        0) <= 0
+    ) {
+      alert("الدرجة الثانية غير متاحة");
+      return;
+    }
+
+    setSelectedTrip(trip);
+    setSelectedTicketType("Second Class");
+  }}
+  className={`
+    rounded-2xl
+    p-3
+    cursor-pointer
+    transition
+    ${
+      selectedTrip?.id === trip.id &&
+      selectedTicketType === "Second Class"
+        ? "bg-blue-600 text-white"
+        : "bg-white/10 hover:bg-white/20"
+    }
+  `}
+>
+  <p className="text-sm text-slate-300">
+    درجة ثانية
+  </p>
+
+  <p className="font-bold text-lg">
+    {trip.secondClassPrice} ج.م
+  </p>
+</div>
+
+</div>
 
 </div>
 
@@ -1725,113 +1778,10 @@ text-white
 
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 py-16">
+      
 
-        <div className="grid md:grid-cols-2 gap-6">
+     
 
-          {/* Cabin */}
-
-          <div
-            onClick={() => {
-
-              if (
-                (
-                  selectedTrip?.remainingCabinTickets ??
-                  selectedTrip?.cabinTickets ??
-                  0
-                ) <= 0
-              ) {
-                alert(
-                  "الكبائن غير متاحة"
-                );
-                return;
-              }
-
-              setSelectedTicketType(
-                "Cabin"
-              );
-
-            }}
-            className={`
-        rounded-3xl
-        p-8
-        cursor-pointer
-        transition
-        shadow-xl
-        ${selectedTicketType ===
-                "Cabin"
-                ? "bg-blue-700 text-white"
-                : "bg-white"
-              }
-      `}
-          >
-
-            <h2 className="text-3xl font-bold mb-4">
-              كابينة            </h2>
-
-            <p className="text-2xl font-bold">
-
-              {
-                selectedTrip?.cabinPrice
-              } ج.م
-
-            </p>
-
-          </div>
-
-          {/* Second Class */}
-
-          <div
-            onClick={() => {
-
-              if (
-                (
-                  selectedTrip?.remainingSecondClassTickets ??
-                  selectedTrip?.secondClassTickets ??
-                  0
-                ) <= 0
-              ) {
-                alert(
-                  "الدرجة الثانية غير متاحة"
-                );
-                return;
-              }
-
-              setSelectedTicketType(
-                "Second Class"
-              );
-
-            }}
-            className={`
-        rounded-3xl
-        p-8
-        cursor-pointer
-        transition
-        shadow-xl
-        ${selectedTicketType ===
-                "Second Class"
-                ? "bg-blue-700 text-white"
-                : "bg-white"
-              }
-      `}
-          >
-
-            <h2 className="text-3xl font-bold mb-4">
-              الدرجة الثانية            </h2>
-
-            <p className="text-2xl font-bold">
-
-              {
-                selectedTrip?.secondClassPrice
-              } ج.م
-
-            </p>
-
-          </div>
-
-        </div>
-
-      </section>
       {/* Booking Form */}
       <section id="booking-section" className="max-w-5xl mx-auto px-6 py-16">
         <div className="bg-white rounded-3xl shadow-xl p-8">
@@ -1872,12 +1822,34 @@ text-white
 
           <div className="mt-10">
 
-            <h2 className="text-3xl font-bold mb-8">
-              البضائع المصاحبة
-            </h2>
+           <button
+  onClick={() =>
+    setShowCargo(!showCargo)
+  }
+  className="
+    w-full
+    flex
+    justify-between
+    items-center
+    mb-8
+    text-right
+  "
+>
 
-            <div className="grid md:grid-cols-2 gap-4">
+  <h2 className="text-3xl font-bold">
+    البضائع المصاحبة
+  </h2>
 
+  <span className="text-2xl">
+{showCargo ? "−" : "+"}
+  </span>
+
+</button>
+
+{showCargo && (
+
+<div className="grid md:grid-cols-2 gap-4">
+  
               {cargoItems.map((item) => (
 
                 <div
@@ -1945,7 +1917,7 @@ text-white
               ))}
 
             </div>
-
+)}
           </div>
 
           <div className="mt-8">
@@ -2253,8 +2225,10 @@ text-white
 
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-16">
-
+<section
+  id="agent-portal"
+  className="max-w-5xl mx-auto px-6 py-16"
+>
 <div
   className="
     bg-gradient-to-br
