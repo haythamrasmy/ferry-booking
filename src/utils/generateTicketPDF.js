@@ -33,7 +33,7 @@ export const generateTicketPDF = async (booking) => {
   doc.text("Wadi El Nile Ferry Ticket", 55, 35);
 
   // Large Background Watermark
-  doc.setTextColor(230, 230, 230); // Very light grey for background watermark
+  doc.setTextColor(230, 230, 230); 
   doc.setFontSize(70);
   doc.text("WNF", 70, 160, { angle: 45 });
 
@@ -73,7 +73,7 @@ export const generateTicketPDF = async (booking) => {
   }
 
   // Primary Ticket Barcode (Using Tracking ID)
-  if (booking.trackingId) {
+  if (booking.trackingId && typeof window !== "undefined") {
     try {
       const ticketCanvas = document.createElement("canvas");
       JsBarcode(ticketCanvas, booking.trackingId, { format: "CODE128", displayValue: false });
@@ -106,8 +106,7 @@ export const generateTicketPDF = async (booking) => {
   localStorage.removeItem("pendingBooking");
 
   // --- PAGE 2+: CARGO ITEMS SECTION ---
-  if (booking.cargo && Object.keys(booking.cargo).length > 0) {
-    // Force cargo entries to start cleanly on a fresh secondary page
+  if (booking.cargo && Object.keys(booking.cargo).length > 0 && typeof window !== "undefined") {
     doc.addPage();
     
     let cargoY = 30;
@@ -116,44 +115,38 @@ export const generateTicketPDF = async (booking) => {
     doc.text("Cargo Tracking Tags", 20, 20);
     doc.line(20, 23, 190, 23);
 
-    console.log("CARGO DATA:", booking.cargo);
+    // Reuse a single canvas element context instead of polluting the DOM tree loop memory
+    const cargoCanvas = document.createElement("canvas");
 
-    console.log("booking.cargo =", booking.cargo);
+    Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
+      for (let i = 1; i <= qty; i++) {
+        // Dynamic Page Splitter Safety Check (Tightened down to 235 for clean bottom boundaries)
+        if (cargoY > 235) {
+          doc.addPage();
+          cargoY = 30; 
+        }
 
-Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
-  console.log("item =", item);
-  console.log("qty =", qty);
-
-  doc.setTextColor(255, 0, 0);
-  doc.text(`TEST: ${item} - ${qty}`, 25, cargoY);
-
-  cargoY += 20;
-});
-
-        // Generate unique tracking identifier string per individual item package
-const serialNumber =
-  `${booking.ticketId || "CRG"}-${itemIndex}-${i}`;
-
-const barcodeData =
-  `ITEM:${item};SERIAL:${serialNumber}`;
-
+        // Clean serial assignment (avoiding messy syntax combinations)
+        const serialNumber = `${booking.ticketId || "CRG"}-${itemIndex + 1}-${i}`;
 
         try {
-          const cargoCanvas = document.createElement("canvas");
-         JsBarcode(cargoCanvas, barcodeData, {
-  format: "CODE128",
-  height: 40,
-  fontSize: 12,
-});
+          // Pass ONLY the unique alphanumeric serial string to barcode library
+          JsBarcode(cargoCanvas, serialNumber, {
+            format: "CODE128",
+            height: 40,
+            displayValue: false // CRITICAL: Stop text rendering natively to fix graphics degradation
+          });
+          
           const cargoBarcodeImg = cargoCanvas.toDataURL("image/png");
 
           // Render Text Metadata Block
           doc.setTextColor(0);
           doc.setFontSize(13);
           doc.text(`Item: ${item} (${i}/${qty})`, 25, cargoY);
+          
           doc.setFontSize(10);
           doc.setTextColor(100);
-doc.text(`Serial: ${serialNumber}`, 25, cargoY + 6);
+          doc.text(`Serial: ${serialNumber}`, 25, cargoY + 6);
 
           // Render Accompanying Barcode Graphics
           doc.addImage(cargoBarcodeImg, "PNG", 25, cargoY + 10, 110, 22);
@@ -162,10 +155,10 @@ doc.text(`Serial: ${serialNumber}`, 25, cargoY + 6);
           doc.setDrawColor(220);
           doc.rect(20, cargoY - 6, 170, 42);
 
-          // Step cursor downward to buffer spatial footprint for subsequent asset blocks
+          // Step cursor downward
           cargoY += 52;
         } catch (err) {
-          console.error(`Error rendering cargo barcode tag variant item entry index: ${i}`, err);
+          console.error(`Error rendering cargo barcode tag for serial: ${serialNumber}`, err);
         }
       }
     });
