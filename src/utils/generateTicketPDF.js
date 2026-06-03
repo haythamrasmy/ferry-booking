@@ -116,13 +116,19 @@ export const generateTicketPDF = async (booking) => {
     doc.text("Cargo Tracking Tags", 20, 20);
     doc.line(20, 23, 190, 23);
 
-    Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
-      for (let i = 1; i <= qty; i++) {
-        // Dynamic Page Splitter Safety Check
-        if (cargoY > 240) {
-          doc.addPage();
-          cargoY = 30; // Reset Y placement for top of new page
-        }
+    console.log("CARGO DATA:", booking.cargo);
+
+    console.log("booking.cargo =", booking.cargo);
+
+Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
+  console.log("item =", item);
+  console.log("qty =", qty);
+
+  doc.setTextColor(255, 0, 0);
+  doc.text(`TEST: ${item} - ${qty}`, 25, cargoY);
+
+  cargoY += 20;
+});
 
         // Generate unique tracking identifier string per individual item package
 const serialNumber =
