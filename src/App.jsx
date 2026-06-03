@@ -1371,14 +1371,15 @@ text-white/80 mb-14          "
       {/* Floating Search Card */}
 
       <section
-        className="
+  className="
     relative
     z-30
     max-w-7xl
     mx-auto
     px-6
--mt-10 md:-mt-24  "
-      >
+    -mt-10 md:-mt-6
+  "
+>
 
         <div
           className="
