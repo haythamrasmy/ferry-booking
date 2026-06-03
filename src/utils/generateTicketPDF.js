@@ -125,15 +125,20 @@ export const generateTicketPDF = async (booking) => {
         }
 
         // Generate unique tracking identifier string per individual item package
-        const calculatedCargoCode = `${booking.ticketId || "CRG"}-${itemIndex}-${i}`;
+const serialNumber =
+  `${booking.ticketId || "CRG"}-${itemIndex}-${i}`;
+
+const barcodeData =
+  `ITEM:${item};SERIAL:${serialNumber}`;
+
 
         try {
           const cargoCanvas = document.createElement("canvas");
-          JsBarcode(cargoCanvas, calculatedCargoCode, {
-            format: "CODE128",
-            height: 40,
-            fontSize: 12,
-          });
+         JsBarcode(cargoCanvas, barcodeData, {
+  format: "CODE128",
+  height: 40,
+  fontSize: 12,
+});
           const cargoBarcodeImg = cargoCanvas.toDataURL("image/png");
 
           // Render Text Metadata Block
@@ -142,7 +147,7 @@ export const generateTicketPDF = async (booking) => {
           doc.text(`Item: ${item} (${i}/${qty})`, 25, cargoY);
           doc.setFontSize(10);
           doc.setTextColor(100);
-          doc.text(`ID: ${calculatedCargoCode}`, 25, cargoY + 6);
+doc.text(`Serial: ${serialNumber}`, 25, cargoY + 6);
 
           // Render Accompanying Barcode Graphics
           doc.addImage(cargoBarcodeImg, "PNG", 25, cargoY + 10, 110, 22);

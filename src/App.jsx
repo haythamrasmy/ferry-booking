@@ -1377,7 +1377,7 @@ text-white/80 mb-14          "
     max-w-7xl
     mx-auto
     px-6
-    -mt-10 md:-mt-6
+    -mt-10 md:-mt-3
   "
 >
 
@@ -1392,6 +1392,8 @@ text-white/80 mb-14          "
       p-6
     "
         >
+
+
 
           <div
             className="
