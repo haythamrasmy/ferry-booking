@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import JsBarcode from "jsbarcode";
 
-// Note: ArabicReshaper transforms isolated Arabic letters into their connected contextual shapes
+// Correct configuration import for arabic-reshaper package
 import ArabicReshaper from "arabic-reshaper";
 import cairoFont from "../../public/fonts/Cairo-Regular.ttf";
 
@@ -115,41 +115,48 @@ export const generateTicketPDF = async (booking) => {
     doc.text("Cargo Tracking Tags", 20, 20);
     doc.line(20, 23, 190, 23);
 
-    // Reuse a single canvas context to minimize memory overhead
     const cargoCanvas = document.createElement("canvas");
-    cargoCanvas.width = 400;  // Pre-scale internal resolution width
-    cargoCanvas.height = 100; // Pre-scale internal resolution height
+    cargoCanvas.width = 400;  
+    cargoCanvas.height = 100;
+
+    // Safely instantiate the reshaper engine once outside the loop
+    let reshaperInstance = null;
+    try {
+      reshaperInstance = new ArabicReshaper();
+    } catch(e) {
+      console.warn("ArabicReshaper could not initialize, falling back to primitive text fallback.", e);
+    }
 
     Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
       for (let i = 1; i <= qty; i++) {
-        // Dynamic Page Splitter Safety Check
         if (cargoY > 235) {
           doc.addPage();
           cargoY = 30; 
         }
 
-        // 1. Generate unique serial configuration identifier
         const serialNumber = `${booking.ticketId || "CRG"}-${itemIndex + 1}-${i}`;
 
-        // 2. Prepare barcode payload combining serial and item name safely
-        // Replacing spaces with underscores ensures smooth scanning compatibility across all scanners
+        // Prepare the dual-data layout barcode payload (Serial + Item description)
         const safeItemString = item.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
         const barcodeData = `${serialNumber}|${safeItemString}`;
 
-        // 3. Fix Arabic Script Display Direction for PDF Text Output
-        // Shape the string characters dynamically 
-        const shapedItemName = ArabicReshaper.reshape(item);
-        // Reverse array direction context so jsPDF outputs right-to-left logic natively
+        // Shape and format the layout string safely
+        let shapedItemName = item;
+        if (reshaperInstance && typeof reshaperInstance.convert === "function") {
+          shapedItemName = reshaperInstance.convert(item);
+        } else if (typeof ArabicReshaper.reshape === "function") {
+          shapedItemName = ArabicReshaper.reshape(item);
+        }
+
         const rtlItemName = shapedItemName.split("").reverse().join("");
         const labelDisplayText = `(${i}/${qty}) :Item ${rtlItemName}`;
 
         try {
-          // 4. Generate the barcode matrix image data
           JsBarcode(cargoCanvas, barcodeData, {
             format: "CODE128",
             height: 80,
             width: 2,
-            displayValue: false // Keeps barcode bars crisp and readable by laser optics
+            displayValue: false 
           });
           
           const cargoBarcodeImg = cargoCanvas.toDataURL("image/png");
@@ -157,7 +164,7 @@ export const generateTicketPDF = async (booking) => {
           // Render Text Metadata Block
           doc.setTextColor(0);
           doc.setFontSize(13);
-          doc.setFont("Cairo"); // Cairo font contains proper glyph mapping tables
+          doc.setFont("Cairo"); 
           doc.text(labelDisplayText, 25, cargoY);
           
           doc.setFontSize(10);
@@ -171,7 +178,6 @@ export const generateTicketPDF = async (booking) => {
           doc.setDrawColor(220);
           doc.rect(20, cargoY - 6, 170, 42);
 
-          // Step cursor downward
           cargoY += 52;
         } catch (err) {
           console.error(`Error rendering cargo barcode tag for serial: ${serialNumber}`, err);
