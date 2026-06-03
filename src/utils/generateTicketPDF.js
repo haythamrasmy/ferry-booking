@@ -1,10 +1,53 @@
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import JsBarcode from "jsbarcode";
-
-// Correct configuration import for arabic-reshaper package
-import ArabicReshaper from "arabic-reshaper";
 import cairoFont from "../../public/fonts/Cairo-Regular.ttf";
+
+/**
+ * Pure, self-contained Arabic shaping utility to fix jsPDF script detachment.
+ * Maps isolated Arabic glyphs to their proper initial, medial, or final shapes.
+ */
+const fixArabicText = (text) => {
+  if (!text) return "";
+  
+  const arabicMap = {
+    'ا': ['ﺍ', 'ﺎ', 'ﺎ', 'ﺍ'], 'ب': ['ﺏ', 'ﺐ', 'ﺒ', 'ﺑ'], 'ت': ['ﺕ', 'ﺖ', 'ﺘ', 'ﺗ'],
+    'ث': ['ﺙ', 'ﺚ', 'ﺜ', 'ﺛ'], 'ج': ['ﺝ', 'ﺞ', 'ﺠ', 'ﺟ'], 'ح': ['ﺡ', 'ﺢ', 'ﺤ', 'ﺣ'],
+    'خ': ['ﺥ', 'ﺦ', 'ﺨ', 'ﺧ'], 'د': ['ﺩ', 'ﺪ', 'ﺪ', 'ﺩ'], 'ذ': ['ﺫ', 'ﺬ', 'ﺬ', 'ﺫ'],
+    'ر': ['ﺭ', 'ﺮ', 'ﺮ', 'ﺭ'], 'ز': ['ﺯ', 'ﺰ', 'ﺰ', 'ﺯ'], 'س': ['ﺱ', 'ﺲ', 'ﺴ', 'ﺳ'],
+    'ش': ['ﺵ', 'ﺶ', 'ﺸ', 'ﺷ'], 'ص': ['ﺹ', 'ﺺ', 'ﺼ', 'ﺻ'], 'ض': ['ﺽ', 'ﺾ', 'ﻀ', 'ﺿ'],
+    'ط': ['ﻁ', 'ﻂ', 'ﻄ', 'ﻃ'], 'ظ': ['ﻅ', 'ﻆ', 'ﻈ', ' الظ'], 'ع': ['ﻉ', 'ﻊ', 'ﻌ', 'ﻋ'],
+    'غ': ['ﻍ', 'ﻎ', 'ﻐ', 'ﻏ'], 'ف': ['ﻑ', 'ﻒ', 'ﻔ', 'ﻓ'], 'ق': ['ﻕ', 'ﻖ', 'ﻘ', 'ﻗ'],
+    'ك': ['ﻙ', 'ﻚ', 'ﻜ', 'ﻛ'], 'ل': ['ﻝ', 'ﻞ', 'ﻠ', 'ﻟ'], 'م': ['ﻡ', 'ﻢ', 'ﻤ', 'ﻣ'],
+    'ن': ['ﻥ', 'ﻦ', 'ﻨ', 'ﻧ'], 'ه': ['ﻩ', 'ﻪ', 'ﻬ', 'ﻫ'], 'و': ['ﻭ', 'ﻮ', 'ﻮ', 'ﻭ'],
+    'ي': ['ﻱ', 'ﻲ', 'ﻴ', 'ﻳ'], 'ة': ['ﺓ', 'ﺔ', 'ﺔ', 'ﺓ'], 'ى': ['ﻯ', 'ﻰ', 'ﻰ', 'ﻯ'],
+    'لا': ['ﻻ', 'ﻼ', 'ﻼ', 'ﻻ']
+  };
+
+  let chars = text.split("");
+  let shaped = [];
+
+  for (let i = 0; i < chars.length; i++) {
+    let current = chars[i];
+    if (arabicMap[current]) {
+      let prev = chars[i - 1];
+      let next = chars[i + 1];
+      
+      let hasPrev = prev && arabicMap[prev] && !['ا', 'د', 'ذ', 'ر', 'ز', 'و', 'ة', 'ى'].includes(prev);
+      let hasNext = next && arabicMap[next];
+
+      if (hasPrev && hasNext) shaped.push(arabicMap[current][2]);      // Medial
+      else if (hasPrev && !hasNext) shaped.push(arabicMap[current][1]); // Final
+      else if (!hasPrev && hasNext) shaped.push(arabicMap[current][3]); // Initial
+      else shaped.push(arabicMap[current][0]);                          // Isolated
+    } else {
+      shaped.push(current);
+    }
+  }
+  
+  // Reverse the string explicitly for Right-To-Left execution blocks
+  return shaped.reverse().join("");
+};
 
 export const generateTicketPDF = async (booking) => {
   const doc = new jsPDF();
@@ -44,7 +87,11 @@ export const generateTicketPDF = async (booking) => {
   doc.text(`Passenger: ${booking.name || "N/A"}`, 20, 82);
   doc.text(`Passport: ${booking.passport || "N/A"}`, 20, 94);
   doc.text(`Ticket Type: ${booking.ticketType || "N/A"}`, 20, 106);
-  doc.text(`Trip: ${booking.trip || "N/A"}`, 20, 118);
+  
+  // Cleanly handle mixed Trip labels using our safe BiDi helper
+  const tripLabel = "Trip: ";
+  const processedTripData = booking.trip ? fixArabicText(booking.trip) : "N/A";
+  doc.text(`${tripLabel}${processedTripData}`, 20, 118);
 
   // Tracking Section
   doc.setFontSize(14);
@@ -115,17 +162,10 @@ export const generateTicketPDF = async (booking) => {
     doc.text("Cargo Tracking Tags", 20, 20);
     doc.line(20, 23, 190, 23);
 
+    // Prepare clear high-DPI canvas wrapper
     const cargoCanvas = document.createElement("canvas");
     cargoCanvas.width = 400;  
     cargoCanvas.height = 100;
-
-    // Safely instantiate the reshaper engine once outside the loop
-    let reshaperInstance = null;
-    try {
-      reshaperInstance = new ArabicReshaper();
-    } catch(e) {
-      console.warn("ArabicReshaper could not initialize, falling back to primitive text fallback.", e);
-    }
 
     Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
       for (let i = 1; i <= qty; i++) {
@@ -136,22 +176,16 @@ export const generateTicketPDF = async (booking) => {
 
         const serialNumber = `${booking.ticketId || "CRG"}-${itemIndex + 1}-${i}`;
 
-        // Prepare the dual-data layout barcode payload (Serial + Item description)
+        // Create a URL-safe, clean alphanumeric data string for the scanner lookup payload
         const safeItemString = item.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
         const barcodeData = `${serialNumber}|${safeItemString}`;
 
-        // Shape and format the layout string safely
-        let shapedItemName = item;
-        if (reshaperInstance && typeof reshaperInstance.convert === "function") {
-          shapedItemName = reshaperInstance.convert(item);
-        } else if (typeof ArabicReshaper.reshape === "function") {
-          shapedItemName = ArabicReshaper.reshape(item);
-        }
-
-        const rtlItemName = shapedItemName.split("").reverse().join("");
+        // Shape and format the item name securely using our internal helper function
+        const rtlItemName = fixArabicText(item);
         const labelDisplayText = `(${i}/${qty}) :Item ${rtlItemName}`;
 
         try {
+          // Generate sharp barcode graphics
           JsBarcode(cargoCanvas, barcodeData, {
             format: "CODE128",
             height: 80,
@@ -174,7 +208,7 @@ export const generateTicketPDF = async (booking) => {
           // Render Accompanying Barcode Graphics
           doc.addImage(cargoBarcodeImg, "PNG", 25, cargoY + 10, 110, 22);
           
-          // Outer boundary line box decoration around each individual tag item
+          // Outer card boundary box decoration around each item block
           doc.setDrawColor(220);
           doc.rect(20, cargoY - 6, 170, 42);
 
