@@ -154,7 +154,12 @@ export const generateTicketPDF = async (booking) => {
 
   // --- PAGE 2+: CARGO ITEMS SECTION ---
   if (booking.cargo && Object.keys(booking.cargo).length > 0 && typeof window !== "undefined") {
+
+    console.log("BOOKING =", booking);
+console.log("CARGO =", booking.cargo);
     doc.addPage();
+
+    
     
     let cargoY = 30;
     doc.setTextColor(0, 51, 102);
@@ -166,6 +171,8 @@ export const generateTicketPDF = async (booking) => {
     const cargoCanvas = document.createElement("canvas");
     cargoCanvas.width = 400;  
     cargoCanvas.height = 100;
+
+    console.log("CARGO PDF:", booking.cargo);
 
     Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
       for (let i = 1; i <= qty; i++) {
