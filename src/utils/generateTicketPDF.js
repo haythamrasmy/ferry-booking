@@ -193,9 +193,9 @@ console.log("CARGO =", booking.cargo);
 const barcodeData = serialNumber;
 
         // Shape and format the item name securely using our internal helper function
-        const rtlItemName = fixArabicText(item);
-        const labelDisplayText = `(${i}/${qty}) :Item ${rtlItemName}`;
-
+const rtlItemName = item;
+const labelDisplayText =
+`${rtlItemName} (${i}/${qty})`;
         try {
           // Generate sharp barcode graphics
           JsBarcode(cargoCanvas, barcodeData, {
