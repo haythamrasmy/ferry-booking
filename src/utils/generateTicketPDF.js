@@ -90,8 +90,13 @@ export const generateTicketPDF = async (booking) => {
   
   // Cleanly handle mixed Trip labels using our safe BiDi helper
   const tripLabel = "Trip: ";
-  const processedTripData = booking.trip ? fixArabicText(booking.trip) : "N/A";
-  doc.text(`${tripLabel}${processedTripData}`, 20, 118);
+const processedTripData =
+  booking.trip || "N/A";
+doc.text(
+  `${tripLabel}${processedTripData}`,
+  20,
+  118
+);
 
   // Tracking Section
   doc.setFontSize(14);
