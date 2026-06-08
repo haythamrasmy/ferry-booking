@@ -10,6 +10,8 @@ import {
     deleteDoc,
     doc,
     getDocs,
+    query,
+    where
 } from "firebase/firestore";
 
 import {
@@ -36,7 +38,7 @@ import {
 
 export default function Admin() {
 
-const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
+    const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
 
     const [bookings, setBookings] =
         useState([]);
@@ -105,6 +107,8 @@ const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
         setScannedCode
     ] = useState("");
 
+    const [scannedCargo, setScannedCargo] =
+        useState(null);
 
     const [agents, setAgents] = useState([]);
 
@@ -135,10 +139,10 @@ const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
 
 
 
-   const [
-  showBookingsSection,
-  setShowBookingsSection
-] = useState(false);
+    const [
+        showBookingsSection,
+        setShowBookingsSection
+    ] = useState(false);
 
 
 
@@ -203,21 +207,21 @@ const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
-               if (
-  user &&
-  user.email === ADMIN_EMAIL
-) {
+                if (
+                    user &&
+                    user.email === ADMIN_EMAIL
+                ) {
 
-  setIsAdmin(true);
+                    setIsAdmin(true);
 
-  unsubscribeBookings =
-    fetchBookings();
+                    unsubscribeBookings =
+                        fetchBookings();
 
-} else {
+                } else {
 
-  setIsAdmin(false);
+                    setIsAdmin(false);
 
-}
+                }
 
                 setLoading(false);
             });
@@ -307,24 +311,43 @@ const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
             "--qr-color",
             "black"
         );
+scanner.render(
 
-        scanner.render(
+  async (decodedText) => {
 
-            (decodedText) => {
+    setScannedCode(decodedText);
 
-                setScannedCode(
-                    decodedText
-                );
+    const q = query(
+      collection(db, "cargoItems"),
+      where("serial", "==", decodedText)
+    );
 
-                alert(
-                    `تم المسح: ${decodedText}`
-                );
+    const snapshot =
+      await getDocs(q);
 
-            },
+    if (!snapshot.empty) {
 
-            () => { }
+      const cargoData =
+        snapshot.docs[0].data();
 
-        );
+      setScannedCargo(cargoData);
+
+    } else {
+
+      setScannedCargo(null);
+
+      alert(
+        "لم يتم العثور على هذه القطعة"
+      );
+
+    }
+
+  },
+
+  () => {}
+
+);
+
         return () => {
             scanner.clear();
         };
@@ -607,39 +630,39 @@ const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
     };
 
 
-   const adminLogin = async () => {
-  try {
+    const adminLogin = async () => {
+        try {
 
-    const credential =
-      await signInWithEmailAndPassword(
-        auth,
-        adminEmail,
-        adminPassword
-      );
+            const credential =
+                await signInWithEmailAndPassword(
+                    auth,
+                    adminEmail,
+                    adminPassword
+                );
 
-    if (
-      credential.user.email !==
-      ADMIN_EMAIL
-    ) {
+            if (
+                credential.user.email !==
+                ADMIN_EMAIL
+            ) {
 
-      await signOut(auth);
+                await signOut(auth);
 
-      alert(
-        "هذا الحساب ليس حساب الأدمن"
-      );
+                alert(
+                    "هذا الحساب ليس حساب الأدمن"
+                );
 
-      return;
-    }
+                return;
+            }
 
-    alert("تم تسجيل دخول الأدمن");
+            alert("تم تسجيل دخول الأدمن");
 
-  } catch (error) {
+        } catch (error) {
 
-    console.log(error);
+            console.log(error);
 
-    alert("بيانات غير صحيحة");
-  }
-};
+            alert("بيانات غير صحيحة");
+        }
+    };
     const adminLogout = async () => {
         await signOut(auth);
     };
@@ -1001,15 +1024,15 @@ const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
 
                     <div className="flex-1 text-center">
 
-  <h1 className="text-5xl font-black">
-    لوحة التحكم
-  </h1>
+                        <h1 className="text-5xl font-black">
+                            لوحة التحكم
+                        </h1>
 
-  <p className="text-slate-400 mt-2">
-    إدارة الرحلات والحجوزات والوكلاء
-  </p>
+                        <p className="text-slate-400 mt-2">
+                            إدارة الرحلات والحجوزات والوكلاء
+                        </p>
 
-</div>
+                    </div>
                     <button
                         onClick={adminLogout}
                         className="bg-red-600 px-5 py-3 rounded-2xl"
@@ -2639,7 +2662,10 @@ items-center
     p-4
     rounded-2xl
   "
-                ></div>
+                >
+                
+                </div>
+
                 {scannedCode && (
 
                     <div
@@ -2659,6 +2685,46 @@ items-center
                     </div>
 
                 )}
+
+                {scannedCargo && (
+
+  <div
+    className="
+      mt-6
+      bg-blue-100
+      text-black
+      p-6
+      rounded-2xl
+    "
+  >
+
+    <h3 className="font-bold text-xl">
+      بيانات الشحنة
+    </h3>
+
+    <p>
+      الصنف:
+      {scannedCargo.item}
+    </p>
+
+    <p>
+      رقم التتبع:
+      {scannedCargo.trackingId}
+    </p>
+
+    <p>
+      الحالة:
+      {scannedCargo.status}
+    </p>
+
+    <p>
+      الرحلة:
+      {scannedCargo.destination}
+    </p>
+
+  </div>
+
+)}
 
             </div>
 
