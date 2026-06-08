@@ -9,7 +9,7 @@ import cairoFont from "../../public/fonts/Cairo-Regular.ttf";
  */
 const fixArabicText = (text) => {
   if (!text) return "";
-  
+
   const arabicMap = {
     'ا': ['ﺍ', 'ﺎ', 'ﺎ', 'ﺍ'], 'ب': ['ﺏ', 'ﺐ', 'ﺒ', 'ﺑ'], 'ت': ['ﺕ', 'ﺖ', 'ﺘ', 'ﺗ'],
     'ث': ['ﺙ', 'ﺚ', 'ﺜ', 'ﺛ'], 'ج': ['ﺝ', 'ﺞ', 'ﺠ', 'ﺟ'], 'ح': ['ﺡ', 'ﺢ', 'ﺤ', 'ﺣ'],
@@ -32,7 +32,7 @@ const fixArabicText = (text) => {
     if (arabicMap[current]) {
       let prev = chars[i - 1];
       let next = chars[i + 1];
-      
+
       let hasPrev = prev && arabicMap[prev] && !['ا', 'د', 'ذ', 'ر', 'ز', 'و', 'ة', 'ى'].includes(prev);
       let hasNext = next && arabicMap[next];
 
@@ -44,7 +44,7 @@ const fixArabicText = (text) => {
       shaped.push(current);
     }
   }
-  
+
   // Reverse the string explicitly for Right-To-Left execution blocks
   return shaped.reverse().join("");
 };
@@ -57,7 +57,7 @@ export const generateTicketPDF = async (booking) => {
   doc.setFont("Cairo");
 
   // --- PAGE 1: PASSENGER TICKET ---
-  
+
   // Outer Border
   doc.setDrawColor(0, 51, 102);
   doc.rect(10, 10, 190, 277);
@@ -76,7 +76,7 @@ export const generateTicketPDF = async (booking) => {
   doc.text("Wadi El Nile Ferry Ticket", 55, 35);
 
   // Large Background Watermark
-  doc.setTextColor(230, 230, 230); 
+  doc.setTextColor(230, 230, 230);
   doc.setFontSize(70);
   doc.text("WNF", 70, 160, { angle: 45 });
 
@@ -87,16 +87,16 @@ export const generateTicketPDF = async (booking) => {
   doc.text(`Passenger: ${booking.name || "N/A"}`, 20, 82);
   doc.text(`Passport: ${booking.passport || "N/A"}`, 20, 94);
   doc.text(`Ticket Type: ${booking.ticketType || "N/A"}`, 20, 106);
-  
+
   // Cleanly handle mixed Trip labels using our safe BiDi helper
   const tripLabel = "Trip: ";
-const processedTripData =
-  booking.trip || "N/A";
-doc.text(
-  `${tripLabel}${processedTripData}`,
-  20,
-  118
-);
+  const processedTripData =
+    booking.trip || "N/A";
+  doc.text(
+    `${tripLabel}${processedTripData}`,
+    20,
+    118
+  );
 
   // Tracking Section
   doc.setFontSize(14);
@@ -130,7 +130,7 @@ doc.text(
       const ticketCanvas = document.createElement("canvas");
       JsBarcode(ticketCanvas, booking.trackingId, { format: "CODE128", displayValue: false });
       const ticketBarcodeImg = ticketCanvas.toDataURL("image/png");
-      
+
       doc.setTextColor(0);
       doc.setFontSize(12);
       doc.text("Ticket Barcode:", 20, 165);
@@ -149,7 +149,7 @@ doc.text(
   doc.setFontSize(11);
   doc.text("Please arrive 2 hours before departure.", 20, 220);
   doc.text("Keep this ticket during the whole trip.", 20, 230);
-  
+
   doc.setTextColor(0, 51, 102);
   doc.setFontSize(12);
   doc.text("Wadi El Nile River Transport Authority", 20, 265);
@@ -161,11 +161,11 @@ doc.text(
   if (booking.cargo && Object.keys(booking.cargo).length > 0 && typeof window !== "undefined") {
 
     console.log("BOOKING =", booking);
-console.log("CARGO =", booking.cargo);
+    console.log("CARGO =", booking.cargo);
     doc.addPage();
 
-    
-    
+
+
     let cargoY = 30;
     doc.setTextColor(0, 51, 102);
     doc.setFontSize(18);
@@ -174,7 +174,7 @@ console.log("CARGO =", booking.cargo);
 
     // Prepare clear high-DPI canvas wrapper
     const cargoCanvas = document.createElement("canvas");
-    cargoCanvas.width = 400;  
+    cargoCanvas.width = 400;
     cargoCanvas.height = 100;
 
     console.log("CARGO PDF:", booking.cargo);
@@ -183,43 +183,42 @@ console.log("CARGO =", booking.cargo);
       for (let i = 1; i <= qty; i++) {
         if (cargoY > 235) {
           doc.addPage();
-          cargoY = 30; 
+          cargoY = 30;
         }
 
         const serialNumber = `${booking.ticketId || "CRG"}-${itemIndex + 1}-${i}`;
 
         // Create a URL-safe, clean alphanumeric data string for the scanner lookup payload
         const safeItemString = item.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
-const barcodeData = serialNumber;
+        const barcodeData = serialNumber;
 
         // Shape and format the item name securely using our internal helper function
-const rtlItemName = item;
-const labelDisplayText =
-`${rtlItemName} (${i}/${qty})`;
+        const rtlItemName = item;
+        const labelDisplayText =
+          `${rtlItemName} (${i}/${qty})`;
         try {
           // Generate sharp barcode graphics
           JsBarcode(cargoCanvas, barcodeData, {
             format: "CODE128",
             height: 80,
             width: 2,
-            displayValue: false 
+            displayValue: false
           });
-          
+
           const cargoBarcodeImg = cargoCanvas.toDataURL("image/png");
 
           // Render Text Metadata Block
           doc.setTextColor(0);
           doc.setFontSize(13);
-          doc.setFont("Cairo"); 
-          doc.text(labelDisplayText, 25, cargoY);
-          
+          doc.setFont("Cairo");
+          doc.text(" " + labelDisplayText, 25, cargoY);
           doc.setFontSize(10);
           doc.setTextColor(100);
           doc.text(`Serial: ${serialNumber}`, 25, cargoY + 6);
 
           // Render Accompanying Barcode Graphics
           doc.addImage(cargoBarcodeImg, "PNG", 25, cargoY + 10, 110, 22);
-          
+
           // Outer card boundary box decoration around each item block
           doc.setDrawColor(220);
           doc.rect(20, cargoY - 6, 170, 42);

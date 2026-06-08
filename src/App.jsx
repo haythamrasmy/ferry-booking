@@ -767,7 +767,43 @@ const [showCargo, setShowCargo] = useState(false);
         }
       );
 
+for (const [item, qty] of Object.entries(selectedCargo)) {
 
+  const itemIndex =
+    Object.keys(selectedCargo).indexOf(item);
+
+  for (let i = 1; i <= qty; i++) {
+
+    const serialNumber =
+      `${ticketId}-${itemIndex + 1}-${i}`;
+
+    await addDoc(
+      collection(db, "cargoItems"),
+      {
+        serial: serialNumber,
+
+        item: item,
+
+        ticketId: ticketId,
+
+        trackingId: trackingId,
+
+        senderName: name,
+
+        receiverName: name,
+
+        destination:
+          selectedTrip?.route,
+
+        status: "تم الاستلام",
+
+        createdAt: new Date(),
+      }
+    );
+
+  }
+
+}
 
       setUserBooking({
         id: bookingRef.id,
