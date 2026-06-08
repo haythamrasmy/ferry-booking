@@ -190,7 +190,7 @@ console.log("CARGO =", booking.cargo);
 
         // Create a URL-safe, clean alphanumeric data string for the scanner lookup payload
         const safeItemString = item.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
-        const barcodeData = `${serialNumber}|${safeItemString}`;
+const barcodeData = serialNumber;
 
         // Shape and format the item name securely using our internal helper function
         const rtlItemName = fixArabicText(item);
