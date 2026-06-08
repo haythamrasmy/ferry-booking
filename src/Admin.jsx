@@ -35,6 +35,9 @@ import {
 
 
 export default function Admin() {
+
+const ADMIN_EMAIL = "hrasmy2010@hotmail.com";
+
     const [bookings, setBookings] =
         useState([]);
 
@@ -139,6 +142,8 @@ export default function Admin() {
 
 
 
+
+
     useEffect(() => {
         let unsubscribeBookings = null;
 
@@ -198,14 +203,21 @@ export default function Admin() {
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    setIsAdmin(true);
+               if (
+  user &&
+  user.email === ADMIN_EMAIL
+) {
 
-                    unsubscribeBookings =
-                        fetchBookings();
-                } else {
-                    setIsAdmin(false);
-                }
+  setIsAdmin(true);
+
+  unsubscribeBookings =
+    fetchBookings();
+
+} else {
+
+  setIsAdmin(false);
+
+}
 
                 setLoading(false);
             });
@@ -595,23 +607,39 @@ export default function Admin() {
     };
 
 
-    const adminLogin = async () => {
-        try {
-            await signInWithEmailAndPassword(
-                auth,
-                adminEmail,
-                adminPassword
-            );
+   const adminLogin = async () => {
+  try {
 
-            alert("تم تسجيل دخول الأدمن");
+    const credential =
+      await signInWithEmailAndPassword(
+        auth,
+        adminEmail,
+        adminPassword
+      );
 
-        } catch (error) {
-            console.log(error);
+    if (
+      credential.user.email !==
+      ADMIN_EMAIL
+    ) {
 
-            alert("بيانات غير صحيحة");
-        }
-    };
+      await signOut(auth);
 
+      alert(
+        "هذا الحساب ليس حساب الأدمن"
+      );
+
+      return;
+    }
+
+    alert("تم تسجيل دخول الأدمن");
+
+  } catch (error) {
+
+    console.log(error);
+
+    alert("بيانات غير صحيحة");
+  }
+};
     const adminLogout = async () => {
         await signOut(auth);
     };
