@@ -2709,16 +2709,16 @@ items-center
   "
             >
 
-            <h2
-  className="
+                <h2
+                    className="
     text-3xl
     font-bold
     mb-6
     text-black
   "
->
-  ماسح التذاكر
-</h2>
+                >
+                    ماسح التذاكر
+                </h2>
 
                 <div
                     id="reader"
@@ -2732,8 +2732,8 @@ items-center
 
                 {scannedCargo && (
 
-                   <div
-  className="
+                    <div
+                        className="
       mt-6
       p-5
       rounded-xl
@@ -2742,7 +2742,7 @@ items-center
       text-black
       shadow
     "
->
+                    >
                         <h3 className="text-xl font-bold mb-4">
                             بيانات القطعة
                         </h3>
@@ -2791,54 +2791,82 @@ items-center
 
                             <button
                                 onClick={() =>
-                                    updateCargoStatus(
-                                        "تم الاستلام"
-                                    )
+                                    updateCargoStatus("تم الاستلام")
                                 }
+                                className="
+    bg-green-600
+    text-white
+    px-4
+    py-2
+    rounded-xl
+    font-bold
+  "
                             >
                                 تم الاستلام
                             </button>
 
                             <button
                                 onClick={() =>
-                                    updateCargoStatus(
-                                        "في المخزن"
-                                    )
+                                    updateCargoStatus("في المخزن")
                                 }
+                                className="
+    bg-blue-600
+    text-white
+    px-4
+    py-2
+    rounded-xl
+    font-bold
+  "
                             >
                                 في المخزن
                             </button>
 
+
                             <button
                                 onClick={() =>
-                                    updateCargoStatus(
-                                        "تم التحميل"
-                                    )
+                                    updateCargoStatus("تم التحميل")
                                 }
+                                className="
+    bg-yellow-600
+    text-white
+    px-4
+    py-2
+    rounded-xl
+    font-bold
+  "
                             >
                                 تم التحميل
                             </button>
-
                             <button
                                 onClick={() =>
-                                    updateCargoStatus(
-                                        "وصلت الوجهة"
-                                    )
+                                    updateCargoStatus("وصلت الوجهة")
                                 }
+                                className="
+    bg-purple-600
+    text-white
+    px-4
+    py-2
+    rounded-xl
+    font-bold
+  "
                             >
                                 وصلت الوجهة
                             </button>
-
                             <button
                                 onClick={() =>
-                                    updateCargoStatus(
-                                        "تم التسليم"
-                                    )
+                                    updateCargoStatus("تم التسليم")
                                 }
+                                className="
+    bg-red-600
+    text-white
+    px-4
+    py-2
+    rounded-xl
+    font-bold
+  "
                             >
                                 تم التسليم
                             </button>
-
                         </div>
 
                     </div>
