@@ -149,7 +149,47 @@ export default function Admin() {
     ] = useState(false);
 
 
+   const updateCargoStatus = async (
+            newStatus
+        ) => {
 
+            if (
+                !scannedCargoId
+            ) return;
+
+            try {
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "cargoItems",
+                        scannedCargoId
+                    ),
+                    {
+                        status:
+                            newStatus
+                    }
+                );
+
+                setScannedCargo(
+                    prev => ({
+                        ...prev,
+                        status:
+                            newStatus
+                    })
+                );
+
+            } catch (err) {
+
+                console.error(err);
+
+                alert(
+                    "فشل تحديث الحالة"
+                );
+
+            }
+
+        };
 
 
     useEffect(() => {
@@ -209,47 +249,7 @@ export default function Admin() {
                 }
             );
 
-        const updateCargoStatus = async (
-            newStatus
-        ) => {
-
-            if (
-                !scannedCargoId
-            ) return;
-
-            try {
-
-                await updateDoc(
-                    doc(
-                        db,
-                        "cargoItems",
-                        scannedCargoId
-                    ),
-                    {
-                        status:
-                            newStatus
-                    }
-                );
-
-                setScannedCargo(
-                    prev => ({
-                        ...prev,
-                        status:
-                            newStatus
-                    })
-                );
-
-            } catch (err) {
-
-                console.error(err);
-
-                alert(
-                    "فشل تحديث الحالة"
-                );
-
-            }
-
-        };
+     
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
