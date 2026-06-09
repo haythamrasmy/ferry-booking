@@ -2846,66 +2846,9 @@ items-center
 
                 )}
 
-                {scannedCode && (
+              
 
-                    <div
-                        className="
-        mt-6
-        p-4
-        bg-green-100
-        rounded-2xl
-        font-bold
-      "
-                    >
-
-                        الكود:
-                        {" "}
-                        {scannedCode}
-
-                    </div>
-
-                )}
-
-                {scannedCargo && (
-
-                    <div
-                        className="
-      mt-6
-      bg-blue-100
-      text-black
-      p-6
-      rounded-2xl
-    "
-                    >
-
-                        <h3 className="font-bold text-xl">
-                            بيانات الشحنة
-                        </h3>
-
-                        <p>
-                            الصنف:
-                            {scannedCargo.item}
-                        </p>
-
-                        <p>
-                            رقم التتبع:
-                            {scannedCargo.trackingId}
-                        </p>
-
-                        <p>
-                            الحالة:
-                            {scannedCargo.status}
-                        </p>
-
-                        <p>
-                            الرحلة:
-                            {scannedCargo.destination}
-                        </p>
-
-                    </div>
-
-                )}
-
+                
             </div>
 
         </div>
