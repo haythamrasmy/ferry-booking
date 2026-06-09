@@ -172,6 +172,11 @@ for (const [itemIndex, [item, qty]] of Object.entries(
 
         const serialNumber = `${booking.ticketId || "CRG"}-${itemIndex + 1}-${i}`;
 
+        console.log(
+  "PDF SERIAL =",
+  serialNumber
+);
+
         // Create a URL-safe, clean alphanumeric data string for the scanner lookup payload
         
 

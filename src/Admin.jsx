@@ -149,47 +149,47 @@ export default function Admin() {
     ] = useState(false);
 
 
-   const updateCargoStatus = async (
-            newStatus
-        ) => {
+    const updateCargoStatus = async (
+        newStatus
+    ) => {
 
-            if (
-                !scannedCargoId
-            ) return;
+        if (
+            !scannedCargoId
+        ) return;
 
-            try {
+        try {
 
-                await updateDoc(
-                    doc(
-                        db,
-                        "cargoItems",
-                        scannedCargoId
-                    ),
-                    {
-                        status:
-                            newStatus
-                    }
-                );
+            await updateDoc(
+                doc(
+                    db,
+                    "cargoItems",
+                    scannedCargoId
+                ),
+                {
+                    status:
+                        newStatus
+                }
+            );
 
-                setScannedCargo(
-                    prev => ({
-                        ...prev,
-                        status:
-                            newStatus
-                    })
-                );
+            setScannedCargo(
+                prev => ({
+                    ...prev,
+                    status:
+                        newStatus
+                })
+            );
 
-            } catch (err) {
+        } catch (err) {
 
-                console.error(err);
+            console.error(err);
 
-                alert(
-                    "فشل تحديث الحالة"
-                );
+            alert(
+                "فشل تحديث الحالة"
+            );
 
-            }
+        }
 
-        };
+    };
 
 
     useEffect(() => {
@@ -249,7 +249,7 @@ export default function Admin() {
                 }
             );
 
-     
+
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
@@ -361,6 +361,11 @@ export default function Admin() {
 
             async (decodedText) => {
 
+                console.log(
+                    "QR CONTENT =",
+                    decodedText
+                );
+
                 setScannedCode(decodedText);
 
                 const q = query(
@@ -370,6 +375,12 @@ export default function Admin() {
 
                 const snapshot =
                     await getDocs(q);
+
+                console.log(
+                    "FOUND DOCS:",
+                    snapshot.size
+                );
+
 
                 if (!snapshot.empty) {
 
