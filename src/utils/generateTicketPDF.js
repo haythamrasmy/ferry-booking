@@ -1,6 +1,5 @@
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
-import JsBarcode from "jsbarcode";
 import cairoFont from "../../public/fonts/Cairo-Regular.ttf";
 
 /**
@@ -125,21 +124,7 @@ export const generateTicketPDF = async (booking) => {
   }
 
   // Primary Ticket Barcode (Using Tracking ID)
-  if (booking.trackingId && typeof window !== "undefined") {
-    try {
-      const ticketCanvas = document.createElement("canvas");
-      JsBarcode(ticketCanvas, booking.trackingId, { format: "CODE128", displayValue: false });
-      const ticketBarcodeImg = ticketCanvas.toDataURL("image/png");
-
-      doc.setTextColor(0);
-      doc.setFontSize(12);
-      doc.text("Ticket Barcode:", 20, 165);
-      doc.addImage(ticketBarcodeImg, "PNG", 20, 170, 100, 20);
-    } catch (err) {
-      console.error("Failed to generate ticket barcode", err);
-    }
-  }
-
+  
   // Separation Line
   doc.setDrawColor(200);
   doc.line(20, 205, 190, 205);
@@ -173,14 +158,13 @@ export const generateTicketPDF = async (booking) => {
     doc.line(20, 23, 190, 23);
 
     // Prepare clear high-DPI canvas wrapper
-    const cargoCanvas = document.createElement("canvas");
-    cargoCanvas.width = 400;
-    cargoCanvas.height = 100;
+    
 
     console.log("CARGO PDF:", booking.cargo);
 
-    Object.entries(booking.cargo).forEach(([item, qty], itemIndex) => {
-      for (let i = 1; i <= qty; i++) {
+for (const [itemIndex, [item, qty]] of Object.entries(
+  Object.entries(booking.cargo)
+)) {      for (let i = 1; i <= qty; i++) {
         if (cargoY > 235) {
           doc.addPage();
           cargoY = 30;
@@ -189,46 +173,56 @@ export const generateTicketPDF = async (booking) => {
         const serialNumber = `${booking.ticketId || "CRG"}-${itemIndex + 1}-${i}`;
 
         // Create a URL-safe, clean alphanumeric data string for the scanner lookup payload
-        const safeItemString = item.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_");
-        const barcodeData = serialNumber;
+        
 
         // Shape and format the item name securely using our internal helper function
         const rtlItemName = item;
         const labelDisplayText =
           `${rtlItemName} (${i}/${qty})`;
         try {
-          // Generate sharp barcode graphics
-          JsBarcode(cargoCanvas, barcodeData, {
-            format: "CODE128",
-            height: 80,
-            width: 2,
-            displayValue: false
-          });
 
-          const cargoBarcodeImg = cargoCanvas.toDataURL("image/png");
+  const cargoQrData =
+    await QRCode.toDataURL(
+      serialNumber,
+      {
+        width: 300,
+        margin: 1,
+      }
+    );
+
+  doc.addImage(
+    cargoQrData,
+    "PNG",
+    25,
+    cargoY - 2,
+    35,
+    35
+  );
+
+  // Render Text Metadata Block
+  doc.setTextColor(0);
+
+
 
           // Render Text Metadata Block
           doc.setTextColor(0);
           doc.setFontSize(13);
           doc.setFont("Cairo");
-          doc.text(" " + labelDisplayText, 25, cargoY);
+          doc.text(" " + labelDisplayText, 70, cargoY);
           doc.setFontSize(10);
           doc.setTextColor(100);
-          doc.text(`Serial: ${serialNumber}`, 25, cargoY + 6);
-
+          doc.text(`Serial: ${serialNumber}`, 70, cargoY + 8);
           // Render Accompanying Barcode Graphics
-          doc.addImage(cargoBarcodeImg, "PNG", 25, cargoY + 10, 110, 22);
 
           // Outer card boundary box decoration around each item block
           doc.setDrawColor(220);
-          doc.rect(20, cargoY - 6, 170, 42);
-
-          cargoY += 52;
+          doc.rect(20, cargoY - 8, 170, 50);
+          cargoY += 60;
         } catch (err) {
           console.error(`Error rendering cargo barcode tag for serial: ${serialNumber}`, err);
         }
       }
-    });
+    }
   }
 
   // Save Executed Document Assembly Stream
