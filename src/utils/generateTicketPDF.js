@@ -170,7 +170,8 @@ for (const [itemIndex, [item, qty]] of Object.entries(
           cargoY = 30;
         }
 
-        const serialNumber = `${booking.ticketId || "CRG"}-${itemIndex + 1}-${i}`;
+const serialNumber = `${booking.ticketId || "CRG"}-${Number(itemIndex) + 1}-${i}`;
+
 
         console.log(
   "PDF SERIAL =",
