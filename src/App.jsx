@@ -775,7 +775,7 @@ for (const [item, qty] of Object.entries(selectedCargo)) {
   for (let i = 1; i <= qty; i++) {
 
     const serialNumber =
-      `${ticketId}-${itemIndex + 1}-${i}`;
+  `${ticketId}-${item.replaceAll(" ", "_")}-${i}`;
 
     await addDoc(
       collection(db, "cargoItems"),

@@ -108,16 +108,22 @@ export const generateTicketPDF = async (booking) => {
 
   // QR Code Generation
   try {
-    const qrData = await QRCode.toDataURL(
-      JSON.stringify({
-        ticketId: booking.ticketId,
-        name: booking.name,
-        passport: booking.passport,
-        ticketType: booking.ticketType,
-        trip: booking.trip,
-        status: booking.status,
-      })
-    );
+   const qrData =
+  await QRCode.toDataURL(
+    JSON.stringify({
+      ticketId: booking.ticketId,
+      name: booking.name,
+      passport: booking.passport,
+      ticketType: booking.ticketType,
+      trip: booking.trip,
+      status: booking.status,
+    }),
+    {
+      width: 500,
+      margin: 1,
+    }
+  );
+    
     doc.addImage(qrData, "PNG", 145, 65, 45, 45);
   } catch (err) {
     console.error("Failed to generate QR code", err);
@@ -180,9 +186,9 @@ for (const [itemIndex, [item, qty]] of Object.entries(
           cargoY = 30;
         }
 
-const serialNumber = `${booking.ticketId || "CRG"}-${Number(itemIndex) + 1}-${i}`;
-
-
+const serialNumber =
+ `${booking.ticketId}-${item.replaceAll(" ", "_")}-${i}`;
+ 
         console.log(
   "PDF SERIAL =",
   serialNumber
