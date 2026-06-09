@@ -2709,41 +2709,40 @@ items-center
   "
             >
 
-                <h2
-                    className="
-      text-3xl
-      font-bold
-      mb-6
-    "
-                >
-                    ماسح التذاكر
-                </h2>
+            <h2
+  className="
+    text-3xl
+    font-bold
+    mb-6
+    text-black
+  "
+>
+  ماسح التذاكر
+</h2>
 
                 <div
                     id="reader"
                     className="
     text-black
     bg-white
-    p-4
     rounded-2xl
+    overflow-hidden
   "
-                >
-
-                </div>
+                />
 
                 {scannedCargo && (
 
-                    <div
-                        className="
+                   <div
+  className="
       mt-6
       p-5
       rounded-xl
       border
-      bg-white
+      bg-slate-100
+      text-black
       shadow
     "
-                    >
-
+>
                         <h3 className="text-xl font-bold mb-4">
                             بيانات القطعة
                         </h3>
@@ -2846,9 +2845,9 @@ items-center
 
                 )}
 
-              
 
-                
+
+
             </div>
 
         </div>

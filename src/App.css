@@ -182,3 +182,23 @@
     border-right-color: var(--border);
   }
 }
+
+#reader {
+  min-height: auto !important;
+}
+
+#reader__scan_region {
+  min-height: auto !important;
+}
+
+#reader__dashboard {
+  padding: 10px !important;
+}
+
+#reader img {
+  margin: auto !important;
+}
+
+#reader video {
+  border-radius: 12px !important;
+}
