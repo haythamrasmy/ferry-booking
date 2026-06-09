@@ -162,6 +162,16 @@ export const generateTicketPDF = async (booking) => {
 
     console.log("CARGO PDF:", booking.cargo);
 
+    console.log(
+  "CARGO KEYS:",
+  Object.keys(booking.cargo)
+);
+
+console.log(
+  "CARGO ENTRIES:",
+  Object.entries(booking.cargo)
+);
+
 for (const [itemIndex, [item, qty]] of Object.entries(
   Object.entries(booking.cargo)
 )) {      for (let i = 1; i <= qty; i++) {
