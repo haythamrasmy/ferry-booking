@@ -35,6 +35,9 @@ import {
     setDoc
 } from "firebase/firestore";
 
+import { doc, updateDoc } from "firebase/firestore";
+
+
 
 export default function Admin() {
 
@@ -109,6 +112,8 @@ export default function Admin() {
 
     const [scannedCargo, setScannedCargo] =
         useState(null);
+
+    const [scannedCargoId, setScannedCargoId] = useState(null);
 
     const [agents, setAgents] = useState([]);
 
@@ -204,6 +209,48 @@ export default function Admin() {
 
                 }
             );
+
+        const updateCargoStatus = async (
+            newStatus
+        ) => {
+
+            if (
+                !scannedCargoId
+            ) return;
+
+            try {
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "cargoItems",
+                        scannedCargoId
+                    ),
+                    {
+                        status:
+                            newStatus
+                    }
+                );
+
+                setScannedCargo(
+                    prev => ({
+                        ...prev,
+                        status:
+                            newStatus
+                    })
+                );
+
+            } catch (err) {
+
+                console.error(err);
+
+                alert(
+                    "فشل تحديث الحالة"
+                );
+
+            }
+
+        };
 
         const unsubscribe =
             onAuthStateChanged(auth, (user) => {
@@ -311,48 +358,56 @@ export default function Admin() {
             "--qr-color",
             "black"
         );
-scanner.render(
+        scanner.render(
 
-  async (decodedText) => {
+            async (decodedText) => {
 
-    setScannedCode(decodedText);
+                setScannedCode(decodedText);
 
-    const q = query(
-      collection(db, "cargoItems"),
-      where("serial", "==", decodedText)
-    );
+                const q = query(
+                    collection(db, "cargoItems"),
+                    where("serial", "==", decodedText)
+                );
 
-    const snapshot =
-      await getDocs(q);
+                const snapshot =
+                    await getDocs(q);
 
-    if (!snapshot.empty) {
+                if (!snapshot.empty) {
 
-      const cargoData =
-        snapshot.docs[0].data();
+                    const cargoDoc =
+                        snapshot.docs[0];
 
-      setScannedCargo(cargoData);
+                    setScannedCargo(
+                        cargoDoc.data()
+                    );
 
-    } else {
+                    setScannedCargoId(
+                        cargoDoc.id
+                    );
 
-      setScannedCargo(null);
+                } else {
 
-      alert(
-        "لم يتم العثور على هذه القطعة"
-      );
+                    setScannedCargo(null);
 
-    }
+                    alert(
+                        "لم يتم العثور على هذه القطعة"
+                    );
 
-  },
+                }
 
-  () => {}
+            },
 
-);
+            () => { }
+
+        );
 
         return () => {
             scanner.clear();
         };
 
     }, [isAdmin]);
+
+
 
     const confirmBooking = async (id) => {
 
@@ -2663,8 +2718,123 @@ items-center
     rounded-2xl
   "
                 >
-                
+
                 </div>
+
+                {scannedCargo && (
+
+                    <div
+                        className="
+      mt-6
+      p-5
+      rounded-xl
+      border
+      bg-white
+      shadow
+    "
+                    >
+
+                        <h3 className="text-xl font-bold mb-4">
+                            بيانات القطعة
+                        </h3>
+
+                        <p>
+                            <strong>
+                                الصنف:
+                            </strong>
+                            {" "}
+                            {scannedCargo.item}
+                        </p>
+
+                        <p>
+                            <strong>
+                                الرقم:
+                            </strong>
+                            {" "}
+                            {scannedCargo.serial}
+                        </p>
+
+                        <p>
+                            <strong>
+                                التتبع:
+                            </strong>
+                            {" "}
+                            {scannedCargo.trackingId}
+                        </p>
+
+                        <p>
+                            <strong>
+                                الوجهة:
+                            </strong>
+                            {" "}
+                            {scannedCargo.destination}
+                        </p>
+
+                        <p>
+                            <strong>
+                                الحالة:
+                            </strong>
+                            {" "}
+                            {scannedCargo.status}
+                        </p>
+
+                        <div className="flex flex-wrap gap-2 mt-4">
+
+                            <button
+                                onClick={() =>
+                                    updateCargoStatus(
+                                        "تم الاستلام"
+                                    )
+                                }
+                            >
+                                تم الاستلام
+                            </button>
+
+                            <button
+                                onClick={() =>
+                                    updateCargoStatus(
+                                        "في المخزن"
+                                    )
+                                }
+                            >
+                                في المخزن
+                            </button>
+
+                            <button
+                                onClick={() =>
+                                    updateCargoStatus(
+                                        "تم التحميل"
+                                    )
+                                }
+                            >
+                                تم التحميل
+                            </button>
+
+                            <button
+                                onClick={() =>
+                                    updateCargoStatus(
+                                        "وصلت الوجهة"
+                                    )
+                                }
+                            >
+                                وصلت الوجهة
+                            </button>
+
+                            <button
+                                onClick={() =>
+                                    updateCargoStatus(
+                                        "تم التسليم"
+                                    )
+                                }
+                            >
+                                تم التسليم
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                )}
 
                 {scannedCode && (
 
@@ -2688,43 +2858,43 @@ items-center
 
                 {scannedCargo && (
 
-  <div
-    className="
+                    <div
+                        className="
       mt-6
       bg-blue-100
       text-black
       p-6
       rounded-2xl
     "
-  >
+                    >
 
-    <h3 className="font-bold text-xl">
-      بيانات الشحنة
-    </h3>
+                        <h3 className="font-bold text-xl">
+                            بيانات الشحنة
+                        </h3>
 
-    <p>
-      الصنف:
-      {scannedCargo.item}
-    </p>
+                        <p>
+                            الصنف:
+                            {scannedCargo.item}
+                        </p>
 
-    <p>
-      رقم التتبع:
-      {scannedCargo.trackingId}
-    </p>
+                        <p>
+                            رقم التتبع:
+                            {scannedCargo.trackingId}
+                        </p>
 
-    <p>
-      الحالة:
-      {scannedCargo.status}
-    </p>
+                        <p>
+                            الحالة:
+                            {scannedCargo.status}
+                        </p>
 
-    <p>
-      الرحلة:
-      {scannedCargo.destination}
-    </p>
+                        <p>
+                            الرحلة:
+                            {scannedCargo.destination}
+                        </p>
 
-  </div>
+                    </div>
 
-)}
+                )}
 
             </div>
 
