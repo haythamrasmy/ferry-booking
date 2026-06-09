@@ -35,7 +35,6 @@ import {
     setDoc
 } from "firebase/firestore";
 
-import { doc, updateDoc } from "firebase/firestore";
 
 
 
