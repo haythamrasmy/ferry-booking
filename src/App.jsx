@@ -77,7 +77,7 @@ export default function FerryBookingWebsite() {
   const [adminPassword, setAdminPassword] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
 
-const [showCargo, setShowCargo] = useState(false);
+  const [showCargo, setShowCargo] = useState(false);
 
   const [selectedCargo, setSelectedCargo] =
     useState({});
@@ -89,24 +89,24 @@ const [showCargo, setShowCargo] = useState(false);
   const [trackedShipment, setTrackedShipment] =
     useState(null);
 
-    const [trackedItems, setTrackedItems] =
-  useState([]);
+  const [trackedItems, setTrackedItems] =
+    useState([]);
 
   const deliveredCount =
-  trackedItems.filter(
-    item => item.status === "تم التسليم"
-  ).length;
+    trackedItems.filter(
+      item => item.status === "تم التسليم"
+    ).length;
 
- 
-const totalCount =
-  trackedItems.length;
 
-const progress =
-  totalCount > 0
-    ? Math.round(
+  const totalCount =
+    trackedItems.length;
+
+  const progress =
+    totalCount > 0
+      ? Math.round(
         (deliveredCount / totalCount) * 100
       )
-    : 0;
+      : 0;
 
   const [agentEmail, setAgentEmail] = useState("");
   const [agentPassword, setAgentPassword] = useState("");
@@ -143,69 +143,69 @@ const progress =
 
 
 
- const trackShipment = async () => {
+  const trackShipment = async () => {
 
-  try {
+    try {
 
-    const shipmentQuery =
-      await getDocs(
-        collection(db, "shipments")
-      );
+      const shipmentQuery =
+        await getDocs(
+          collection(db, "shipments")
+        );
 
-    const shipment =
-      shipmentQuery.docs.find(
-        (doc) =>
-          doc.data().trackingId ===
+      const shipment =
+        shipmentQuery.docs.find(
+          (doc) =>
+            doc.data().trackingId ===
+            trackingNumber
+        );
+
+      if (!shipment) {
+
+        alert("رقم التتبع غير موجود");
+
+        setTrackedShipment(null);
+        setTrackedItems([]);
+
+        return;
+      }
+
+      setTrackedShipment({
+        id: shipment.id,
+        ...shipment.data(),
+      });
+
+      const cargoQuery = query(
+        collection(db, "cargoItems"),
+        where(
+          "trackingId",
+          "==",
           trackingNumber
+        )
       );
 
-    if (!shipment) {
+      const cargoSnapshot =
+        await getDocs(cargoQuery);
 
-      alert("رقم التتبع غير موجود");
-
-      setTrackedShipment(null);
-      setTrackedItems([]);
-
-      return;
-    }
-
-    setTrackedShipment({
-      id: shipment.id,
-      ...shipment.data(),
-    });
-
-    const cargoQuery = query(
-      collection(db, "cargoItems"),
-      where(
-        "trackingId",
-        "==",
-        trackingNumber
-      )
-    );
-
-    const cargoSnapshot =
-      await getDocs(cargoQuery);
-
-    const items =
-      cargoSnapshot.docs.map(
-        (doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })
-      );
+      const items =
+        cargoSnapshot.docs.map(
+          (doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })
+        );
 
       items.sort((a, b) =>
-  a.item.localeCompare(b.item, "ar")
-);
+        a.item.localeCompare(b.item, "ar")
+      );
 
-    setTrackedItems(items);
+      setTrackedItems(items);
 
-  } catch (error) {
+    } catch (error) {
 
-    console.log(error);
+      console.log(error);
 
-  }
-};
+    }
+  };
 
   const updateCargoQuantity = (
     item,
@@ -814,43 +814,43 @@ const progress =
         }
       );
 
-for (const [item, qty] of Object.entries(selectedCargo)) {
+      for (const [item, qty] of Object.entries(selectedCargo)) {
 
-  const itemIndex =
-    Object.keys(selectedCargo).indexOf(item);
+        const itemIndex =
+          Object.keys(selectedCargo).indexOf(item);
 
-  for (let i = 1; i <= qty; i++) {
+        for (let i = 1; i <= qty; i++) {
 
-    const serialNumber =
-  `${ticketId}-${item.replaceAll(" ", "_")}-${i}`;
+          const serialNumber =
+            `${ticketId}-${item.replaceAll(" ", "_")}-${i}`;
 
-    await addDoc(
-      collection(db, "cargoItems"),
-      {
-        serial: serialNumber,
+          await addDoc(
+            collection(db, "cargoItems"),
+            {
+              serial: serialNumber,
+              item: item,
+              ticketId: ticketId,
+              trackingId: trackingId,
+              senderName: name,
+              receiverName: name,
+              destination: selectedTrip?.route,
 
-        item: item,
+              status: "تم الاستلام",
 
-        ticketId: ticketId,
+              history: [
+                {
+                  status: "تم الاستلام",
+                  time: new Date().toLocaleString("ar-EG")
+                }
+              ],
 
-        trackingId: trackingId,
+              createdAt: new Date(),
+            }
+          );
 
-        senderName: name,
+        }
 
-        receiverName: name,
-
-        destination:
-          selectedTrip?.route,
-
-        status: "تم الاستلام",
-
-        createdAt: new Date(),
       }
-    );
-
-  }
-
-}
 
       setUserBooking({
         id: bookingRef.id,
@@ -1016,62 +1016,62 @@ for (const [item, qty] of Object.entries(selectedCargo)) {
 
   const exportMyBookings = () => {
 
-  if (!agentUser) return;
+    if (!agentUser) return;
 
-  const myBookings = bookings.filter(
-    (booking) =>
-      booking.agentId === agentUser.id
-  );
-
-  const excelData = myBookings.map(
-    (booking) => ({
-      الراكب: booking.name,
-      الهاتف: booking.phone,
-      الجواز: booking.passport,
-      الرحلة: booking.trip,
-      "نوع التذكرة": booking.ticketType,
-      السعر: booking.ticketPrice,
-      الحالة: booking.status,
-    })
-  );
-
-  const worksheet =
-    XLSX.utils.json_to_sheet(
-      excelData
+    const myBookings = bookings.filter(
+      (booking) =>
+        booking.agentId === agentUser.id
     );
 
-  const workbook =
-    XLSX.utils.book_new();
+    const excelData = myBookings.map(
+      (booking) => ({
+        الراكب: booking.name,
+        الهاتف: booking.phone,
+        الجواز: booking.passport,
+        الرحلة: booking.trip,
+        "نوع التذكرة": booking.ticketType,
+        السعر: booking.ticketPrice,
+        الحالة: booking.status,
+      })
+    );
 
-  XLSX.utils.book_append_sheet(
-    workbook,
-    worksheet,
-    "Bookings"
-  );
+    const worksheet =
+      XLSX.utils.json_to_sheet(
+        excelData
+      );
 
-  const excelBuffer =
-    XLSX.write(
+    const workbook =
+      XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
       workbook,
-      {
-        bookType: "xlsx",
-        type: "array",
-      }
+      worksheet,
+      "Bookings"
     );
 
-  const file =
-    new Blob(
-      [excelBuffer],
-      {
-        type:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
-      }
-    );
+    const excelBuffer =
+      XLSX.write(
+        workbook,
+        {
+          bookType: "xlsx",
+          type: "array",
+        }
+      );
 
-  saveAs(
-    file,
-    `${agentUser.fullName}-bookings.xlsx`
-  );
-};
+    const file =
+      new Blob(
+        [excelBuffer],
+        {
+          type:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+        }
+      );
+
+    saveAs(
+      file,
+      `${agentUser.fullName}-bookings.xlsx`
+    );
+  };
 
   const agentLogout = async () => {
 
@@ -1152,9 +1152,9 @@ bg-black/55  "
   w-full
 "
         >
-<div className="flex justify-end">
-  <div
-    className="
+          <div className="flex justify-end">
+            <div
+              className="
       bg-white/10
       backdrop-blur-xl
       rounded-[32px]
@@ -1166,25 +1166,25 @@ bg-black/55  "
       items-center
       gap-4
     "
-  >
-    <img
-      src="/logo.png"
-      alt="Logo"
-      className="w-10 opacity-85"
-    />
+            >
+              <img
+                src="/logo.png"
+                alt="Logo"
+                className="w-10 opacity-85"
+              />
 
-    <img
-      src="/3a-logo.png"
-      alt="3A"
-      className="w-10 opacity-85"
-    />
+              <img
+                src="/3a-logo.png"
+                alt="3A"
+                className="w-10 opacity-85"
+              />
 
-    <div className="text-white font-black text-xl">
-      3A International
-    </div>
-  </div>
-</div>
-        
+              <div className="text-white font-black text-xl">
+                3A International
+              </div>
+            </div>
+          </div>
+
 
           {/* Main Hero */}
           <div
@@ -1392,15 +1392,15 @@ text-white/80 mb-14          "
 
         </div>
 
-      <button
-  onClick={() => {
-    document
-      .getElementById("agent-portal")
-      ?.scrollIntoView({
-        behavior: "smooth",
-      });
-  }}
-  className="
+        <button
+          onClick={() => {
+            document
+              .getElementById("agent-portal")
+              ?.scrollIntoView({
+                behavior: "smooth",
+              });
+          }}
+          className="
     absolute
     left-0
     top-[35%]
@@ -1438,23 +1438,23 @@ text-white/80 mb-14          "
 
     w-[95px]
   "
->
-  <span className="text-2xl">
-    👤
-  </span>
+        >
+          <span className="text-2xl">
+            👤
+          </span>
 
-  <div className="text-center leading-tight">
-    <div>بوابة</div>
-    <div>الوكيل</div>
-  </div>
-</button>
+          <div className="text-center leading-tight">
+            <div>بوابة</div>
+            <div>الوكيل</div>
+          </div>
+        </button>
 
       </section>
 
       {/* Floating Search Card */}
 
       <section
-  className="
+        className="
     relative
     z-30
     max-w-7xl
@@ -1462,7 +1462,7 @@ text-white/80 mb-14          "
     px-6
     -mt-10 md:-mt-3
   "
->
+      >
 
         <div
           className="
@@ -1580,13 +1580,13 @@ placeholder:text-black/50        "
       </section>
 
 
-     
+
 
       <section id="available-trips" className="max-w-5xl mx-auto px-6 py-16">
 
 
-<div
-  className="
+        <div
+          className="
     relative
     overflow-hidden
     bg-gradient-to-br
@@ -1600,18 +1600,18 @@ placeholder:text-black/50        "
     border
     border-fuchsia-700/40
   "
->
+        >
           <div className="mb-8">
 
-  <h2 className="text-4xl font-black">
-    الرحلات المتاحة
-  </h2>
+            <h2 className="text-4xl font-black">
+              الرحلات المتاحة
+            </h2>
 
-  <p className="text-slate-300 mt-2">
-    اختر الرحلة المناسبة ثم نوع التذكرة
-  </p>
+            <p className="text-slate-300 mt-2">
+              اختر الرحلة المناسبة ثم نوع التذكرة
+            </p>
 
-</div>
+          </div>
 
           <div className="grid md:grid-cols-2 gap-6">
 
@@ -1630,40 +1630,39 @@ placeholder:text-black/50        "
     shadow-lg
     hover:shadow-2xl
     hover:-translate-y-1
-    ${
-      selectedTrip?.id === trip.id
-        ? `
+    ${selectedTrip?.id === trip.id
+                    ? `
           border-blue-600
           bg-gradient-to-br
           from-fuchsia-900/60
 to-purple-900/60
 
         `
-        : `
+                    : `
          border-white/10
 bg-white/5
 backdrop-blur-xl
 hover:border-fuchsia-400
         `
-    }
+                  }
 `}
                 onClick={() =>
                   setSelectedTrip(trip)
                 }
               >
 
-               <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4">
 
-  <h3 className="text-2xl font-bold">
-    🚢 {trip.route}
-  </h3>
+                  <h3 className="text-2xl font-bold">
+                    🚢 {trip.route}
+                  </h3>
 
- 
 
-  {selectedTrip?.id === trip.id && (
 
-    <span
-      className="
+                  {selectedTrip?.id === trip.id && (
+
+                    <span
+                      className="
         bg-blue-600
         text-white
         px-3
@@ -1672,17 +1671,17 @@ hover:border-fuchsia-400
         text-sm
         font-bold
       "
-    >
-      مختارة
-    </span>
+                    >
+                      مختارة
+                    </span>
 
-  )}
+                  )}
 
-</div>
-               <div className="flex flex-wrap gap-3 mb-5">
+                </div>
+                <div className="flex flex-wrap gap-3 mb-5">
 
-  <span
-    className="
+                  <span
+                    className="
 bg-white/10
 text-white
       px-3
@@ -1691,12 +1690,12 @@ text-white
       text-sm
       font-medium
     "
-  >
-    📅 {trip.date}
-  </span>
+                  >
+                    📅 {trip.date}
+                  </span>
 
-  <span
-    className="
+                  <span
+                    className="
 bg-white/10
 text-white
       px-3
@@ -1705,158 +1704,154 @@ text-white
       text-sm
       font-medium
     "
-  >
-    🕒 {trip.time}
-  </span>
+                  >
+                    🕒 {trip.time}
+                  </span>
 
-</div>
-                  <p>
-                    عدد تذاكر الدرجة الثانية:
-                    {" "}
-                    {trip.totalSecondClassTickets || 0}
-                  </p>
+                </div>
+                <p>
+                  عدد تذاكر الدرجة الثانية:
+                  {" "}
+                  {trip.totalSecondClassTickets || 0}
+                </p>
 
-                  <p>
-                    عدد الكبائن:
-                    {" "}
-                    {trip.totalCabinTickets || 0}
-                  </p>
+                <p>
+                  عدد الكبائن:
+                  {" "}
+                  {trip.totalCabinTickets || 0}
+                </p>
 
-                 <div className="flex flex-wrap gap-3 mt-4">
+                <div className="flex flex-wrap gap-3 mt-4">
 
-  <span
-    className={`
+                  <span
+                    className={`
       px-4
       py-2
       rounded-xl
       font-bold
-      ${
-        (
-          trip.remainingCabinTickets ??
-          trip.cabinTickets ??
-          0
-        ) <= 3
-          ? "bg-red-100 text-red-700"
-          : "bg-green-100 text-green-700"
-      }
+      ${(
+                        trip.remainingCabinTickets ??
+                        trip.cabinTickets ??
+                        0
+                      ) <= 3
+                        ? "bg-red-100 text-red-700"
+                        : "bg-green-100 text-green-700"
+                      }
     `}
-  >
-    🛏️ {
-      trip.remainingCabinTickets ??
-      trip.cabinTickets ??
-      0
-    } كابينة
-  </span>
+                  >
+                    🛏️ {
+                      trip.remainingCabinTickets ??
+                      trip.cabinTickets ??
+                      0
+                    } كابينة
+                  </span>
 
-  <span
-    className={`
+                  <span
+                    className={`
       px-4
       py-2
       rounded-xl
       font-bold
-      ${
-        (
-          trip.remainingSecondClassTickets ??
-          trip.secondClassTickets ??
-          0
-        ) <= 5
-          ? "bg-red-100 text-red-700"
-          : "bg-blue-100 text-blue-700"
-      }
+      ${(
+                        trip.remainingSecondClassTickets ??
+                        trip.secondClassTickets ??
+                        0
+                      ) <= 5
+                        ? "bg-red-100 text-red-700"
+                        : "bg-blue-100 text-blue-700"
+                      }
     `}
-  >
-    🎫 {
-      trip.remainingSecondClassTickets ??
-      trip.secondClassTickets ??
-      0
-    } درجة ثانية
-  </span>
+                  >
+                    🎫 {
+                      trip.remainingSecondClassTickets ??
+                      trip.secondClassTickets ??
+                      0
+                    } درجة ثانية
+                  </span>
 
-</div>
-                 <div className="grid grid-cols-2 gap-3 mt-4">
+                </div>
+                <div className="grid grid-cols-2 gap-3 mt-4">
 
-  <div
-  onClick={(e) => {
-    e.stopPropagation();
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
 
-    if (
-      (trip.remainingCabinTickets ??
-        trip.cabinTickets ??
-        0) <= 0
-    ) {
-      alert("الكبائن غير متاحة");
-      return;
-    }
+                      if (
+                        (trip.remainingCabinTickets ??
+                          trip.cabinTickets ??
+                          0) <= 0
+                      ) {
+                        alert("الكبائن غير متاحة");
+                        return;
+                      }
 
-    setSelectedTrip(trip);
-    setSelectedTicketType("Cabin");
-  }}
-  className={`
+                      setSelectedTrip(trip);
+                      setSelectedTicketType("Cabin");
+                    }}
+                    className={`
     rounded-2xl
     p-3
     cursor-pointer
     transition
-    ${
-      selectedTrip?.id === trip.id &&
-      selectedTicketType === "Cabin"
-        ? "bg-blue-600 text-white"
-        : "bg-white/10 hover:bg-white/20"
-    }
+    ${selectedTrip?.id === trip.id &&
+                        selectedTicketType === "Cabin"
+                        ? "bg-blue-600 text-white"
+                        : "bg-white/10 hover:bg-white/20"
+                      }
   `}
->
-  <p className="text-sm text-slate-300">
-    كابينة
-  </p>
+                  >
+                    <p className="text-sm text-slate-300">
+                      كابينة
+                    </p>
 
-  <p className="font-bold text-lg">
-    {trip.cabinPrice} ج.م
-  </p>
-</div>
+                    <p className="font-bold text-lg">
+                      {trip.cabinPrice} ج.م
+                    </p>
+                  </div>
 
-<div
-  onClick={(e) => {
-    e.stopPropagation();
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
 
-    if (
-      (trip.remainingSecondClassTickets ??
-        trip.secondClassTickets ??
-        0) <= 0
-    ) {
-      alert("الدرجة الثانية غير متاحة");
-      return;
-    }
+                      if (
+                        (trip.remainingSecondClassTickets ??
+                          trip.secondClassTickets ??
+                          0) <= 0
+                      ) {
+                        alert("الدرجة الثانية غير متاحة");
+                        return;
+                      }
 
-    setSelectedTrip(trip);
-    setSelectedTicketType("Second Class");
-  }}
-  className={`
+                      setSelectedTrip(trip);
+                      setSelectedTicketType("Second Class");
+                    }}
+                    className={`
     rounded-2xl
     p-3
     cursor-pointer
     transition
-    ${
-      selectedTrip?.id === trip.id &&
-      selectedTicketType === "Second Class"
-        ? "bg-blue-600 text-white"
-        : "bg-white/10 hover:bg-white/20"
-    }
+    ${selectedTrip?.id === trip.id &&
+                        selectedTicketType === "Second Class"
+                        ? "bg-blue-600 text-white"
+                        : "bg-white/10 hover:bg-white/20"
+                      }
   `}
->
-  <p className="text-sm text-slate-300">
-    درجة ثانية
-  </p>
+                  >
+                    <p className="text-sm text-slate-300">
+                      درجة ثانية
+                    </p>
 
-  <p className="font-bold text-lg">
-    {trip.secondClassPrice} ج.م
-  </p>
-</div>
+                    <p className="font-bold text-lg">
+                      {trip.secondClassPrice} ج.م
+                    </p>
+                  </div>
 
-</div>
+                </div>
 
-</div>
+              </div>
 
-))}
-           
+            ))}
+
 
           </div>
 
@@ -1864,9 +1859,9 @@ text-white
 
       </section>
 
-      
 
-     
+
+
 
       {/* Booking Form */}
       <section id="booking-section" className="max-w-5xl mx-auto px-6 py-16">
@@ -1908,11 +1903,11 @@ text-white
 
           <div className="mt-10">
 
-           <button
-  onClick={() =>
-    setShowCargo(!showCargo)
-  }
-  className="
+            <button
+              onClick={() =>
+                setShowCargo(!showCargo)
+              }
+              className="
     w-full
     flex
     justify-between
@@ -1920,27 +1915,27 @@ text-white
     mb-8
     text-right
   "
->
+            >
 
-  <h2 className="text-3xl font-bold">
-    البضائع المصاحبة
-  </h2>
+              <h2 className="text-3xl font-bold">
+                البضائع المصاحبة
+              </h2>
 
-  <span className="text-2xl">
-{showCargo ? "−" : "+"}
-  </span>
+              <span className="text-2xl">
+                {showCargo ? "−" : "+"}
+              </span>
 
-</button>
+            </button>
 
-{showCargo && (
+            {showCargo && (
 
-<div className="grid md:grid-cols-2 gap-4">
-  
-              {cargoItems.map((item) => (
+              <div className="grid md:grid-cols-2 gap-4">
 
-                <div
-                  key={item}
-                  className="
+                {cargoItems.map((item) => (
+
+                  <div
+                    key={item}
+                    className="
           border
           rounded-2xl
           p-4
@@ -1948,62 +1943,62 @@ text-white
           items-center
           justify-between
         "
-                >
+                  >
 
-                  <span className="font-semibold">
-                    {item}
-                  </span>
+                    <span className="font-semibold">
+                      {item}
+                    </span>
 
-                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
 
-                    <button
-                      onClick={() =>
-                        updateCargoQuantity(
-                          item,
-                          -1
-                        )
-                      }
-                      className="
+                      <button
+                        onClick={() =>
+                          updateCargoQuantity(
+                            item,
+                            -1
+                          )
+                        }
+                        className="
               bg-red-500
               text-white
               w-8
               h-8
               rounded-full
             "
-                    >
-                      -
-                    </button>
+                      >
+                        -
+                      </button>
 
-                    <span className="font-bold text-lg">
-                      {selectedCargo[item] || 0}
-                    </span>
+                      <span className="font-bold text-lg">
+                        {selectedCargo[item] || 0}
+                      </span>
 
-                    <button
-                      onClick={() =>
-                        updateCargoQuantity(
-                          item,
-                          1
-                        )
-                      }
-                      className="
+                      <button
+                        onClick={() =>
+                          updateCargoQuantity(
+                            item,
+                            1
+                          )
+                        }
+                        className="
               bg-green-600
               text-white
               w-8
               h-8
               rounded-full
             "
-                    >
-                      +
-                    </button>
+                      >
+                        +
+                      </button>
+
+                    </div>
 
                   </div>
 
-                </div>
+                ))}
 
-              ))}
-
-            </div>
-)}
+              </div>
+            )}
           </div>
 
           <div className="mt-8">
@@ -2301,101 +2296,101 @@ text-white
                   {" "}
                   {trackedShipment.destination}
                 </p>
-<div className="md:col-span-2 mt-6">
+                <div className="md:col-span-2 mt-6">
 
-  <div className="mb-6">
+                  <div className="mb-6">
 
-  <div className="flex justify-between mb-2">
+                    <div className="flex justify-between mb-2">
 
-    <span className="font-bold">
-      نسبة إنجاز الشحنة
-    </span>
+                      <span className="font-bold">
+                        نسبة إنجاز الشحنة
+                      </span>
 
-    <span className="font-bold">
-      {progress}%
-    </span>
+                      <span className="font-bold">
+                        {progress}%
+                      </span>
 
-  </div>
+                    </div>
 
-  <div className="w-full bg-gray-200 rounded-full h-5">
+                    <div className="w-full bg-gray-200 rounded-full h-5">
 
-    <div
-      className="bg-green-500 h-5 rounded-full transition-all duration-500"
-      style={{
-        width: `${progress}%`
-      }}
-    />
+                      <div
+                        className="bg-green-500 h-5 rounded-full transition-all duration-500"
+                        style={{
+                          width: `${progress}%`
+                        }}
+                      />
 
-  </div>
+                    </div>
 
-</div>
+                  </div>
 
-  <h4 className="text-xl font-bold mb-4">
-    جميع القطع وحالة كل قطعة
-  </h4>
+                  <h4 className="text-xl font-bold mb-4">
+                    جميع القطع وحالة كل قطعة
+                  </h4>
 
-  <div className="space-y-3">
+                  <div className="space-y-3">
 
-    {trackedItems.map((item) => (
+                    {trackedItems.map((item) => (
 
-      <div
-        key={item.id}
-        className="
+                      <div
+                        key={item.id}
+                        className="
           bg-white
           border
           rounded-xl
           p-4
         "
-      >
+                      >
 
-        <p>
-          <strong>الصنف:</strong>
-          {" "}
-          {item.item}
-        </p>
+                        <p>
+                          <strong>الصنف:</strong>
+                          {" "}
+                          {item.item}
+                        </p>
 
-        <p>
-          <strong>السيريال:</strong>
-          {" "}
-          {item.serial}
-        </p>
+                        <p>
+                          <strong>السيريال:</strong>
+                          {" "}
+                          {item.serial}
+                        </p>
 
-      <p>
-  <strong>الحالة الحالية:</strong>
+                        <p>
+                          <strong>الحالة الحالية:</strong>
 
-  <span
-    className={
-      item.status === "تم التسليم"
-        ? "text-green-600 font-bold"
-        : item.status === "وصلت الوجهة"
-        ? "text-purple-600 font-bold"
-        : item.status === "تم التحميل"
-        ? "text-orange-600 font-bold"
-        : item.status === "في المخزن"
-        ? "text-blue-600 font-bold"
-        : "text-gray-600 font-bold"
-    }
-  >
-    {item.status}
-  </span>
-</p>
+                          <span
+                            className={
+                              item.status === "تم التسليم"
+                                ? "text-green-600 font-bold"
+                                : item.status === "وصلت الوجهة"
+                                  ? "text-purple-600 font-bold"
+                                  : item.status === "تم التحميل"
+                                    ? "text-orange-600 font-bold"
+                                    : item.status === "في المخزن"
+                                      ? "text-blue-600 font-bold"
+                                      : "text-gray-600 font-bold"
+                            }
+                          >
+                            {item.status}
+                          </span>
+                        </p>
 
-{item.history?.length > 0 && (
+                        {item.history?.length > 0 && (
 
-  <div className="mt-4 border-t pt-3">
+                          <div className="mt-4 border-t pt-3">
 
-    <p className="font-bold mb-2">
-      سجل حركة القطعة
-    </p>
+                            <p className="font-bold mb-2">
+                              سجل حركة القطعة
+                            </p>
 
-    {item.history
-      .slice()
-      .reverse()
-      .map((entry, index) => (
+                            {item.history
+                              .slice()
+                              .reverse()
+                              .map((entry, index) => (
 
-        <div
-          key={index}
-          className="
+                                <div
+                                  key={index}
+                                  className="
             text-sm
             bg-slate-50
             border
@@ -2403,41 +2398,40 @@ text-white
             p-2
             mb-2
           "
-        >
+                                >
 
-          <div>
-            <strong>الحالة:</strong>
-            {" "}
-            {entry.status}
-          </div>
+                                  <div>
+                                    <p>
+                                      <strong>عدد القطع:</strong>
+                                      {trackedItems.length}
+                                    </p>
+                                  </div>
 
-          <div>
-            <strong>بواسطة:</strong>
-            {" "}
-            {entry.updatedBy}
-          </div>
+                                  <div>
+                                    <strong>بواسطة:</strong>
+                                    النظام
+                                  </div>
 
-          <div>
-            <strong>التاريخ:</strong>
-            {" "}
-            {entry.updatedAt}
-          </div>
+                                  <div>
+                                    <strong>التاريخ:</strong>
+                                    {entry.time}
+                                  </div>
 
-        </div>
+                                </div>
 
-      ))}
+                              ))}
 
-  </div>
+                          </div>
 
-)}
+                        )}
 
-      </div>
+                      </div>
 
-    ))}
+                    ))}
 
-  </div>
+                  </div>
 
-</div>
+                </div>
               </div>
 
             </div>
@@ -2447,12 +2441,12 @@ text-white
 
       </section>
 
-<section
-  id="agent-portal"
-  className="max-w-5xl mx-auto px-6 py-16"
->
-<div
-  className="
+      <section
+        id="agent-portal"
+        className="max-w-5xl mx-auto px-6 py-16"
+      >
+        <div
+          className="
     bg-gradient-to-br
     from-fuchsia-950
     via-purple-950
@@ -2464,11 +2458,11 @@ text-white
     border
     border-fuchsia-700/50
   "
->
-         <div className="flex items-center gap-4 mb-8">
+        >
+          <div className="flex items-center gap-4 mb-8">
 
-  <div
-    className="
+            <div
+              className="
       w-14
       h-14
       rounded-full
@@ -2478,26 +2472,26 @@ text-white
       justify-center
       text-2xl
     "
-  >
-    👥
-  </div>
+            >
+              👥
+            </div>
 
-  <div>
+            <div>
 
-    <h2 className="text-3xl font-bold">
-      بوابة الوكلاء
-    </h2>
+              <h2 className="text-3xl font-bold">
+                بوابة الوكلاء
+              </h2>
 
-    <p className="text-slate-300">
-      إدارة الحجوزات والمبيعات
-    </p>
+              <p className="text-slate-300">
+                إدارة الحجوزات والمبيعات
+              </p>
 
-  </div>
+            </div>
 
-</div>
+          </div>
 
-<div
-  className="
+          <div
+            className="
     absolute
     top-0
     left-0
@@ -2509,7 +2503,7 @@ text-white
     to-transparent
     pointer-events-none
   "
-/>
+          />
 
           {!agentUser ? (
 
@@ -2522,7 +2516,7 @@ text-white
                 onChange={(e) =>
                   setAgentEmail(e.target.value)
                 }
-className="
+                className="
   bg-white/10
   border
   border-white/20
@@ -2563,10 +2557,10 @@ hover:bg-fuchsia-700
 
             <div>
 
-             <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-4 mb-6">
 
-  <div
-    className="
+                <div
+                  className="
       w-16
       h-16
       rounded-full
@@ -2576,38 +2570,38 @@ hover:bg-fuchsia-700
       justify-center
       text-3xl
     "
-  >
-    👤
-  </div>
+                >
+                  👤
+                </div>
 
-  <div>
+                <div>
 
-    <h3 className="text-2xl font-bold">
-      {agentUser.fullName}
-    </h3>
+                  <h3 className="text-2xl font-bold">
+                    {agentUser.fullName}
+                  </h3>
 
-    <p className="text-slate-300">
-      بوابة الوكيل
-    </p>
+                  <p className="text-slate-300">
+                    بوابة الوكيل
+                  </p>
 
-    <p>         وكيل معتمد
-</p>
+                  <p>         وكيل معتمد
+                  </p>
 
-  </div>
+                </div>
 
-</div>
+              </div>
 
-<div
-  className="
+              <div
+                className="
     flex
     flex-wrap
     gap-3
     mb-6
   "
->
+              >
 
-  <div
-    className="
+                <div
+                  className="
       bg-emerald-500/15
       border
       border-emerald-500/20
@@ -2617,12 +2611,12 @@ hover:bg-fuchsia-700
       text-emerald-300
       text-sm
     "
-  >
-    🟢 متصل الآن
-  </div>
+                >
+                  🟢 متصل الآن
+                </div>
 
-  <div
-    className="
+                <div
+                  className="
       bg-white/10
       border
       border-white/10
@@ -2632,46 +2626,46 @@ hover:bg-fuchsia-700
       text-slate-300
       text-sm
     "
-  >
-    {agentStats.bookings} حجز
-  </div>
+                >
+                  {agentStats.bookings} حجز
+                </div>
 
-</div>
+              </div>
 
-            <div className="flex flex-wrap gap-3 mb-6">
+              <div className="flex flex-wrap gap-3 mb-6">
 
-  <button
-    onClick={exportMyBookings}
-    className="
+                <button
+                  onClick={exportMyBookings}
+                  className="
       bg-green-600
       text-white
       px-6
       py-3
       rounded-2xl
     "
-  >
-    Export Excel ({agentStats.bookings})
-  </button>
+                >
+                  Export Excel ({agentStats.bookings})
+                </button>
 
-  <button
-    onClick={agentLogout}
-    className="
+                <button
+                  onClick={agentLogout}
+                  className="
       bg-red-600
       text-white
       px-6
       py-3
       rounded-2xl
     "
-  >
-    تسجيل خروج الوكيل
-  </button>
+                >
+                  تسجيل خروج الوكيل
+                </button>
 
-</div>
+              </div>
 
-             <div className="grid md:grid-cols-3 gap-4 mt-6">
+              <div className="grid md:grid-cols-3 gap-4 mt-6">
 
-<div
-  className="
+                <div
+                  className="
     bg-white/10
     backdrop-blur-xl
     border
@@ -2679,17 +2673,17 @@ hover:bg-fuchsia-700
     rounded-3xl
     p-5
   "
->    <p className="text-slate-300">
-      عدد الحجوزات
-    </p>
+                >    <p className="text-slate-300">
+                    عدد الحجوزات
+                  </p>
 
-    <h3 className="text-3xl font-bold">
-      {agentStats.bookings}
-    </h3>
-  </div>
+                  <h3 className="text-3xl font-bold">
+                    {agentStats.bookings}
+                  </h3>
+                </div>
 
-<div
-  className="
+                <div
+                  className="
     bg-emerald-500/10
     backdrop-blur-xl
     border
@@ -2697,17 +2691,17 @@ hover:bg-fuchsia-700
     rounded-3xl
     p-5
   "
-><p className="text-emerald-300">
-        إجمالي المبيعات
-    </p>
+                ><p className="text-emerald-300">
+                    إجمالي المبيعات
+                  </p>
 
-    <h3 className="text-3xl font-bold text-green-700">
-      {agentStats.sales}
-    </h3>
-  </div>
+                  <h3 className="text-3xl font-bold text-green-700">
+                    {agentStats.sales}
+                  </h3>
+                </div>
 
-<div
-  className="
+                <div
+                  className="
     bg-fuchsia-500/10
     backdrop-blur-xl
     border
@@ -2715,16 +2709,16 @@ hover:bg-fuchsia-700
     rounded-3xl
     p-5
   "
->    <p className="text-fuchsia-300">
-      العمولة
-    </p>
+                >    <p className="text-fuchsia-300">
+                    العمولة
+                  </p>
 
-    <h3 className="text-3xl font-bold text-blue-700">
-      {agentStats.commission.toFixed(2)}
-    </h3>
-  </div>
+                  <h3 className="text-3xl font-bold text-blue-700">
+                    {agentStats.commission.toFixed(2)}
+                  </h3>
+                </div>
 
-</div>
+              </div>
 
             </div>
 
@@ -2732,17 +2726,17 @@ hover:bg-fuchsia-700
 
         </div>
 
-{agentUser && (
+        {agentUser && (
 
-<div className="mt-8">
- <div className="flex justify-between items-center mb-4">
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
 
-  <h3 className="text-2xl font-bold">
-    آخر الحجوزات
-  </h3>
+              <h3 className="text-2xl font-bold">
+                آخر الحجوزات
+              </h3>
 
-  <span
-    className="
+              <span
+                className="
       bg-blue-100
       text-blue-700
       px-4
@@ -2750,25 +2744,25 @@ hover:bg-fuchsia-700
       rounded-xl
       font-bold
     "
-  >
-    {bookings.filter(
-      booking =>
-        booking.agentId === agentUser.id
-    ).length}
-    {" "}راكب
-  </span>
+              >
+                {bookings.filter(
+                  booking =>
+                    booking.agentId === agentUser.id
+                ).length}
+                {" "}راكب
+              </span>
 
-</div>
+            </div>
 
-<input
-  type="text"
-  placeholder="ابحث بالاسم أو الجواز أو الهاتف"
-  value={agentSearch}
-  onChange={(e) =>
-    setAgentSearch(e.target.value)
-  }
+            <input
+              type="text"
+              placeholder="ابحث بالاسم أو الجواز أو الهاتف"
+              value={agentSearch}
+              onChange={(e) =>
+                setAgentSearch(e.target.value)
+              }
 
- className="
+              className="
   w-full
   bg-white/10
   border
@@ -2780,139 +2774,139 @@ hover:bg-fuchsia-700
   text-white
   placeholder:text-slate-400
 "
-/>
+            />
 
-  <div className="overflow-x-auto">
+            <div className="overflow-x-auto">
 
-<table
-  className="
+              <table
+                className="
     w-full
     overflow-hidden
     rounded-3xl
   "
->
-      <thead>
+              >
+                <thead>
 
-<tr
-  className="
+                  <tr
+                    className="
     bg-white/10
     border-b
     border-white/10
   "
->
-          <th className="p-3 text-right">
-            الراكب
-          </th>
+                  >
+                    <th className="p-3 text-right">
+                      الراكب
+                    </th>
 
-          <th className="p-3 text-right">
-            الرحلة
-          </th>
+                    <th className="p-3 text-right">
+                      الرحلة
+                    </th>
 
-          <th className="p-3 text-right">
-            التذكرة
-          </th>
+                    <th className="p-3 text-right">
+                      التذكرة
+                    </th>
 
-          <th className="p-3 text-right">
-            السعر
-          </th>
+                    <th className="p-3 text-right">
+                      السعر
+                    </th>
 
-          <th className="p-3 text-right">
-            الحالة
-          </th>
+                    <th className="p-3 text-right">
+                      الحالة
+                    </th>
 
-        </tr>
+                  </tr>
 
-      </thead>
+                </thead>
 
-      <tbody>
+                <tbody>
 
-       {bookings
-  .filter((booking) => {
+                  {bookings
+                    .filter((booking) => {
 
-    if (
-      booking.agentId !==
-      agentUser.id
-    ) {
-      return false;
-    }
+                      if (
+                        booking.agentId !==
+                        agentUser.id
+                      ) {
+                        return false;
+                      }
 
-    const searchValue =
-      agentSearch.toLowerCase();
+                      const searchValue =
+                        agentSearch.toLowerCase();
 
-    return (
+                      return (
 
-      booking.name
-        ?.toLowerCase()
-        .includes(searchValue)
+                        booking.name
+                          ?.toLowerCase()
+                          .includes(searchValue)
 
-      ||
+                        ||
 
-      booking.passport
-        ?.toString()
-        .includes(agentSearch)
+                        booking.passport
+                          ?.toString()
+                          .includes(agentSearch)
 
-      ||
+                        ||
 
-      booking.phone
-        ?.toString()
-        .includes(agentSearch)
+                        booking.phone
+                          ?.toString()
+                          .includes(agentSearch)
 
-    );
+                      );
 
-  })
-          .slice()
-          .reverse()
-          .map((booking) => (
+                    })
+                    .slice()
+                    .reverse()
+                    .map((booking) => (
 
-            <tr
-              key={booking.id}
-              className="border-b"
-            >
+                      <tr
+                        key={booking.id}
+                        className="border-b"
+                      >
 
-              <td className="p-3">
-                {booking.name}
-              </td>
+                        <td className="p-3">
+                          {booking.name}
+                        </td>
 
-              <td className="p-3">
-                {booking.trip}
-              </td>
+                        <td className="p-3">
+                          {booking.trip}
+                        </td>
 
-              <td className="p-3">
-                {booking.ticketType}
-              </td>
+                        <td className="p-3">
+                          {booking.ticketType}
+                        </td>
 
-              <td className="p-3">
-                {booking.ticketPrice}
-              </td>
+                        <td className="p-3">
+                          {booking.ticketPrice}
+                        </td>
 
-              <td className="p-3">
+                        <td className="p-3">
 
-                {booking.status === "confirmed"
-                  ? (
-                    <span className="text-green-600 font-bold">
-                      مؤكد
-                    </span>
-                  )
-                  : (
-                    <span className="text-yellow-600 font-bold">
-                      قيد المراجعة
-                    </span>
-                  )}
+                          {booking.status === "confirmed"
+                            ? (
+                              <span className="text-green-600 font-bold">
+                                مؤكد
+                              </span>
+                            )
+                            : (
+                              <span className="text-yellow-600 font-bold">
+                                قيد المراجعة
+                              </span>
+                            )}
 
-              </td>
+                        </td>
 
-            </tr>
+                      </tr>
 
-          ))}
+                    ))}
 
-      </tbody>
+                </tbody>
 
-    </table>
+              </table>
 
-  </div>
+            </div>
 
-</div>
-)}
+          </div>
+        )}
       </section>
 
       {/* Footer */}
