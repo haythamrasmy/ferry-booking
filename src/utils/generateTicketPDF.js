@@ -49,6 +49,9 @@ const fixArabicText = (text) => {
 };
 
 export const generateTicketPDF = async (booking) => {
+  console.log("PDF BOOKING =", booking);
+  console.log("PDF TRACKING =", booking.trackingId);
+  console.log("PDF TICKET =", booking.ticketId);
   const doc = new jsPDF();
 
   // 1. Setup Fonts
@@ -108,29 +111,29 @@ export const generateTicketPDF = async (booking) => {
 
   // QR Code Generation
   try {
-   const qrData =
-  await QRCode.toDataURL(
-    JSON.stringify({
-      ticketId: booking.ticketId,
-      name: booking.name,
-      passport: booking.passport,
-      ticketType: booking.ticketType,
-      trip: booking.trip,
-      status: booking.status,
-    }),
-    {
-      width: 500,
-      margin: 1,
-    }
-  );
-    
+    const qrData =
+      await QRCode.toDataURL(
+        JSON.stringify({
+          ticketId: booking.ticketId,
+          name: booking.name,
+          passport: booking.passport,
+          ticketType: booking.ticketType,
+          trip: booking.trip,
+          status: booking.status,
+        }),
+        {
+          width: 500,
+          margin: 1,
+        }
+      );
+
     doc.addImage(qrData, "PNG", 145, 65, 45, 45);
   } catch (err) {
     console.error("Failed to generate QR code", err);
   }
 
   // Primary Ticket Barcode (Using Tracking ID)
-  
+
   // Separation Line
   doc.setDrawColor(200);
   doc.line(20, 205, 190, 205);
@@ -164,38 +167,39 @@ export const generateTicketPDF = async (booking) => {
     doc.line(20, 23, 190, 23);
 
     // Prepare clear high-DPI canvas wrapper
-    
+
 
     console.log("CARGO PDF:", booking.cargo);
 
     console.log(
-  "CARGO KEYS:",
-  Object.keys(booking.cargo)
-);
+      "CARGO KEYS:",
+      Object.keys(booking.cargo)
+    );
 
-console.log(
-  "CARGO ENTRIES:",
-  Object.entries(booking.cargo)
-);
+    console.log(
+      "CARGO ENTRIES:",
+      Object.entries(booking.cargo)
+    );
 
-for (const [itemIndex, [item, qty]] of Object.entries(
-  Object.entries(booking.cargo)
-)) {      for (let i = 1; i <= qty; i++) {
+    for (const [itemIndex, [item, qty]] of Object.entries(
+      Object.entries(booking.cargo)
+    )) {
+      for (let i = 1; i <= qty; i++) {
         if (cargoY > 235) {
           doc.addPage();
           cargoY = 30;
         }
 
-const serialNumber =
- `${booking.ticketId}-${item.replaceAll(" ", "_")}-${i}`;
- 
+        const serialNumber =
+          `${booking.ticketId}-${item.replaceAll(" ", "_")}-${i}`;
+
         console.log(
-  "PDF SERIAL =",
-  serialNumber
-);
+          "PDF SERIAL =",
+          serialNumber
+        );
 
         // Create a URL-safe, clean alphanumeric data string for the scanner lookup payload
-        
+
 
         // Shape and format the item name securely using our internal helper function
         const rtlItemName = item;
@@ -203,26 +207,26 @@ const serialNumber =
           `${rtlItemName} (${i}/${qty})`;
         try {
 
-  const cargoQrData =
-    await QRCode.toDataURL(
-      serialNumber,
-      {
-        width: 300,
-        margin: 1,
-      }
-    );
+          const cargoQrData =
+            await QRCode.toDataURL(
+              serialNumber,
+              {
+                width: 300,
+                margin: 1,
+              }
+            );
 
-  doc.addImage(
-    cargoQrData,
-    "PNG",
-    25,
-    cargoY - 2,
-    35,
-    35
-  );
+          doc.addImage(
+            cargoQrData,
+            "PNG",
+            25,
+            cargoY - 2,
+            35,
+            35
+          );
 
-  // Render Text Metadata Block
-  doc.setTextColor(0);
+          // Render Text Metadata Block
+          doc.setTextColor(0);
 
 
 
