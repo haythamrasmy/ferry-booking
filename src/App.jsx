@@ -92,6 +92,21 @@ const [showCargo, setShowCargo] = useState(false);
     const [trackedItems, setTrackedItems] =
   useState([]);
 
+  const deliveredCount =
+  trackedItems.filter(
+    item => item.status === "تم التسليم"
+  ).length;
+
+const totalCount =
+  trackedItems.length;
+
+const progress =
+  totalCount > 0
+    ? Math.round(
+        (deliveredCount / totalCount) * 100
+      )
+    : 0;
+
   const [agentEmail, setAgentEmail] = useState("");
   const [agentPassword, setAgentPassword] = useState("");
   const [agentUser, setAgentUser] = useState(null);
@@ -177,6 +192,10 @@ const [showCargo, setShowCargo] = useState(false);
           ...doc.data(),
         })
       );
+
+      items.sort((a, b) =>
+  a.item.localeCompare(b.item, "ar")
+);
 
     setTrackedItems(items);
 
@@ -2283,6 +2302,33 @@ text-white
                 </p>
 <div className="md:col-span-2 mt-6">
 
+  <div className="mb-6">
+
+  <div className="flex justify-between mb-2">
+
+    <span className="font-bold">
+      نسبة إنجاز الشحنة
+    </span>
+
+    <span className="font-bold">
+      {progress}%
+    </span>
+
+  </div>
+
+  <div className="w-full bg-gray-200 rounded-full h-5">
+
+    <div
+      className="bg-green-500 h-5 rounded-full transition-all duration-500"
+      style={{
+        width: `${progress}%`
+      }}
+    />
+
+  </div>
+
+</div>
+
   <h4 className="text-xl font-bold mb-4">
     جميع القطع وحالة كل قطعة
   </h4>
@@ -2313,11 +2359,25 @@ text-white
           {item.serial}
         </p>
 
-        <p>
-          <strong>الحالة الحالية:</strong>
-          {" "}
-          {item.status}
-        </p>
+      <p>
+  <strong>الحالة الحالية:</strong>
+
+  <span
+    className={
+      item.status === "تم التسليم"
+        ? "text-green-600 font-bold"
+        : item.status === "وصلت الوجهة"
+        ? "text-purple-600 font-bold"
+        : item.status === "تم التحميل"
+        ? "text-orange-600 font-bold"
+        : item.status === "في المخزن"
+        ? "text-blue-600 font-bold"
+        : "text-gray-600 font-bold"
+    }
+  >
+    {item.status}
+  </span>
+</p>
 
       </div>
 
