@@ -2279,23 +2279,7 @@ text-white
                   {trackedShipment.trackingId}
                 </p>
 
-                <p>
-                  <strong>الحالة:</strong>
-                  {" "}
-                  {trackedShipment.status}
-                </p>
-
-                <p>
-                  <strong>المرسل:</strong>
-                  {" "}
-                  {trackedShipment.senderName}
-                </p>
-
-                <p>
-                  <strong>المستلم:</strong>
-                  {" "}
-                  {trackedShipment.receiverName}
-                </p>
+               
 
                 <div className="md:col-span-2">
 
