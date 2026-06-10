@@ -11,7 +11,8 @@ import {
     doc,
     getDocs,
     query,
-    where
+    where,
+    arrayUnion
 } from "firebase/firestore";
 
 import {
@@ -149,48 +150,56 @@ export default function Admin() {
     ] = useState(false);
 
 
-    const updateCargoStatus = async (
-        newStatus
-    ) => {
+  const updateCargoStatus = async (
+    newStatus
+) => {
 
-        if (
-            !scannedCargoId
-        ) return;
+    if (!scannedCargoId) return;
 
-        try {
+    try {
 
-            await updateDoc(
-                doc(
-                    db,
-                    "cargoItems",
-                    scannedCargoId
-                ),
-                {
-                    status:
-                        newStatus
-                }
-            );
+        await updateDoc(
+            doc(
+                db,
+                "cargoItems",
+                scannedCargoId
+            ),
+            {
+                status: newStatus,
 
-            setScannedCargo(
-                prev => ({
-                    ...prev,
-                    status:
-                        newStatus
+                history: arrayUnion({
+                    status: newStatus,
+                    time: new Date().toISOString()
                 })
-            );
+            }
+        );
 
-        } catch (err) {
+        setScannedCargo(
+            prev => ({
+                ...prev,
+                status: newStatus,
 
-            console.error(err);
+                history: [
+                    ...(prev?.history || []),
+                    {
+                        status: newStatus,
+                        time: new Date().toISOString()
+                    }
+                ]
+            })
+        );
 
-            alert(
-                "فشل تحديث الحالة"
-            );
+    } catch (err) {
 
-        }
+        console.error(err);
 
-    };
+        alert(
+            "فشل تحديث الحالة"
+        );
 
+    }
+
+};
 
     useEffect(() => {
         let unsubscribeBookings = null;
