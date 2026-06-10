@@ -92,44 +92,44 @@ export default function FerryBookingWebsite() {
   const [trackedItems, setTrackedItems] =
     useState([]);
 
- const progressPoints = trackedItems.reduce(
-  (total, item) => {
+  const progressPoints = trackedItems.reduce(
+    (total, item) => {
 
-    switch (item.status) {
+      switch (item.status) {
 
-      case "تم الاستلام":
-        return total + 20;
+        case "تم الاستلام":
+          return total + 20;
 
-      case "في المخزن":
-        return total + 40;
+        case "في المخزن":
+          return total + 40;
 
-      case "تم التحميل":
-        return total + 60;
+        case "تم التحميل":
+          return total + 60;
 
-      case "وصلت الوجهة":
-        return total + 80;
+        case "وصلت الوجهة":
+          return total + 80;
 
-      case "تم التسليم":
-        return total + 100;
+        case "تم التسليم":
+          return total + 100;
 
-      default:
-        return total;
-    }
+        default:
+          return total;
+      }
 
-  },
-  0
-);
+    },
+    0
+  );
 
-const progress =
-  trackedItems.length > 0
-    ? Math.round(
+  const progress =
+    trackedItems.length > 0
+      ? Math.round(
         progressPoints /
         trackedItems.length
       )
-    : 0;
+      : 0;
 
 
- 
+
 
   const [agentEmail, setAgentEmail] = useState("");
   const [agentPassword, setAgentPassword] = useState("");
@@ -193,7 +193,7 @@ const progress =
       }
 
 
-    
+
       const cargoQuery = query(
         collection(db, "cargoItems"),
         where(
@@ -220,26 +220,26 @@ const progress =
 
       let shipmentStatus = "قيد التجهيز";
 
-if (items.some(i => i.status === "تم التسليم")) {
-  shipmentStatus = "تم التسليم";
-}
-else if (items.some(i => i.status === "وصلت الوجهة")) {
-  shipmentStatus = "وصلت الوجهة";
-}
-else if (items.some(i => i.status === "تم التحميل")) {
-  shipmentStatus = "تم التحميل";
-}
-else if (items.some(i => i.status === "في المخزن")) {
-  shipmentStatus = "في المخزن";
-}
+      if (items.some(i => i.status === "تم التسليم")) {
+        shipmentStatus = "تم التسليم";
+      }
+      else if (items.some(i => i.status === "وصلت الوجهة")) {
+        shipmentStatus = "وصلت الوجهة";
+      }
+      else if (items.some(i => i.status === "تم التحميل")) {
+        shipmentStatus = "تم التحميل";
+      }
+      else if (items.some(i => i.status === "في المخزن")) {
+        shipmentStatus = "في المخزن";
+      }
 
-setTrackedShipment({
-  id: shipment.id,
-  ...shipment.data(),
-  status: shipmentStatus,
-});
+      setTrackedShipment({
+        id: shipment.id,
+        ...shipment.data(),
+        status: shipmentStatus,
+      });
 
-setTrackedItems(items);
+      setTrackedItems(items);
 
       setTrackedItems(items);
 
@@ -2444,22 +2444,16 @@ text-white
                                 >
 
                                   <div>
-                                    <p>
-                                      <strong>عدد القطع:</strong>
-                                      {trackedItems.length}
-                                    </p>
-                                  </div>
-
-                                  <div>
-                                    <strong>بواسطة:</strong>
-                                    النظام
+                                    <strong>الحالة:</strong>
+                                    {" "}
+                                    {entry.status}
                                   </div>
 
                                   <div>
                                     <strong>التاريخ:</strong>
+                                    {" "}
                                     {entry.time}
                                   </div>
-
                                 </div>
 
                               ))}
