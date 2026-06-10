@@ -128,16 +128,8 @@ const progress =
       )
     : 0;
 
-    
-  const totalCount =
-    trackedItems.length;
 
-  const progress =
-    totalCount > 0
-      ? Math.round(
-        (deliveredCount / totalCount) * 100
-      )
-      : 0;
+ 
 
   const [agentEmail, setAgentEmail] = useState("");
   const [agentPassword, setAgentPassword] = useState("");
@@ -201,26 +193,7 @@ const progress =
       }
 
 
-      let shipmentStatus = "قيد التجهيز";
-
-if (items.some(i => i.status === "تم التسليم")) {
-  shipmentStatus = "تم التسليم";
-}
-else if (items.some(i => i.status === "وصلت الوجهة")) {
-  shipmentStatus = "وصلت الوجهة";
-}
-else if (items.some(i => i.status === "تم التحميل")) {
-  shipmentStatus = "تم التحميل";
-}
-else if (items.some(i => i.status === "في المخزن")) {
-  shipmentStatus = "في المخزن";
-}
-
-     setTrackedShipment({
-  id: shipment.id,
-  ...shipment.data(),
-  status: shipmentStatus,
-});
+    
       const cargoQuery = query(
         collection(db, "cargoItems"),
         where(
@@ -244,6 +217,29 @@ else if (items.some(i => i.status === "في المخزن")) {
       items.sort((a, b) =>
         a.item.localeCompare(b.item, "ar")
       );
+
+      let shipmentStatus = "قيد التجهيز";
+
+if (items.some(i => i.status === "تم التسليم")) {
+  shipmentStatus = "تم التسليم";
+}
+else if (items.some(i => i.status === "وصلت الوجهة")) {
+  shipmentStatus = "وصلت الوجهة";
+}
+else if (items.some(i => i.status === "تم التحميل")) {
+  shipmentStatus = "تم التحميل";
+}
+else if (items.some(i => i.status === "في المخزن")) {
+  shipmentStatus = "في المخزن";
+}
+
+setTrackedShipment({
+  id: shipment.id,
+  ...shipment.data(),
+  status: shipmentStatus,
+});
+
+setTrackedItems(items);
 
       setTrackedItems(items);
 
