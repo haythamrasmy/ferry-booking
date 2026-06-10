@@ -97,44 +97,7 @@ const [showCargo, setShowCargo] = useState(false);
     item => item.status === "تم التسليم"
   ).length;
 
-  <div className="mt-4 space-y-2">
-
-  <h4 className="font-bold text-lg">
-    سجل الحركة
-  </h4>
-
-  {item.history?.map(
-    (step, index) => (
-
-      <div
-        key={index}
-        className="
-          border-r-4
-          border-green-500
-          pr-3
-          py-2
-          bg-gray-50
-          rounded
-        "
-      >
-
-        <div className="font-bold">
-          {step.status}
-        </div>
-
-        <div className="text-sm text-gray-500">
-          {new Date(
-            step.time
-          ).toLocaleString("ar-EG")}
-        </div>
-
-      </div>
-
-    )
-  )}
-
-</div>
-
+ 
 const totalCount =
   trackedItems.length;
 
