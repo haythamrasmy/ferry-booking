@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { db, auth } from "./firebase";
 
+import CargoScanner from "./CargoScanner";
 
 import { motion } from "framer-motion";
 import cairoFont from "../public/fonts/Cairo-Regular.ttf";
