@@ -92,11 +92,41 @@ export default function FerryBookingWebsite() {
   const [trackedItems, setTrackedItems] =
     useState([]);
 
-  const deliveredCount =
-    trackedItems.filter(
-      item => item.status === "تم التسليم"
-    ).length;
+ const progressPoints = trackedItems.reduce(
+  (total, item) => {
 
+    switch (item.status) {
+
+      case "تم الاستلام":
+        return total + 20;
+
+      case "في المخزن":
+        return total + 40;
+
+      case "تم التحميل":
+        return total + 60;
+
+      case "وصلت الوجهة":
+        return total + 80;
+
+      case "تم التسليم":
+        return total + 100;
+
+      default:
+        return total;
+    }
+
+  },
+  0
+);
+
+const progress =
+  trackedItems.length > 0
+    ? Math.round(
+        progressPoints /
+        trackedItems.length
+      )
+    : 0;
 
   const totalCount =
     trackedItems.length;
@@ -169,11 +199,27 @@ export default function FerryBookingWebsite() {
         return;
       }
 
-      setTrackedShipment({
-        id: shipment.id,
-        ...shipment.data(),
-      });
 
+      let shipmentStatus = "قيد التجهيز";
+
+if (items.some(i => i.status === "تم التسليم")) {
+  shipmentStatus = "تم التسليم";
+}
+else if (items.some(i => i.status === "وصلت الوجهة")) {
+  shipmentStatus = "وصلت الوجهة";
+}
+else if (items.some(i => i.status === "تم التحميل")) {
+  shipmentStatus = "تم التحميل";
+}
+else if (items.some(i => i.status === "في المخزن")) {
+  shipmentStatus = "في المخزن";
+}
+
+     setTrackedShipment({
+  id: shipment.id,
+  ...shipment.data(),
+  status: shipmentStatus,
+});
       const cargoQuery = query(
         collection(db, "cargoItems"),
         where(
