@@ -2281,7 +2281,51 @@ text-white
                   {" "}
                   {trackedShipment.destination}
                 </p>
+<div className="md:col-span-2 mt-6">
 
+  <h4 className="text-xl font-bold mb-4">
+    جميع القطع وحالة كل قطعة
+  </h4>
+
+  <div className="space-y-3">
+
+    {trackedItems.map((item) => (
+
+      <div
+        key={item.id}
+        className="
+          bg-white
+          border
+          rounded-xl
+          p-4
+        "
+      >
+
+        <p>
+          <strong>الصنف:</strong>
+          {" "}
+          {item.item}
+        </p>
+
+        <p>
+          <strong>السيريال:</strong>
+          {" "}
+          {item.serial}
+        </p>
+
+        <p>
+          <strong>الحالة الحالية:</strong>
+          {" "}
+          {item.status}
+        </p>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</div>
               </div>
 
             </div>
