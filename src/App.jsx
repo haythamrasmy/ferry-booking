@@ -2380,6 +2380,57 @@ text-white
   </span>
 </p>
 
+{item.history?.length > 0 && (
+
+  <div className="mt-4 border-t pt-3">
+
+    <p className="font-bold mb-2">
+      سجل حركة القطعة
+    </p>
+
+    {item.history
+      .slice()
+      .reverse()
+      .map((entry, index) => (
+
+        <div
+          key={index}
+          className="
+            text-sm
+            bg-slate-50
+            border
+            rounded-lg
+            p-2
+            mb-2
+          "
+        >
+
+          <div>
+            <strong>الحالة:</strong>
+            {" "}
+            {entry.status}
+          </div>
+
+          <div>
+            <strong>بواسطة:</strong>
+            {" "}
+            {entry.updatedBy}
+          </div>
+
+          <div>
+            <strong>التاريخ:</strong>
+            {" "}
+            {entry.updatedAt}
+          </div>
+
+        </div>
+
+      ))}
+
+  </div>
+
+)}
+
       </div>
 
     ))}
