@@ -128,6 +128,7 @@ const progress =
       )
     : 0;
 
+    
   const totalCount =
     trackedItems.length;
 
