@@ -14,6 +14,8 @@ import {
   onSnapshot,
   doc,
   serverTimestamp,
+  query,
+  where,
 } from "firebase/firestore";
 
 import {
@@ -87,6 +89,9 @@ const [showCargo, setShowCargo] = useState(false);
   const [trackedShipment, setTrackedShipment] =
     useState(null);
 
+    const [trackedItems, setTrackedItems] =
+  useState([]);
+
   const [agentEmail, setAgentEmail] = useState("");
   const [agentPassword, setAgentPassword] = useState("");
   const [agentUser, setAgentUser] = useState(null);
@@ -122,43 +127,65 @@ const [showCargo, setShowCargo] = useState(false);
 
 
 
-  const trackShipment = async () => {
+ const trackShipment = async () => {
 
-    try {
+  try {
 
-      const querySnapshot =
-        await getDocs(
-          collection(db, "shipments")
-        );
+    const shipmentQuery =
+      await getDocs(
+        collection(db, "shipments")
+      );
 
-      const shipment =
-        querySnapshot.docs.find(
-          (doc) =>
-            doc.data().trackingId ===
-            trackingNumber
-        );
+    const shipment =
+      shipmentQuery.docs.find(
+        (doc) =>
+          doc.data().trackingId ===
+          trackingNumber
+      );
 
-      if (shipment) {
+    if (!shipment) {
 
-        setTrackedShipment({
-          id: shipment.id,
-          ...shipment.data(),
-        });
+      alert("رقم التتبع غير موجود");
 
-      } else {
+      setTrackedShipment(null);
+      setTrackedItems([]);
 
-        alert("رقم التتبع غير موجود");
-
-        setTrackedShipment(null);
-      }
-
-    } catch (error) {
-
-      console.log(error);
-
-      alert(error.message);
+      return;
     }
-  };
+
+    setTrackedShipment({
+      id: shipment.id,
+      ...shipment.data(),
+    });
+
+    const cargoQuery = query(
+      collection(db, "cargoItems"),
+      where(
+        "trackingId",
+        "==",
+        trackingNumber
+      )
+    );
+
+    const cargoSnapshot =
+      await getDocs(cargoQuery);
+
+    const items =
+      cargoSnapshot.docs.map(
+        (doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })
+      );
+
+    setTrackedItems(items);
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+};
 
   const updateCargoQuantity = (
     item,
