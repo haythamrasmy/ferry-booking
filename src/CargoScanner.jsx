@@ -213,10 +213,7 @@ export default function CargoScanner() {
             const timestamp = new Date().toISOString();
 
             const locationDetails = await getLocationDetails();
-            if (!locationDetails || locationDetails.source !== "gps") {
-                alert("يجب تفعيل GPS الحقيقي لتحديث الحالة");
-                return;
-            }
+           
             const device = getDeviceInfo();
 
             await updateDoc(
@@ -270,6 +267,16 @@ export default function CargoScanner() {
     };
 
     useEffect(() => {
+    document.title = "قسم متابعة الشحنات";
+
+    startScanner();
+
+    return () => {
+        stopScanner();
+    };
+}, []);
+
+    useEffect(() => {
         startScanner();
 
         checkLocationPermission(); // ✅ هنا
@@ -289,6 +296,9 @@ export default function CargoScanner() {
 
             {/* Header */}
             <div className="mb-6 text-center">
+            <h3 className="font-bold text-lg">
+قسم متابعة الشحنات
+                        </h3>
                 <h1 className="text-3xl font-bold text-blue-400">
                     3A international
                 </h1>
@@ -432,13 +442,17 @@ active:scale-[0.98]
 transition-all
 duration-300
 "                        >
-                            <div className="font-bold text-lg">
-                                تحديث حالة الشحنة
-                            </div>
+                           <div className="font-bold text-lg">
+    {scannedCargo?.status === "✅ تم التسليم"
+        ? "تم تسليم هذه الشحنة بالفعل"
+        : "تحديث حالة الشحنة"}
+</div>
 
-                            <div className="text-xs text-blue-100 mt-1">
-                                حدد أين موقع الشحنة الآن
-                            </div>
+<div className="text-xs text-blue-100 mt-1">
+    {scannedCargo?.status === "✅ تم التسليم"
+        ? "لا يمكن تعديل حالة الشحنة بعد التسليم"
+        : "حدد أين موقع الشحنة الآن"}
+</div>
                         </button>
 
                         {showStatusMenu && (
