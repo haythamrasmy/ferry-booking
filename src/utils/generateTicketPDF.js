@@ -185,7 +185,8 @@ export const generateTicketPDF = async (booking) => {
       Object.entries(booking.cargo)
     )) {
       for (let i = 1; i <= qty; i++) {
-        if (cargoY > 235) {
+if (cargoY > 180)
+            {
           doc.addPage();
           cargoY = 30;
         }
@@ -216,35 +217,117 @@ export const generateTicketPDF = async (booking) => {
               }
             );
 
-          doc.addImage(
-            cargoQrData,
-            "PNG",
-            25,
-            cargoY - 2,
-            35,
-            35
-          );
+        // ================================
+// CUT HERE TOP
+// ================================
+doc.setDrawColor(180);
+doc.setLineDashPattern([2, 2], 0);
+doc.line(20, cargoY - 12, 190, cargoY - 12);
 
-          // Render Text Metadata Block
-          doc.setTextColor(0);
+doc.setFontSize(10);
+doc.setTextColor(120);
+doc.text("✂ CUT HERE ✂", 95, cargoY - 15, {
+  align: "center",
+});
 
+// Main Tag Border
+doc.setLineDashPattern([], 0);
+doc.setDrawColor(0, 51, 102);
+doc.setLineWidth(1);
 
+doc.roundedRect(
+  20,
+  cargoY - 5,
+  170,
+  70,
+  3,
+  3
+);
 
-          // Render Text Metadata Block
-          doc.setTextColor(0);
-          doc.setFontSize(13);
-          doc.setFont("Cairo");
-          doc.text(" " + labelDisplayText, 70, cargoY);
-          doc.setFontSize(10);
-          doc.setTextColor(100);
-          doc.text(`Serial: ${serialNumber}`, 70, cargoY + 8);
-          // Render Accompanying Barcode Graphics
+// Header Bar
+doc.setFillColor(0, 51, 102);
+doc.rect(20, cargoY - 5, 170, 12, "F");
 
-          // Outer card boundary box decoration around each item block
-          doc.setDrawColor(220);
-          doc.rect(20, cargoY - 8, 170, 50);
-          cargoY += 60;
-        } catch (err) {
+doc.setTextColor(255);
+doc.setFontSize(12);
+doc.text("CARGO TRACKING TAG", 105, cargoY + 3, {
+  align: "center",
+});
+
+// Large QR Code
+doc.addImage(
+  cargoQrData,
+  "PNG",
+  28,
+  cargoY + 10,
+  45,
+  45
+);
+
+// Cargo Information
+doc.setTextColor(0);
+doc.setFont("Cairo");
+
+doc.setFontSize(14);
+doc.text(labelDisplayText, 80, cargoY + 20);
+
+doc.setFontSize(11);
+
+doc.text(
+  `Ticket ID: ${booking.ticketId}`,
+  80,
+  cargoY + 32
+);
+
+doc.text(
+  `Tracking ID: ${booking.trackingId || "N/A"}`,
+  80,
+  cargoY + 42
+);
+
+doc.text(
+  `Piece: ${i}/${qty}`,
+  80,
+  cargoY + 52
+);
+
+doc.setFontSize(9);
+doc.setTextColor(120);
+
+doc.text(
+  serialNumber,
+  80,
+  cargoY + 60
+);
+
+// CUT HERE BOTTOM
+doc.setDrawColor(180);
+doc.setLineDashPattern([2, 2], 0);
+
+doc.line(
+  20,
+  cargoY + 78,
+  190,
+  cargoY + 78
+);
+
+doc.setFontSize(10);
+
+doc.text(
+  "✂ CUT HERE ✂",
+  95,
+  cargoY + 74,
+  {
+    align: "center",
+  }
+);
+
+doc.setLineDashPattern([], 0);
+
+// Move Next Tag
+cargoY += 90;
+        }
+         catch (err) {
           console.error(`Error rendering cargo barcode tag for serial: ${serialNumber}`, err);
         }
       }

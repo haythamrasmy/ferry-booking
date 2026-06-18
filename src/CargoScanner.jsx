@@ -9,6 +9,7 @@ import {
     updateDoc,
     doc,
     arrayUnion,
+    onSnapshot, // 👈 أضف دي
 } from "firebase/firestore";
 
 import { Html5QrcodeScanner } from "html5-qrcode";
@@ -51,6 +52,22 @@ const getLocationDetails = async () => {
     });
 };
 
+
+
+const updateShipmentStatus = async (shipmentId, newStatus) => {
+    const timestamp = new Date().toISOString();
+
+    await updateDoc(doc(db, "shipments", shipmentId), {
+        status: newStatus,
+        history: arrayUnion({
+            status: newStatus,
+            time: timestamp,
+        }),
+    });
+};
+
+
+
 // ✅ معلومات الجهاز
 const getDeviceInfo = () => {
     return navigator.userAgent;
@@ -81,30 +98,49 @@ export default function CargoScanner() {
         );
     };
 
+    const [shipment, setShipment] = useState(null);
+    const [shipmentItems, setShipmentItems] = useState([]);
+
+    const [selectedWarehouse, setSelectedWarehouse] = useState("");
+
+
+
     const STATUS_ORDER = {
-        "📦 تم استلام طلب الشحن": 1,
-        "🏬 في المخزن": 2,
-        "🚚 تم التحميل": 3,
-        "📍 وصلت الوجهة": 4,
-        "✅ تم التسليم": 5,
+        "📋 المراجعة والاستلام من موقع العميل": 1,
+        "🏬 دخول المخازن": 2,
+        "🚚 التحميل على عربة النقل": 3,
+        "🛣️ النقل البري إلى السد العالي": 4,
+        "📦 التفريغ والاستلام بمخزن الهيئة (السد العالي)": 5,
+        "⛴️ التحميل إلى الصندل": 6,
+        "🚢 التحرك من ميناء السد العالي": 7,
+        "📍 التفريغ في ميناء وادي حلفا": 8,
+        "✅ التسليم النهائي في وادي حلفا": 9,
     };
 
     const STATUS_STEPS = Object.keys(STATUS_ORDER);
 
     const STATUS_COLORS = {
-        "📦 تم استلام طلب الشحن": "bg-green-500",
-        "🏬 في المخزن": "bg-blue-500",
-        "🚚 تم التحميل": "bg-yellow-500",
-        "📍 وصلت الوجهة": "bg-purple-500",
-        "✅ تم التسليم": "bg-red-500",
+        "📋 المراجعة والاستلام من موقع العميل": "bg-green-500",
+        "🏬 دخول المخازن": "bg-blue-500",
+        "🚚 التحميل على عربة النقل": "bg-yellow-500",
+        "🛣️ النقل البري إلى السد العالي": "bg-orange-500",
+        "📦 التفريغ والاستلام بمخزن الهيئة (السد العالي)": "bg-indigo-500",
+        "⛴️ التحميل إلى الصندل": "bg-cyan-500",
+        "🚢 التحرك من ميناء السد العالي": "bg-teal-500",
+        "📍 التفريغ في ميناء وادي حلفا": "bg-purple-500",
+        "✅ التسليم النهائي في وادي حلفا": "bg-red-500",
     };
 
     const STATUS_TEXT_COLORS = {
-        "📦 تم استلام طلب الشحن": "text-green-400",
-        "🏬 في المخزن": "text-blue-400",
-        "🚚 تم التحميل": "text-yellow-400",
-        "📍 وصلت الوجهة": "text-purple-400",
-        "✅ تم التسليم": "text-red-400",
+        "📋 المراجعة والاستلام من موقع العميل": "bg-green-500",
+        "🏬 دخول المخازن": "bg-blue-500",
+        "🚚 التحميل على عربة النقل": "bg-yellow-500",
+        "🛣️ النقل البري إلى السد العالي": "bg-orange-500",
+        "📦 التفريغ والاستلام بمخزن الهيئة (السد العالي)": "bg-indigo-500",
+        "⛴️ التحميل إلى الصندل": "bg-cyan-500",
+        "🚢 التحرك من ميناء السد العالي": "bg-teal-500",
+        "📍 التفريغ في ميناء وادي حلفا": "bg-purple-500",
+        "✅ التسليم النهائي في وادي حلفا": "bg-red-500",
     };
 
     const startScanner = () => {
@@ -191,6 +227,11 @@ export default function CargoScanner() {
         }, 300);
     };
     const updateCargoStatus = async (newStatus) => {
+
+
+
+        setSelectedStatus("");
+        setSelectedWarehouse("");
         if (!locationEnabled) {
             alert("يجب تفعيل الموقع قبل تحديث الحالة");
             return;
@@ -213,8 +254,13 @@ export default function CargoScanner() {
             const timestamp = new Date().toISOString();
 
             const locationDetails = await getLocationDetails();
-           
+
             const device = getDeviceInfo();
+
+            if (newStatus === "🏬 دخول المخازن" && !selectedWarehouse) {
+                alert("يجب اختيار المخزن أولاً");
+                return;
+            }
 
             await updateDoc(
                 doc(db, "cargoItems", scannedCargoId),
@@ -222,6 +268,7 @@ export default function CargoScanner() {
                     status: newStatus,
                     history: arrayUnion({
                         status: newStatus,
+                        warehouse: selectedWarehouse || null,
                         time: timestamp,
                         location: locationDetails,
                         device: device,
@@ -253,8 +300,11 @@ export default function CargoScanner() {
                         ...(prev.history || []),
                         {
                             status: newStatus,
+                            warehouse: selectedWarehouse || null,
                             time: timestamp,
-                        },
+                            location: locationDetails || {},
+                            device: device || "unknown",
+                        }
                     ],
                 };
             });
@@ -267,14 +317,58 @@ export default function CargoScanner() {
     };
 
     useEffect(() => {
-    document.title = "قسم متابعة الشحنات";
+        document.title = "قسم متابعة الشحنات";
 
-    startScanner();
+        startScanner();
 
-    return () => {
-        stopScanner();
-    };
-}, []);
+        return () => {
+            stopScanner();
+        };
+    }, []);
+
+
+    useEffect(() => {
+        if (!scannedCargo?.shipmentId) return;
+
+        const loadShipmentItems = async () => {
+
+            const q = query(
+                collection(db, "cargoItems"),
+                where(
+                    "shipmentId",
+                    "==",
+                    scannedCargo.shipmentId
+                )
+            );
+
+            const snapshot = await getDocs(q);
+
+            setShipmentItems(
+                snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }))
+            );
+        };
+
+        loadShipmentItems();
+
+    }, [scannedCargo]);
+
+    useEffect(() => {
+        if (!scannedCargo?.shipmentId) return;
+
+        const unsub = onSnapshot(
+            doc(db, "shipments", scannedCargo.shipmentId),
+            (docSnap) => {
+                if (docSnap.exists()) {
+                    setShipment(docSnap.data());
+                }
+            }
+        );
+
+        return () => unsub();
+    }, [scannedCargo]);
 
     useEffect(() => {
         startScanner();
@@ -286,19 +380,83 @@ export default function CargoScanner() {
         };
     }, []);
 
+    useEffect(() => {
+        if (selectedStatus !== "🏬 دخول المخازن") {
+            setSelectedWarehouse("");
+        }
+    }, [selectedStatus]);
+
     const progress =
         (((STATUS_ORDER[scannedCargo?.status] || 1) - 1) /
             (STATUS_STEPS.length - 1)) *
         100;
+
+    const shipmentStats = STATUS_STEPS.reduce(
+        (acc, step) => {
+
+            acc[step] = shipmentItems.filter(
+                item => item.status === step
+            ).length;
+
+            return acc;
+        },
+        {}
+    );
+
+
+
+    const shipmentProgress =
+        shipmentItems.length > 0
+            ? Math.round(
+                (
+                    shipmentItems.reduce(
+                        (sum, item) =>
+                            sum +
+                            (STATUS_ORDER[item.status] || 1),
+                        0
+                    ) /
+                    (shipmentItems.length *
+                        STATUS_STEPS.length)
+                ) *
+                100
+            )
+            : 0;
+
+    const maxStage = Math.max(
+        ...shipmentItems.map(
+            item => STATUS_ORDER[item.status] || 1
+        ),
+        1
+    );
+
+    const delayedItems = shipmentItems.filter(
+        item =>
+            (STATUS_ORDER[item.status] || 1) <
+            maxStage - 1
+    );
+
+    const completedItems = shipmentItems.filter(
+        item =>
+            item.status ===
+            "✅ التسليم النهائي في وادي حلفا"
+    );
+
+    const inTransitItems = shipmentItems.filter(
+        item =>
+            item.status !==
+            "✅ التسليم النهائي في وادي حلفا" &&
+            !delayedItems.includes(item)
+    );
+
 
     return (
         <div className="min-h-screen p-5 bg-slate-900 text-white">
 
             {/* Header */}
             <div className="mb-6 text-center">
-            <h3 className="font-bold text-lg">
-قسم متابعة الشحنات
-                        </h3>
+                <h3 className="font-bold text-lg">
+                    قسم متابعة الشحنات
+                </h3>
                 <h1 className="text-3xl font-bold text-blue-400">
                     3A international
                 </h1>
@@ -414,6 +572,9 @@ export default function CargoScanner() {
 
                     </div>
 
+
+                 
+
                     {/* Status Selector */}
                     <div className="mt-5 relative">
 
@@ -442,18 +603,31 @@ active:scale-[0.98]
 transition-all
 duration-300
 "                        >
-                           <div className="font-bold text-lg">
-    {scannedCargo?.status === "✅ تم التسليم"
-        ? "تم تسليم هذه الشحنة بالفعل"
-        : "تحديث حالة الشحنة"}
-</div>
+                            {scannedCargo?.status === "✅ تم التسليم"
+                                ? "تم تسليم هذه القطعة بالفعل"
+                                : "تحديث حالة القطعة"}
 
-<div className="text-xs text-blue-100 mt-1">
-    {scannedCargo?.status === "✅ تم التسليم"
-        ? "لا يمكن تعديل حالة الشحنة بعد التسليم"
-        : "حدد أين موقع الشحنة الآن"}
-</div>
+                                <br></br>
+
+                            {scannedCargo?.status === "✅ تم التسليم"
+                                ? "لا يمكن تعديل حالة القطعة بعد التسليم"
+                                : "حدد أين موقع القطعة الآن"}
+
+
                         </button>
+                        {selectedStatus === "🏬 دخول المخازن" && (
+                            <select
+                                value={selectedWarehouse}
+                                onChange={(e) => setSelectedWarehouse(e.target.value)}
+                                className="w-full p-3 rounded-xl bg-slate-700 mt-3 text-white"
+                            >
+                                <option value="">اختر المخزن</option>
+                                <option value="مخزن 1">مخزن 1</option>
+                                <option value="مخزن 2">مخزن 2</option>
+                                <option value="مخزن 3">مخزن 3</option>
+                                <option value="مخزن 4">مخزن 4</option>
+                            </select>
+                        )}
 
                         {showStatusMenu && (
                             <div className="mt-2 bg-slate-700 rounded-xl overflow-hidden border border-slate-600">
@@ -542,7 +716,7 @@ duration-300
                     <div className="mt-8">
 
                         <h4 className="text-center font-bold mb-4">
-                            مسار الشحنة
+                            مسار القطعة
                         </h4>
 
                         <div className="relative border-l-2 border-blue-500/40 ml-3">
@@ -606,7 +780,13 @@ duration-300
                                                 </p>
 
                                                 {record && (
+
                                                     <>
+                                                        {record.warehouse && (
+                                                            <p className="text-xs text-yellow-400">
+                                                                🏬 {record.warehouse}
+                                                            </p>
+                                                        )}
                                                         <p className="text-xs text-gray-300 mt-1">
                                                             {new Date(record.time).toLocaleString()}
                                                         </p>
@@ -639,54 +819,168 @@ duration-300
                         </div>
 
                     </div>
+                    {shipmentItems.length > 0 && (
 
-                    {/* Analysis */}
-                    <div className="mt-10">
+                        <div className="mt-6">
+                            <h3 className="text-center font-bold text-lg mb-2">
+                                حالة بضائع التذكرة
+                            </h3>
+                            <div className="text-center mb-4">
 
-                        <h4 className="text-center font-bold text-lg mb-4">
-                            تحليل حركة الشحنة
-                        </h4>
+                                <div className="text-cyan-400 font-bold">
+                                    🎫 رقم التذكرة: {scannedCargo?.ticketId}
+                                </div>
 
-                        <div className="space-y-3">
+                                <div className="text-gray-300 mt-1">
+                                    👤 صاحب التذكرة: {scannedCargo?.senderName}
+                                </div>
 
-                            {(scannedCargo.history || [])
-                                .sort(
-                                    (a, b) =>
-                                        new Date(b.time) -
-                                        new Date(a.time)
-                                )
-                                .map((record, index) => (
-                                    <div
-                                        key={index}
-                                        className="
-                        bg-slate-800
-                        border
-                        border-slate-700
-                        rounded-xl
-                        p-4
-                    "
-                                    >
-                                        <div className="text-xs text-cyan-400 mb-2">
-                                            حركة #{index + 1}
-                                        </div>
+                            </div>
 
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-semibold">
-                                                {record.status}
-                                            </span>
+                            <div className="grid grid-cols-2 gap-3">
 
-                                            <span className="text-xs text-gray-400">
-                                                {new Date(
-                                                    record.time
-                                                ).toLocaleString()}
-                                            </span>
-                                        </div>
+                                {/* إجمالي القطع */}
+                                <div className="bg-slate-800 rounded-2xl p-4 text-center border border-slate-700">
+                                    <div className="text-3xl mb-2">📦</div>
+
+                                    <div className="text-2xl font-bold text-cyan-400">
+                                        {shipmentItems.length}
                                     </div>
-                                ))}
+
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        إجمالي القطع
+                                    </div>
+                                </div>
+
+                                {/* مكتملة */}
+                                <div className="bg-slate-800 rounded-2xl p-4 text-center border border-slate-700">
+                                    <div className="text-3xl mb-2">✅</div>
+
+                                    <div className="text-2xl font-bold text-green-400">
+                                        {completedItems.length}
+                                    </div>
+
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        مكتملة
+                                    </div>
+                                </div>
+
+                                {/* قيد الشحن */}
+                                <div className="bg-slate-800 rounded-2xl p-4 text-center border border-slate-700">
+                                    <div className="text-3xl mb-2">🚢</div>
+
+                                    <div className="text-2xl font-bold text-blue-400">
+                                        {inTransitItems.length}
+                                    </div>
+
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        قيد الشحن
+                                    </div>
+                                </div>
+
+                                {/* متأخرة */}
+                                <div className="bg-slate-800 rounded-2xl p-4 text-center border border-slate-700">
+                                    <div className="text-3xl mb-2">⚠️</div>
+
+                                    <div className="text-2xl font-bold text-yellow-400">
+                                        {delayedItems.length}
+                                    </div>
+
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        متأخرة
+                                    </div>
+                                </div>
+
+                            </div>
+
+                               {shipmentItems.length > 0 && (
+
+                        <div className="mt-6 mb-4">
+
+                            <div className="
+            bg-slate-800
+            border
+            border-slate-700
+            rounded-2xl
+            p-5
+            text-center
+        ">
+
+                                <div className="text-3xl mb-2">
+                                    🎯
+                                </div>
+
+                                <div className="text-5xl font-bold text-cyan-400">
+                                    {shipmentProgress}%
+                                </div>
+
+                                <div className="text-sm text-gray-400 mt-2">
+                                    نسبة شحن القطع المرتيطة بهذة التذكرة
+                                </div>
+
+                                <div className="mt-4 w-full bg-slate-700 rounded-full h-3 overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-700"
+                                        style={{
+                                            width: `${shipmentProgress}%`,
+                                        }}
+                                    />
+                                </div>
+
+                            </div>
 
                         </div>
 
-                    </div>
+                    )}
+
+                            {delayedItems.length > 0 && (
+
+                                <div className="mt-4">
+
+                                    <div className="text-yellow-400 font-bold mb-2">
+                                        ⚠️ القطع المتأخرة
+                                    </div>
+
+                                    <div className="space-y-2">
+
+                                        {delayedItems.map(item => (
+
+                                            <div
+                                                key={item.id}
+                                                className="
+                        bg-slate-800
+                        border
+                        border-yellow-500/30
+                        rounded-xl
+                        p-3
+                    "
+                                            >
+
+                                                <div className="font-semibold">
+                                                    {item.item}
+                                                </div>
+
+                                                <div className="text-xs text-gray-400">
+                                                    {item.serial}
+                                                </div>
+
+                                                <div className="text-sm text-yellow-400 mt-1">
+                                                    {item.status}
+                                                </div>
+
+                                            </div>
+
+                                        ))}
+
+                                    </div>
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+                    )}
 
                 </div>
             )}

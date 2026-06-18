@@ -1411,7 +1411,7 @@ items-center
                                                     {booking.createdAt
                                                         ? booking.createdAt
                                                             .toDate()
-                                                            .toLocaleString("ar-EG")
+                                                            .toISOString()
                                                         : "-"}
                                                 </td>
 

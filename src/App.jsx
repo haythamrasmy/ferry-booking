@@ -827,36 +827,21 @@ export default function FerryBookingWebsite() {
             Date.now() +
             expirationTime,
         });
-      await addDoc(
-        collection(db, "shipments"),
-        {
+     const shipmentRef = await addDoc(
+  collection(db, "shipments"),
+  {
+    trackingId,
+    ticketId,
+    senderName: name,
+    receiverName: name,
+    cargo: selectedCargo,
+    destination: selectedTrip?.route,
+    status: "قيد التجهيز",
+    createdAt: new Date(),
+  }
+);
 
-
-
-          trackingId,
-
-          ticketId,
-
-          senderName:
-            name,
-
-          receiverName:
-            name,
-
-          cargo:
-            selectedCargo,
-
-          destination:
-            selectedTrip?.route,
-
-          status:
-            "قيد التجهيز",
-
-          createdAt:
-            new Date(),
-
-        }
-      );
+const shipmentId = shipmentRef.id;
 
       for (const [item, qty] of Object.entries(selectedCargo)) {
 
@@ -881,10 +866,13 @@ export default function FerryBookingWebsite() {
 
               status: "تم الاستلام",
 
+                            shipmentId: shipmentId,
+
+
               history: [
                 {
                   status: "تم الاستلام",
-                  time: new Date().toLocaleString("ar-EG")
+                  time: new Date().toISOString()
                 }
               ],
 
