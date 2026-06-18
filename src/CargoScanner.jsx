@@ -719,6 +719,8 @@ duration-300
                             مسار القطعة
                         </h4>
 
+                        
+
                         <div className="relative border-l-2 border-blue-500/40 ml-3">
 
                             {STATUS_STEPS.map(
@@ -819,6 +821,10 @@ duration-300
                         </div>
 
                     </div>
+
+                    <div className="bg-red-500 text-white p-2 rounded mb-3">
+  shipmentItems = {shipmentItems.length}
+</div>
                     {shipmentItems.length > 0 && (
 
                         <div className="mt-6">
