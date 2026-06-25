@@ -11,8 +11,8 @@ import {
     doc,
     getDocs,
     updateDoc,
+    deleteDoc,
 } from "firebase/firestore";
-
 
 export default function OfflinePassengers() {
 
@@ -45,16 +45,16 @@ export default function OfflinePassengers() {
 
         try {
 
-            await addDoc(
-                collection(db, "offlineTrips"),
-                {
-                    tripName,
-                    tripDate,
-                    archived: false,
-                    createdAt: serverTimestamp(),
-                }
-            );
-
+          await addDoc(
+    collection(db, "offlineTrips"),
+    {
+        tripName,
+        tripDate,
+        archived: false,
+        passengerCount: 0,
+        createdAt: serverTimestamp(),
+    }
+);
             setTripName("");
             setTripDate("");
 
@@ -88,20 +88,21 @@ export default function OfflinePassengers() {
 
                 }));
 
-              setTrips(
-    data.filter(trip =>
-        showArchived
-            ? trip.archived === true
-            : trip.archived !== true
-    )
-);
+                setTrips(
+                    data.filter(trip =>
+                        showArchived
+                            ? trip.archived === true
+                            : trip.archived !== true
+                    )
+                );
             }
 
         );
 
+       
         return () => unsubscribe();
 
-}, [showArchived]);
+    }, [showArchived]);
     ////////////////////////////////////////////////////////
 
     const loadPassengers = async (trip) => {
@@ -142,6 +143,27 @@ export default function OfflinePassengers() {
 
     ////////////////////////////////////////////////////////
 
+    const clearPassengers = async (tripId) => {
+
+    const snapshot = await getDocs(
+        collection(db, "offlineTrips", tripId, "passengers")
+    );
+
+    const batch = writeBatch(db);
+
+    snapshot.forEach((document) => {
+
+        batch.delete(document.ref);
+
+    });
+
+    await batch.commit();
+
+   
+};
+
+
+
     const importExcel = (e) => {
 
         const file = e.target.files[0];
@@ -150,7 +172,7 @@ export default function OfflinePassengers() {
 
         const reader = new FileReader();
 
-        reader.onload = (event) => {
+reader.onload = async (event) => {
 
             const data = new Uint8Array(event.target.result);
 
@@ -163,6 +185,29 @@ export default function OfflinePassengers() {
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
             const passengers = XLSX.utils.sheet_to_json(sheet);
+
+            const oldPassengers = await getDocs(
+    collection(
+        db,
+        "offlineTrips",
+        selectedTrip.id,
+        "passengers"
+    )
+);
+
+if (!oldPassengers.empty) {
+
+    const replace = window.confirm(
+
+        "هذه الرحلة تحتوي بالفعل على ركاب.\n\nاضغط OK لاستبدال القائمة الحالية.\nاضغط Cancel لإلغاء العملية."
+
+    );
+
+    if (!replace) return;
+
+    await clearPassengers(selectedTrip.id);
+
+}
 
             const batch = writeBatch(db);
 
@@ -199,18 +244,27 @@ export default function OfflinePassengers() {
 
             });
 
-            batch.commit()
+          await batch.commit();
 
-                .then(() => {
+await updateDoc(
 
-                    alert(
-                        `Imported ${passengers.length} passengers successfully`
-                    );
+    doc(db, "offlineTrips", selectedTrip.id),
 
-                })
+    {
+        passengerCount: passengers.length,
+    }
 
-                .catch(console.error);
+);
 
+alert(
+
+    `Passenger list imported successfully.
+
+Total passengers: ${passengers.length}`
+
+);
+
+e.target.value = "";
         };
 
         reader.readAsArrayBuffer(file);
@@ -239,14 +293,14 @@ export default function OfflinePassengers() {
 
     const restoreTrip = async (tripId) => {
 
-    await updateDoc(
-        doc(db, "offlineTrips", tripId),
-        {
-            archived: false,
-        }
-    );
+        await updateDoc(
+            doc(db, "offlineTrips", tripId),
+            {
+                archived: false,
+            }
+        );
 
-};
+    };
 
     ////////////////////////////////////////////////////////
 
@@ -258,11 +312,11 @@ export default function OfflinePassengers() {
 
                 {/* Header */}
 
-                <div className="flex justify-between items-center mb-10">
+                <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 mb-10">
 
                     <div>
 
-                        <h1 className="text-5xl font-black">
+                        <h1 className="text-3xl md:text-5xl font-black">
                             Offline Passengers
                         </h1>
 
@@ -271,22 +325,45 @@ export default function OfflinePassengers() {
                         </p>
 
                     </div>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
 
-                    <button
-                        onClick={() => setShowAddTrip(true)}
-                        className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-2xl font-bold"
-                    >
-                        + Add Trip
-                    </button>
+                        <button
+                            onClick={() => setShowAddTrip(true)}
+                            className="
+w-full
+sm:w-auto
+bg-blue-600
+hover:bg-blue-700
+px-6
+py-3
+rounded-2xl
+font-bold
+transition
+"
+                        >
+                            + Add Trip
+                        </button>
 
-                    <button
-    onClick={() => setShowArchived(!showArchived)}
-    className="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-2xl font-bold"
->
-    {showArchived ? "Current Trips" : "Archived Trips"}
-</button>
+                        <button
+                            onClick={() => setShowArchived(!showArchived)}
+                            className="
+w-full
+sm:w-auto
+bg-gray-700
+hover:bg-gray-600
+px-6
+py-3
+rounded-2xl
+font-bold
+transition
+"
+                        >
+                            {showArchived
+                                ? "Current Trips"
+                                : "Archived Trips"}
+                        </button>
 
-
+                    </div>
                 </div>
 
                 {trips.length === 0 ? (
@@ -329,9 +406,16 @@ export default function OfflinePassengers() {
 
                                         </p>
 
+                                        <p className="text-emerald-400 mt-2 font-semibold">
+
+    👥 Passengers:
+    {" "}
+{trip.passengerCount || 0}
+</p>
+
                                     </div>
 
-                                    <div className="flex gap-3">
+                                    <div className="flex flex-col sm:flex-row gap-2 mt-4 lg:mt-0">
 
                                         <button
 
@@ -349,41 +433,72 @@ export default function OfflinePassengers() {
 
                                             }}
 
-                                            className="bg-indigo-600 px-4 py-2 rounded-xl"
-
+                                            className="
+w-full
+sm:w-auto
+bg-indigo-600
+hover:bg-indigo-700
+px-4
+py-2
+rounded-xl
+transition
+"
                                         >
 
                                             Import Excel
 
                                         </button>
 
-                                        <button
-                                            className="bg-green-600 px-4 py-2 rounded-xl"
-                                        >
+                                      <button
+    className="
+w-full
+sm:w-auto
+bg-green-600
+hover:bg-green-700
+px-4
+py-2
+rounded-xl
+transition
+"
+>
+    Export
+</button>
 
-                                            Export
+                                        {showArchived ? (
 
-                                        </button>
+                                            <button
+                                                onClick={() => restoreTrip(trip.id)}
+                                                className="
+w-full
+sm:w-auto
+bg-green-700
+hover:bg-green-800
+px-4
+py-2
+rounded-xl
+transition
+"                                            >
+                                                Restore
+                                            </button>
 
-                                       {showArchived ? (
+                                        ) : (
 
-    <button
-        onClick={() => restoreTrip(trip.id)}
-        className="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-xl"
-    >
-        Restore
-    </button>
+                                            <button
+                                                onClick={() => archiveTrip(trip.id)}
+                                                className="
+w-full
+sm:w-auto
+bg-orange-600
+hover:bg-orange-700
+px-4
+py-2
+rounded-xl
+transition
+"                                            >
+                                                Archive
+                                            </button>
 
-) : (
-
-    <button
-        onClick={() => archiveTrip(trip.id)}
-        className="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-xl"
-    >
-        Archive
-    </button>
-
-)}
+                                        )}
 
                                     </div>
 
