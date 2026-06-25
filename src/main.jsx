@@ -12,6 +12,10 @@ import "./index.css";
 import App from "./App";
 import Admin from "./Admin";
 import CargoScanner from "./CargoScanner";
+
+import OfflinePassengers from "./OfflinePassengers";
+
+
 ReactDOM.createRoot(
   document.getElementById("root")
 ).render(
@@ -29,6 +33,13 @@ ReactDOM.createRoot(
           path="/scanner"
           element={<CargoScanner />}
         />
+
+        <Route
+    path="/offline"
+    element={<OfflinePassengers />}
+/>
+
+       
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

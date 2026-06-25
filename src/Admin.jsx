@@ -12,7 +12,8 @@ import {
     getDocs,
     query,
     where,
-    arrayUnion
+    arrayUnion,
+    serverTimestamp
 } from "firebase/firestore";
 
 import {
@@ -35,7 +36,6 @@ import {
 
     setDoc
 } from "firebase/firestore";
-
 
 
 
@@ -150,56 +150,59 @@ export default function Admin() {
     ] = useState(false);
 
 
-  const updateCargoStatus = async (
-    newStatus
-) => {
 
-    if (!scannedCargoId) return;
+  
 
-    try {
+    const updateCargoStatus = async (
+        newStatus
+    ) => {
 
-        await updateDoc(
-            doc(
-                db,
-                "cargoItems",
-                scannedCargoId
-            ),
-            {
-                status: newStatus,
+        if (!scannedCargoId) return;
 
-                history: arrayUnion({
+        try {
+
+            await updateDoc(
+                doc(
+                    db,
+                    "cargoItems",
+                    scannedCargoId
+                ),
+                {
                     status: newStatus,
-                    time: new Date().toISOString()
-                })
-            }
-        );
 
-        setScannedCargo(
-            prev => ({
-                ...prev,
-                status: newStatus,
-
-                history: [
-                    ...(prev?.history || []),
-                    {
+                    history: arrayUnion({
                         status: newStatus,
                         time: new Date().toISOString()
-                    }
-                ]
-            })
-        );
+                    })
+                }
+            );
 
-    } catch (err) {
+            setScannedCargo(
+                prev => ({
+                    ...prev,
+                    status: newStatus,
 
-        console.error(err);
+                    history: [
+                        ...(prev?.history || []),
+                        {
+                            status: newStatus,
+                            time: new Date().toISOString()
+                        }
+                    ]
+                })
+            );
 
-        alert(
-            "فشل تحديث الحالة"
-        );
+        } catch (err) {
 
-    }
+            console.error(err);
 
-};
+            alert(
+                "فشل تحديث الحالة"
+            );
+
+        }
+
+    };
 
     useEffect(() => {
         let unsubscribeBookings = null;
@@ -292,6 +295,8 @@ export default function Admin() {
             }
         };
     }, []);
+
+
 
 
 
@@ -1068,6 +1073,7 @@ export default function Admin() {
 
     };
 
+  
     const groupedTrips =
         trips.map((trip) => ({
             ...trip,
@@ -1824,25 +1830,44 @@ items-center
                                                     exportTripExcel(trip)
                                                 }
                                                 className="
-      bg-green-600
-      px-4
-      py-2
-      rounded-xl
-    "
+bg-green-600
+px-4
+py-2
+rounded-xl
+"
                                             >
                                                 Export Excel
                                             </button>
+
+                                          
+  <button
+    onClick={() => {
+
+        setSelectedOfflineTrip(trip);
+
+        setShowImportModal(true);
+
+    }}
+    className="
+bg-indigo-600
+px-4
+py-2
+rounded-xl
+"
+>
+    Import Excel
+</button>
 
                                             <button
                                                 onClick={() =>
                                                     archiveTrip(trip)
                                                 }
                                                 className="
-      bg-yellow-600
-      px-4
-      py-2
-      rounded-xl
-    "
+bg-yellow-600
+px-4
+py-2
+rounded-xl
+"
                                             >
                                                 Archive
                                             </button>
@@ -1856,11 +1881,11 @@ items-center
                                                     )
                                                 }
                                                 className="
-      bg-blue-600
-      px-4
-      py-2
-      rounded-xl
-    "
+bg-blue-600
+px-4
+py-2
+rounded-xl
+"
                                             >
                                                 عرض الركاب
                                             </button>
@@ -2099,8 +2124,7 @@ items-center
                     )}
                 </div>
 
-
-
+               
 
 
                 <button
@@ -2884,8 +2908,9 @@ items-center
 
 
 
-
             </div>
+
+           
 
         </div>
 
