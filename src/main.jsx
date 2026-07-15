@@ -12,6 +12,8 @@ import "./index.css";
 import App from "./App";
 import Admin from "./Admin";
 import CargoScanner from "./CargoScanner";
+import VoluntaryReturnCargo from "./VoluntaryReturnCargo";
+
 
 import OfflinePassengers from "./OfflinePassengers";
 
@@ -37,6 +39,11 @@ ReactDOM.createRoot(
         <Route
     path="/offline"
     element={<OfflinePassengers />}
+/>
+
+<Route
+    path="/voluntary-cargo"
+    element={<VoluntaryReturnCargo />}
 />
 
        

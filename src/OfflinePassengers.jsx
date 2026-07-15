@@ -32,8 +32,12 @@ export default function OfflinePassengers() {
 
     const [showArchived, setShowArchived] = useState(false);
 
+    const [activeTab, setActiveTab] = useState("passengers");
 
-   const whatsappMessage = `السلام عليكم،
+    const [cargoRequests, setCargoRequests] = useState([]);
+
+
+    const whatsappMessage = `السلام عليكم،
 
 نرجو من حضرتكم مشاهدة فيديو تعليمات السفر قبل موعد الرحلة من خلال الرابط التالي:
 
@@ -148,6 +152,35 @@ https://youtu.be/4O34PyKWpg8
         setTripPassengers(data);
 
         setExpandedTrip(trip.id);
+
+        loadCargoRequests(trip.id);
+
+    };
+
+
+    const loadCargoRequests = (tripId) => {
+
+        return onSnapshot(
+
+            collection(
+                db,
+                "offlineTrips",
+                tripId,
+                "cargoRequests"
+            ),
+
+            (snapshot) => {
+
+                const data = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+
+                setCargoRequests(data);
+
+            }
+
+        );
 
     };
 
@@ -798,6 +831,8 @@ transition
 
                                                             </p>
 
+                                                            
+
                                                         </div>
 
                                                         <div className="mt-6">
@@ -836,6 +871,87 @@ transition
                     </div>
 
                 )}
+
+                <hr className="my-8 border-slate-700" />
+
+<h2 className="text-2xl font-bold mb-6">
+
+    📦 Cargo Requests
+
+</h2>
+
+{cargoRequests.length === 0 ? (
+
+    <div className="bg-slate-800 rounded-2xl p-6 text-slate-400">
+
+        لا توجد طلبات بضائع لهذه الرحلة.
+
+    </div>
+
+) : (
+
+    <div className="space-y-4">
+
+        {cargoRequests.map((request) => (
+
+      <div
+    key={request.id}
+    className="bg-slate-800 rounded-2xl p-5 border border-slate-700"
+>
+
+    <div className="flex gap-4">
+
+        <img
+
+            src={request.passportImage}
+
+            alt="Passport"
+
+            className="
+                w-28
+                h-36
+                object-cover
+                rounded-xl
+                border
+                border-slate-600
+            "
+
+        />
+
+        <div className="flex-1">
+
+            <h3 className="text-xl font-bold">
+
+                👤 {request.fullName}
+
+            </h3>
+
+            <p className="mt-3">
+
+                🛂 {request.passport}
+
+            </p>
+
+            <p className="mt-2">
+
+                📞 {request.phone}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    
+
+</div>
+
+       ))}
+
+</div>
+    
+
+)}
 
             </div>
 
