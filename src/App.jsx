@@ -144,24 +144,38 @@ export default function FerryBookingWebsite() {
 
   const [agentSearch, setAgentSearch] = useState("");
 
-  const cargoItems = [
-    "ثلاجه 11 قدم",
-    "ثلاجه 14 قدم",
-    "غساله اتوماتيك",
-    "بوتاجاز 4 عين",
-    "بوتاجاز 5 عين",
-    "بوتاجاز 6 عين",
-    "التكييف الصحراوي",
-    "شاشه 32 بوصه",
-    "شاشه 43",
-    "غرفة نوم كامله",
-    "طقم مكتب 3 كرسي",
-    "طقم مكتب 6 كرسي",
-    "سرير 120 إلى 100",
-    "مرتبة سرير متر",
-    "التروسيكل / توك توك صندوق",
-    "شنطه شخصيه",
-  ];
+ const cargoPrices = {
+  "ثلاجه 11 قدم": 1500,
+  "ثلاجه 14 قدم": 1600,
+  "غساله اتوماتيك": 1650,
+  "بوتاجاز 4 عين": 850,
+  "بوتاجاز 5 عين": 1750,
+  "بوتاجاز 6 عين": 2000,
+  "التكييف الصحراوي": 1000,
+  "شاشه 32 بوصه": 1250,
+  "شاشه 43": 1500,
+  "غرفة نوم كامله": 4000,
+  "طقم مكتب 3 كرسي": 3750,
+  "طقم مكتب 6 كرسي": 2500,
+  "سرير 120 إلى 100": 750,
+  "مرتبة سرير متر": 750,
+  "التروسيكل / توك توك صندوق": 2000,
+};
+
+const cargoItems = Object.keys(cargoPrices);
+
+const isKhartoumRoute =
+  selectedTrip?.route?.includes("الخرطوم");
+
+const getCargoPrice = (item) => {
+  const basePrice = cargoPrices[item] || 0;
+
+  if (isKhartoumRoute) {
+    return basePrice * 1.5;
+  }
+
+  return basePrice;
+};
 
 
 
@@ -281,6 +295,13 @@ export default function FerryBookingWebsite() {
     });
 
   };
+
+  const cargoTotal = Object.entries(selectedCargo).reduce(
+  (total, [item, quantity]) => {
+    return total + getCargoPrice(item) * quantity;
+  },
+  0
+);
 
   const fetchBookings = async () => {
     try {
@@ -1962,73 +1983,125 @@ text-white
             {showCargo && (
 
               <div className="grid md:grid-cols-2 gap-4">
+{cargoItems.map((item) => {
+  const price = getCargoPrice(item);
+  const quantity = selectedCargo[item] || 0;
+  const itemTotal = price * quantity;
 
-                {cargoItems.map((item) => (
+  return (
+    <div
+      key={item}
+      className="
+        border
+        rounded-2xl
+        p-4
+        flex
+        items-center
+        justify-between
+        gap-4
+      "
+    >
+      <div className="flex-1">
+        <div className="font-semibold">
+          {item}
+        </div>
 
-                  <div
-                    key={item}
-                    className="
-          border
-          rounded-2xl
-          p-4
-          flex
-          items-center
-          justify-between
-        "
-                  >
+        <div className="text-sm text-slate-500 mt-1">
+          {price.toLocaleString("en-US")} ج.م / قطعة
+        </div>
 
-                    <span className="font-semibold">
-                      {item}
-                    </span>
+        {quantity > 0 && (
+          <div className="text-sm text-blue-700 font-bold mt-1">
+            الإجمالي:{" "}
+            {itemTotal.toLocaleString("en-US")} ج.م
+          </div>
+        )}
+      </div>
 
-                    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() =>
+            updateCargoQuantity(item, -1)
+          }
+          className="
+            bg-red-500
+            text-white
+            w-8
+            h-8
+            rounded-full
+          "
+        >
+          -
+        </button>
 
-                      <button
-                        onClick={() =>
-                          updateCargoQuantity(
-                            item,
-                            -1
-                          )
-                        }
-                        className="
-              bg-red-500
-              text-white
-              w-8
-              h-8
-              rounded-full
-            "
-                      >
-                        -
-                      </button>
+        <span className="font-bold text-lg min-w-[24px] text-center">
+          {quantity}
+        </span>
 
-                      <span className="font-bold text-lg">
-                        {selectedCargo[item] || 0}
-                      </span>
+        <button
+          onClick={() =>
+            updateCargoQuantity(item, 1)
+          }
+          className="
+            bg-green-600
+            text-white
+            w-8
+            h-8
+            rounded-full
+          "
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+})}
 
-                      <button
-                        onClick={() =>
-                          updateCargoQuantity(
-                            item,
-                            1
-                          )
-                        }
-                        className="
-              bg-green-600
-              text-white
-              w-8
-              h-8
-              rounded-full
-            "
-                      >
-                        +
-                      </button>
+{cargoTotal > 0 && (
+  <div className="mt-8 bg-slate-50 border-2 border-blue-200 rounded-2xl p-6">
 
-                    </div>
+    <h3 className="text-xl font-black mb-5">
+      ملخص البضائع
+    </h3>
 
-                  </div>
+    <div className="space-y-3">
+      {Object.entries(selectedCargo).map(
+        ([item, quantity]) => {
+          if (quantity <= 0) return null;
 
-                ))}
+          const price = getCargoPrice(item);
+          const total = price * quantity;
 
+          return (
+            <div
+              key={item}
+              className="flex justify-between items-center border-b pb-2"
+            >
+              <span>
+                {item} × {quantity}
+              </span>
+
+              <span className="font-bold">
+                {total.toLocaleString("en-US")} ج.م
+              </span>
+            </div>
+          );
+        }
+      )}
+    </div>
+
+    <div className="border-t-2 mt-5 pt-4 flex justify-between">
+      <span className="font-bold">
+        إجمالي البضائع
+      </span>
+
+      <span className="font-black text-blue-700 text-xl">
+        {cargoTotal.toLocaleString("en-US")} ج.م
+      </span>
+    </div>
+
+  </div>
+)}
               </div>
             )}
           </div>
